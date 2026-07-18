@@ -1,4 +1,4 @@
-import type { Course, User, AuditLog, SystemConfig, AcademicRecord, GradeEntry, EnrollmentEntry } from '../types';
+import type { Course, User, AuditLog, SystemConfig, AcademicRecord, GradeEntry, EnrollmentEntry, DailyProgress, Milestone, SkillEntry, ClassProgression } from '../types';
 import { INITIAL_USERS, INITIAL_COURSES, INITIAL_AUDIT_LOGS, INITIAL_CONFIG } from './seedData';
 
 const KEYS = {
@@ -144,6 +144,12 @@ export const db = {
     if (!userId) return null;
     const users = this.getUsers();
     return users.find(u => u.id === userId) || null;
+  },
+
+  getCurrentUserWithEvolution(): User | null {
+    const user = this.getCurrentUser();
+    if (!user) return null;
+    return this.ensureEvolutionData(user);
   },
 
   setCurrentUser(userId: string) {
@@ -314,6 +320,48 @@ export const db = {
     return Math.round((sum / record.grades.length) * 10) / 10;
   },
 
+  /** Check if user has evolution data, and migrate if needed */
+  ensureEvolutionData(user: User): User {
+    if (user.role !== 'STUDENT') return user;
+    if (!user.rpgCharacter) return user;
+    
+    const char = user.rpgCharacter;
+    let needsUpdate = false;
+    
+    if (!char.dailyProgress) {
+      (char as any).dailyProgress = {
+        lastActivityDate: new Date().toISOString(),
+        currentStreak: 0,
+        longestStreak: 0,
+        xpGainedToday: 0,
+        dailyTasksCompleted: [],
+        lastDailyReset: new Date().toISOString(),
+      };
+      needsUpdate = true;
+    }
+    
+    if (!char.milestones) {
+      (char as any).milestones = [];
+      needsUpdate = true;
+    }
+    
+    if (!char.classProgressions) {
+      (char as any).classProgressions = [];
+      needsUpdate = true;
+    }
+    
+    if (!char.skillEntries) {
+      (char as any).skillEntries = [];
+      needsUpdate = true;
+    }
+    
+    if (needsUpdate) {
+      this.updateUser(user);
+    }
+    
+    return user;
+  },
+
   /** Compute overall completion percentage for a student across enrolled courses */
   getOverallProgress(userId: string): number {
     const user = this.getUsers().find(u => u.id === userId);
@@ -331,3 +379,52 @@ export const db = {
     return totalLessons === 0 ? 0 : Math.round((completedLessons / totalLessons) * 100);
   },
 };
+
+// ─── Evolution Migration (run after db is defined) ────────────────────────────
+
+/** Migrate existing users to include evolution fields if missing */
+export function migrateEvolutionFields() {
+  try {
+    const users = db.getUsers();
+    let changed = false;
+
+    const migrated = users.map(user => {
+      if (user.role !== 'STUDENT' || !user.rpgCharacter) return user;
+      const char = user.rpgCharacter;
+      const needsMigration = !(char as any).dailyProgress || !(char as any).milestones;
+      if (!needsMigration) return user;
+
+      changed = true;
+      return {
+        ...user,
+        rpgCharacter: {
+          ...char,
+          dailyProgress: (char as any).dailyProgress || {
+            lastActivityDate: new Date().toISOString(),
+            currentStreak: 0,
+            longestStreak: 0,
+            xpGainedToday: 0,
+            dailyTasksCompleted: [],
+            lastDailyReset: new Date().toISOString(),
+          },
+          milestones: (char as any).milestones || [],
+          classProgressions: (char as any).classProgressions || [],
+          skillEntries: (char as any).skillEntries || [],
+        },
+      };
+    });
+
+    if (changed) {
+      db.saveUsers(migrated);
+    }
+  } catch (e) {
+    // Silent fail on migration
+  }
+}
+
+// Run migration
+try {
+  migrateEvolutionFields();
+} catch (e) {
+  // Silent fail
+}

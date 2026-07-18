@@ -15,8 +15,22 @@ import {
   HelpCircle,
   Zap,
   Shield,
-  Sword
+  Sword,
+  Flame,
+  TrendingUp,
+  Calendar,
+  Target
 } from 'lucide-react';
+import { DailyDashboard } from '../../components/DailyDashboard';
+import { StreakIndicator } from '../../components/StreakIndicator';
+import { 
+  getXpProgress, 
+  getMilestoneRequirements, 
+  getRemainingMilestones,
+  canLevelUp,
+  grantXp
+} from '../../engine/EvolutionEngine';
+import { useToast } from '../../components/EvolutionToast';
 
 interface HomeProps {
   onSelectCourse: (courseId: string) => void;
@@ -25,6 +39,7 @@ interface HomeProps {
 export const Home: React.FC<HomeProps> = ({ onSelectCourse }) => {
   const { currentUser, refreshUser } = useAuth();
   const { addLog } = useSystem();
+  const { addToast } = useToast();
   
   const [courses, setCourses] = useState<Course[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
@@ -465,11 +480,81 @@ export const Home: React.FC<HomeProps> = ({ onSelectCourse }) => {
       {activeSubTab === 'evolution' && currentUser && (
         <div id="evolution-tab-panel" role="tabpanel" aria-labelledby="tab-evolution">
           
-          {/* RPG and Stats Panels Row */}
+          {/* Evolution Dashboard Grid */}
           <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1.8fr', gap: '32px', alignItems: 'start', marginBottom: '32px' }}>
             
-            {/* Column 1: RPG character sheet */}
+            {/* Column 1: RPG character sheet + Daily Dashboard */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+              
+              {/* Daily Dashboard */}
+              {currentUser.rpgCharacter && (
+                <DailyDashboard 
+                  character={currentUser.rpgCharacter}
+                  onCompleteTask={(taskId: string) => {
+                    if (!currentUser.rpgCharacter) return;
+                    
+                    // Create a fresh copy and mark the task as completed in dailyTasksCompleted
+                    const char = { ...currentUser.rpgCharacter };
+                    char.dailyProgress = {
+                      ...char.dailyProgress,
+                      dailyTasksCompleted: [...char.dailyProgress.dailyTasksCompleted, taskId],
+                    };
+                    
+                    // Grant XP for completing this daily task
+                    const activityMap: Record<string, 'lesson_watched' | 'lesson_completed' | 'exercise_passed' | 'daily_login'> = {
+                      watch_lesson: 'lesson_watched',
+                      complete_lesson: 'lesson_completed',
+                      do_exercise: 'exercise_passed',
+                      login: 'daily_login',
+                    };
+                    
+                    const activity = activityMap[taskId] || 'lesson_watched';
+                    const result = grantXp(
+                      char,
+                      activity,
+                      {
+                        title: 'Tarefa Diária',
+                        description: activity === 'daily_login' 
+                          ? 'Login diário realizado!'
+                          : `Tarefa ${taskId} concluída!`,
+                      }
+                    );
+                    
+                    // Update user in DB
+                    const updatedUser: typeof currentUser = {
+                      ...currentUser,
+                      rpgCharacter: result.character,
+                    };
+                    db.updateUser(updatedUser as any);
+                    refreshUser();
+                    
+                    // Show toast
+                    addToast({
+                      type: 'xp',
+                      title: 'Tarefa Diária!',
+                      description: `Completou: ${taskId}`,
+                      xpAmount: result.xpGained,
+                    });
+                    
+                    if (result.leveledUp) {
+                      addToast({
+                        type: 'levelup',
+                        title: `🌟 Nível ${result.character.level}!`,
+                        description: 'Continue estudando para evoluir ainda mais!',
+                      });
+                    }
+                    
+                    if (result.milestoneEarned) {
+                      addToast({
+                        type: 'milestone',
+                        title: `🏆 ${result.milestoneEarned.title}`,
+                        description: result.milestoneEarned.description,
+                      });
+                    }
+                  }}
+                />
+              )}
+              
               <div className="evolution-card" style={{ textAlign: 'center', alignItems: 'center' }}>
                 <h3 style={{ fontSize: '1.25rem', fontWeight: '800', margin: '0 0 12px 0', alignSelf: 'flex-start' }}>
                   Ficha do Herói RPG
@@ -477,36 +562,68 @@ export const Home: React.FC<HomeProps> = ({ onSelectCourse }) => {
                 
                 {currentUser.rpgCharacter ? (
                   <>
-                    <RpgAvatar rpgClass={currentUser.rpgCharacter.selectedClass} level={currentUser.rpgCharacter.level} size={130} />
-                    
-                    <div style={{ marginTop: '12px' }}>
-                      <h4 style={{ fontSize: '1.3rem', fontWeight: '800', margin: 0 }}>
-                        {currentUser.rpgCharacter.selectedClass === 'MAGE' && 'Mago do Design'}
-                        {currentUser.rpgCharacter.selectedClass === 'WARRIOR' && 'Guerreiro do Código'}
-                        {currentUser.rpgCharacter.selectedClass === 'RANGER' && 'Patrulheiro da Qualidade'}
-                      </h4>
-                      <p style={{ color: 'var(--primary)', fontWeight: '800', margin: '4px 0 0 0', fontSize: '1.05rem' }}>
-                        Nível {currentUser.rpgCharacter.level}
-                      </p>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '16px', marginBottom: '16px' }}>
+                      <RpgAvatar rpgClass={currentUser.rpgCharacter.selectedClass} level={currentUser.rpgCharacter.level} size={100} />
+                      <div style={{ textAlign: 'left' }}>
+                        <h4 style={{ fontSize: '1.3rem', fontWeight: '800', margin: 0 }}>
+                          {currentUser.rpgCharacter.selectedClass === 'MAGE' && 'Mago do Design'}
+                          {currentUser.rpgCharacter.selectedClass === 'WARRIOR' && 'Guerreiro do Código'}
+                          {currentUser.rpgCharacter.selectedClass === 'RANGER' && 'Patrulheiro da Qualidade'}
+                          {currentUser.rpgCharacter.selectedClass === 'NECROMANCER' && 'Senhor das Sombras'}
+                          {currentUser.rpgCharacter.selectedClass === 'QUEEN' && 'Rainha Encantada'}
+                          {currentUser.rpgCharacter.selectedClass === 'SCHOLAR' && 'Guardião do Saber'}
+                          {currentUser.rpgCharacter.selectedClass === 'SMITH' && 'Mestre das Forjas'}
+                          {currentUser.rpgCharacter.selectedClass === 'PYROMANCER' && 'Feiticeira do Fogo'}
+                          {currentUser.rpgCharacter.selectedClass === 'PIRATE' && 'Senhor dos Mares'}
+                          {currentUser.rpgCharacter.selectedClass === 'JESTER' && 'Mestre da Ilusão'}
+                          {currentUser.rpgCharacter.selectedClass === 'CHAMPION' && 'Herói Lendário'}
+                        </h4>
+                        <p style={{ color: 'var(--primary)', fontWeight: '800', margin: '4px 0 0 0', fontSize: '1.05rem' }}>
+                          Nível {currentUser.rpgCharacter.level}
+                        </p>
+                        <StreakIndicator dailyProgress={currentUser.rpgCharacter.dailyProgress} size="sm" />
+                      </div>
                     </div>
 
                     {/* XP Progress Bar */}
-                    <div style={{ width: '100%', marginTop: '16px', textAlign: 'left' }}>
+                    <div style={{ width: '100%', marginTop: '12px', textAlign: 'left' }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', fontWeight: 'bold', marginBottom: '4px' }}>
                         <span style={{ color: 'var(--text-secondary)' }}>Experiência (XP)</span>
-                        <span>{currentUser.rpgCharacter.xp} / {currentUser.rpgCharacter.level * 200} XP</span>
+                        <span>{currentUser.rpgCharacter.xp} / {getXpProgress(currentUser.rpgCharacter).needed} XP</span>
                       </div>
                       <div style={{ width: '100%', height: '10px', backgroundColor: 'var(--bg-tertiary)', borderRadius: 'var(--radius-full)', overflow: 'hidden' }}>
                         <div 
                           style={{ 
-                            width: `${Math.min(100, (currentUser.rpgCharacter.xp / (currentUser.rpgCharacter.level * 200)) * 100)}%`, 
+                            width: `${Math.min(100, (currentUser.rpgCharacter.xp / getXpProgress(currentUser.rpgCharacter).needed) * 100)}%`, 
                             height: '100%', 
-                            backgroundColor: 'var(--accent)',
-                            borderRadius: 'var(--radius-full)'
+                            background: 'linear-gradient(90deg, var(--primary) 0%, var(--accent) 100%)',
+                            borderRadius: 'var(--radius-full)',
+                            transition: 'width 0.5s ease',
                           }} 
                         />
                       </div>
                     </div>
+
+                    {/* Level up indicator */}
+                    {canLevelUp(currentUser.rpgCharacter) && (
+                      <div style={{
+                        marginTop: '12px',
+                        padding: '10px 16px',
+                        borderRadius: 'var(--radius-md)',
+                        backgroundColor: 'rgba(255, 183, 39, 0.15)',
+                        border: '1px solid var(--accent)',
+                        color: 'var(--accent)',
+                        fontWeight: '800',
+                        fontSize: '0.85rem',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: '8px',
+                        animation: 'pulse-glow 2s ease-in-out infinite',
+                      }}>
+                        <TrendingUp size={18} /> Pronto para evoluir! Complete mais atividades para subir de nível!
+                      </div>
+                    )}
 
                     {/* Stats details */}
                     <div style={{ width: '100%', borderTop: '1px solid var(--border)', paddingTop: '16px', marginTop: '16px', textAlign: 'left' }}>
@@ -543,6 +660,31 @@ export const Home: React.FC<HomeProps> = ({ onSelectCourse }) => {
                           </div>
                         </div>
 
+                      </div>
+                    </div>
+
+                    {/* Milestone count in character sheet */}
+                    <div style={{ width: '100%', borderTop: '1px solid var(--border)', paddingTop: '16px', marginTop: '16px', textAlign: 'left' }}>
+                      <span style={{ fontSize: '0.8rem', fontWeight: 'bold', color: 'var(--text-tertiary)', textTransform: 'uppercase' }}>Conquistas (Marcos):</span>
+                      <div style={{ display: 'flex', gap: '12px', marginTop: '8px' }}>
+                        <div style={{ flex: 1, padding: '8px 12px', backgroundColor: 'rgba(94, 58, 238, 0.1)', borderRadius: 'var(--radius-md)', textAlign: 'center' }}>
+                          <div style={{ fontSize: '0.65rem', fontWeight: 'bold', color: 'var(--primary)', textTransform: 'uppercase' }}>Pessoais</div>
+                          <div style={{ fontSize: '1.2rem', fontWeight: '800', color: 'var(--primary)' }}>
+                            {currentUser.rpgCharacter.milestones.filter(m => m.type === 'PERSONAL').length}
+                          </div>
+                        </div>
+                        <div style={{ flex: 1, padding: '8px 12px', backgroundColor: 'rgba(255, 183, 39, 0.1)', borderRadius: 'var(--radius-md)', textAlign: 'center' }}>
+                          <div style={{ fontSize: '0.65rem', fontWeight: 'bold', color: 'var(--accent)', textTransform: 'uppercase' }}>Herói</div>
+                          <div style={{ fontSize: '1.2rem', fontWeight: '800', color: 'var(--accent)' }}>
+                            {currentUser.rpgCharacter.milestones.filter(m => m.type === 'HERO').length}
+                          </div>
+                        </div>
+                        <div style={{ flex: 1, padding: '8px 12px', backgroundColor: 'var(--bg-tertiary)', borderRadius: 'var(--radius-md)', textAlign: 'center' }}>
+                          <div style={{ fontSize: '0.65rem', fontWeight: 'bold', color: 'var(--text-tertiary)', textTransform: 'uppercase' }}>Total</div>
+                          <div style={{ fontSize: '1.2rem', fontWeight: '800', color: 'var(--text-primary)' }}>
+                            {currentUser.rpgCharacter.milestones.length}
+                          </div>
+                        </div>
                       </div>
                     </div>
 

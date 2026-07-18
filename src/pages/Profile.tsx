@@ -17,8 +17,13 @@ import {
   Award,
   ArrowLeft,
   MessageSquare,
-  GraduationCap
+  GraduationCap,
+  Flame,
+  TrendingUp,
+  Calendar
 } from 'lucide-react';
+import { DailyDashboard } from '../components/DailyDashboard';
+import { StreakIndicator } from '../components/StreakIndicator';
 
 type ProfileTab = 'geral' | 'historico' | 'pareceres' | 'rpg';
 
@@ -202,7 +207,7 @@ export const Profile: React.FC<ProfileProps> = ({ userId, onBack }) => {
     );
   };
 
-  const nextLevelXp = (targetUser.rpgCharacter?.level || 1) * 100;
+  const nextLevelXp = (targetUser.rpgCharacter?.level || 1) * 200;
   const xpPercent = targetUser.rpgCharacter 
     ? Math.min(100, (targetUser.rpgCharacter.xp / nextLevelXp) * 100)
     : 0;
@@ -367,6 +372,11 @@ export const Profile: React.FC<ProfileProps> = ({ userId, onBack }) => {
         <div>
           {targetUser.role === 'STUDENT' && targetUser.rpgCharacter && (
             <>
+              {/* Daily Dashboard */}
+              <div style={{ marginBottom: '32px' }}>
+                <DailyDashboard character={targetUser.rpgCharacter} />
+              </div>
+
               <div className="card" style={{ marginBottom: '32px' }}>
                 <h3 style={{ fontSize: '1.3rem', fontWeight: '800', marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '8px' }}>
                   <Zap size={20} style={{ color: 'var(--accent)' }} /> Atributos e Evolução do Personagem
@@ -387,6 +397,13 @@ export const Profile: React.FC<ProfileProps> = ({ userId, onBack }) => {
                         transition: 'width 0.4s ease'
                       }} 
                     />
+                  </div>
+                </div>
+
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '24px' }}>
+                  <StreakIndicator dailyProgress={targetUser.rpgCharacter.dailyProgress} size="md" />
+                  <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
+                    <span style={{ fontWeight: 'bold', color: 'var(--accent)' }}>+{targetUser.rpgCharacter.dailyProgress.xpGainedToday} XP</span> hoje
                   </div>
                 </div>
 

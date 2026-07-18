@@ -15,9 +15,26 @@ import { UserManagement } from './pages/Admin/UserManagement';
 import { GradeBook } from './pages/Admin/GradeBook';
 import { SystemStatus } from './pages/Maintenance/SystemStatus';
 import { Profile } from './pages/Profile';
+import { LevelUpModal } from './components/LevelUpModal';
+import { ToastProvider } from './components/EvolutionToast';
+import { getStatGainForLevelUp } from './engine/EvolutionEngine';
 
 const AppContent: React.FC = () => {
-  const { currentUser } = useAuth();
+  const { currentUser, dailyLeveledUp, setDailyLeveledUp } = useAuth();
+  const [levelUpChar, setLevelUpChar] = useState<{ char: any; stats: any } | null>(null);
+  
+  // Show level up modal when daily check detects a level up
+  // Note: the actual level up was already processed by AuthContext.runDailyCheck
+  // We just show the modal with the current character state and stat gains
+  useEffect(() => {
+    if (dailyLeveledUp && currentUser?.rpgCharacter) {
+      setLevelUpChar({
+        char: currentUser.rpgCharacter,
+        stats: getStatGainForLevelUp(currentUser.rpgCharacter.selectedClass)
+      });
+      setDailyLeveledUp(false);
+    }
+  }, [dailyLeveledUp, currentUser]);
   
   // Navigation states
   const [activeTab, setActiveTab] = useState<string>('home');
@@ -103,6 +120,15 @@ const AppContent: React.FC = () => {
           {renderTabContent()}
         </DashboardLayout>
       </MaintenanceGuard>
+
+      {/* Level Up Modal */}
+      {levelUpChar && (
+        <LevelUpModal
+          character={levelUpChar.char}
+          statsGained={levelUpChar.stats}
+          onClose={() => setLevelUpChar(null)}
+        />
+      )}
     </div>
   );
 };
@@ -111,7 +137,9 @@ function App() {
   return (
     <AuthProvider>
       <SystemProvider>
-        <AppContent />
+        <ToastProvider>
+          <AppContent />
+        </ToastProvider>
       </SystemProvider>
     </AuthProvider>
   );

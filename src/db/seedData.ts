@@ -28,7 +28,40 @@ export const INITIAL_USERS: User[] = [
       level: 2,
       xp: 150,
       unlockedSkills: ['Alquimia das Cores', 'Teleporte Flexbox'],
-      stats: { strength: 8, intelligence: 24, dexterity: 14 }
+      stats: { strength: 8, intelligence: 24, dexterity: 14 },
+      milestones: [
+        {
+          id: 'ms-1',
+          type: 'PERSONAL',
+          title: 'Primeira Aula!',
+          description: 'Completou a primeira aula de React.',
+          source: 'lesson_completed',
+          achievedAt: '2026-07-15T10:00:00.000Z',
+          relatedEntityId: 'lesson-react-1',
+        },
+        {
+          id: 'ms-2',
+          type: 'PERSONAL',
+          title: 'WCAG Explorador',
+          description: 'Completou o módulo de acessibilidade WCAG.',
+          source: 'lesson_completed',
+          achievedAt: '2026-07-16T14:30:00.000Z',
+          relatedEntityId: 'lesson-ux-1',
+        },
+      ],
+      dailyProgress: {
+        lastActivityDate: new Date().toISOString(),
+        currentStreak: 3,
+        longestStreak: 5,
+        xpGainedToday: 80,
+        dailyTasksCompleted: ['watch_lesson'],
+        lastDailyReset: new Date().toISOString(),
+      },
+      classProgressions: [],
+      skillEntries: [
+        { name: 'Alquimia das Cores', level: 1, xp: 0 },
+        { name: 'Teleporte Flexbox', level: 1, xp: 0 },
+      ],
     }
   },
   {
@@ -45,7 +78,48 @@ export const INITIAL_USERS: User[] = [
       level: 3,
       xp: 320,
       unlockedSkills: ['Espada de Funções', 'Escudo de Estados', 'Loop Supremo'],
-      stats: { strength: 28, intelligence: 12, dexterity: 16 }
+      stats: { strength: 28, intelligence: 12, dexterity: 16 },
+      milestones: [
+        {
+          id: 'ms-p1',
+          type: 'PERSONAL',
+          title: 'Primeira Batalha!',
+          description: 'Completou sua primeira aula.',
+          source: 'lesson_completed',
+          achievedAt: '2026-07-10T09:00:00.000Z',
+          relatedEntityId: 'lesson-react-1',
+        },
+        {
+          id: 'ms-p2',
+          type: 'PERSONAL',
+          title: 'Depurador Nato',
+          description: 'Passou em um exercício de alto nível.',
+          source: 'exercise_passed',
+          achievedAt: '2026-07-12T11:00:00.000Z',
+        },
+        {
+          id: 'ms-p3',
+          type: 'HERO',
+          title: '⚡ Loop Supremo',
+          description: 'Dominou o conceito de loops em programação.',
+          source: 'lesson_completed',
+          achievedAt: '2026-07-14T15:00:00.000Z',
+        },
+      ],
+      dailyProgress: {
+        lastActivityDate: new Date().toISOString(),
+        currentStreak: 7,
+        longestStreak: 7,
+        xpGainedToday: 120,
+        dailyTasksCompleted: ['watch_lesson', 'complete_lesson', 'do_exercise'],
+        lastDailyReset: new Date().toISOString(),
+      },
+      classProgressions: [],
+      skillEntries: [
+        { name: 'Espada de Funções', level: 2, xp: 50 },
+        { name: 'Escudo de Estados', level: 1, xp: 0 },
+        { name: 'Loop Supremo', level: 1, xp: 0 },
+      ],
     }
   },
   {
@@ -62,7 +136,30 @@ export const INITIAL_USERS: User[] = [
       level: 1,
       xp: 60,
       unlockedSkills: ['Visão WCAG'],
-      stats: { strength: 10, intelligence: 14, dexterity: 26 }
+      stats: { strength: 10, intelligence: 14, dexterity: 26 },
+      milestones: [
+        {
+          id: 'ms-j1',
+          type: 'PERSONAL',
+          title: 'Primeira Descoberta!',
+          description: 'Iniciou sua jornada no mundo do UX.',
+          source: 'lesson_completed',
+          achievedAt: '2026-07-17T08:00:00.000Z',
+          relatedEntityId: 'lesson-ux-1',
+        },
+      ],
+      dailyProgress: {
+        lastActivityDate: new Date().toISOString(),
+        currentStreak: 1,
+        longestStreak: 1,
+        xpGainedToday: 60,
+        dailyTasksCompleted: ['watch_lesson', 'complete_lesson'],
+        lastDailyReset: new Date().toISOString(),
+      },
+      classProgressions: [],
+      skillEntries: [
+        { name: 'Visão WCAG', level: 1, xp: 0 },
+      ],
     }
   },
   {
@@ -139,41 +236,8 @@ export const INITIAL_COURSES: Course[] = [
             type: 'exercise',
             duration: '25 min',
             content: 'Crie um componente de botão acessível em React que aceite as propriedades padrão de botão do HTML e adicione suporte a variantes de cor e ícone.',
-            problemContent: `// TODO: Implemente o componente Button abaixo
-import React from 'react';
-
-interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: 'primary' | 'secondary';
-  label: string;
-}
-
-export const Button: React.FC<ButtonProps> = ({ variant = 'primary', label, ...props }) => {
-  // Escreva a implementação que garanta navegação acessível e foco visual
-  return (
-    <button className={\`btn btn-\${variant}\`} {...props}>
-      {label}
-    </button>
-  );
-};`,
-            solutionContent: `import React from 'react';
-
-interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: 'primary' | 'secondary';
-  label: string;
-}
-
-export const Button: React.FC<ButtonProps> = ({ variant = 'primary', label, ...props }) => {
-  return (
-    <button 
-      className={\`btn btn-\${variant}\`} 
-      style={{ padding: '10px 20px', borderRadius: '8px', cursor: 'pointer' }}
-      aria-label={label}
-      {...props}
-    >
-      {label}
-    </button>
-  );
-};`,
+            problemContent: `// TODO: Implemente o componente Button abaixo\nimport React from 'react';\n\ninterface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {\n  variant?: 'primary' | 'secondary';\n  label: string;\n}\n\nexport const Button: React.FC<ButtonProps> = ({ variant = 'primary', label, ...props }) => {\n  // Escreva a implementação que garanta navegação acessível e foco visual\n  return (\n    <button className={\`btn btn-\${variant}\`} {...props}>\n      {label}\n    </button>\n  );\n};`,
+            solutionContent: `import React from 'react';\n\ninterface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {\n  variant?: 'primary' | 'secondary';\n  label: string;\n}\n\nexport const Button: React.FC<ButtonProps> = ({ variant = 'primary', label, ...props }) => {\n  return (\n    <button \n      className={\`btn btn-\${variant}\`} \n      style={{ padding: '10px 20px', borderRadius: '8px', cursor: 'pointer' }}\n      aria-label={label}\n      {...props}\n    >\n      {label}\n    </button>\n  );\n};`,
             explainerContent: '# O que faz um botão ser acessível?\n\n1. **Foco Visual**: Deve possuir `:focus-visible` bem definido para navegação via teclado.\n2. **Aria-Label**: Deve indicar claramente qual é a ação do botão se o texto for curto ou confuso.\n3. **Keyboard triggers**: Botões HTML nativos já suportam `Enter` e `Space` automaticamente.'
           }
         ]
@@ -241,5 +305,5 @@ export const INITIAL_AUDIT_LOGS: AuditLog[] = [
 export const INITIAL_CONFIG: SystemConfig = {
   maintenanceMode: false,
   allowStudentRegistration: true,
-  systemVersion: '1.0.0-PROTOTYPE',
+  systemVersion: '1.1.0-RPG-EVOLUTION',
 };

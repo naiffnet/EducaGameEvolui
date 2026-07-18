@@ -12,15 +12,33 @@ import {
   HelpCircle
 } from 'lucide-react';
 import { RpgAvatar } from '../../components/RpgAvatar';
+import { grantXp, processLevelUp, getXpForLevel } from '../../engine/EvolutionEngine';
+import { useToast } from '../../components/EvolutionToast';
 
 interface CoursePlayerProps {
   courseId: string;
   onBack: () => void;
 }
 
+/** Skill unlock table per class per level */
+const CLASS_SKILL_MAP: Record<string, Record<number, string>> = {
+  MAGE: { 2: 'Teleporte Flexbox', 3: 'Fórmula de Grid' },
+  WARRIOR: { 2: 'Escudo de Estados', 3: 'Loop Supremo' },
+  RANGER: { 2: 'Flecha de Asserções', 3: 'Sentinela de Testes' },
+  NECROMANCER: { 2: 'Sombra Virtual', 3: 'Ritual de Dados' },
+  QUEEN: { 2: 'Comando Inspirador', 3: 'Ordem Real' },
+  SCHOLAR: { 2: 'Análise Profunda', 3: 'Sabedoria Arcana' },
+  SMITH: { 2: 'Martelo Refatorador', 3: 'Forja de Algoritmos' },
+  PYROMANCER: { 2: 'Chama da Inovação', 3: 'Explosão Criativa' },
+  PIRATE: { 2: 'Navegação Ágil', 3: 'Tesouro Escondido' },
+  JESTER: { 2: 'Truque Mágico', 3: 'Ilusão de Classe' },
+  CHAMPION: { 2: 'Aura do Herói', 3: 'Golpe do Destino' },
+};
+
 export const CoursePlayer: React.FC<CoursePlayerProps> = ({ courseId, onBack }) => {
   const { currentUser, refreshUser } = useAuth();
   const { addLog } = useSystem();
+  const { addToast } = useToast();
   
   const [course, setCourse] = useState<Course | null>(null);
   const [activeLesson, setActiveLesson] = useState<Lesson | null>(null);
@@ -31,102 +49,95 @@ export const CoursePlayer: React.FC<CoursePlayerProps> = ({ courseId, onBack }) 
   // Gamification states
   const [levelUpMessage, setLevelUpMessage] = useState<{ active: boolean; oldLevel: number; newLevel: number; newSkill: string } | null>(null);
 
-  const gainXp = (amount: number) => {
-    if (!currentUser || !currentUser.rpgCharacter) return;
+  /** Get the skill to unlock for a class at the new level */
+  const getSkillForLevel = (rpgClass: string | null, newLevel: number): string => {
+    if (!rpgClass) return `Sabedoria Lv. ${newLevel}`;
+    const classSkills = CLASS_SKILL_MAP[rpgClass];
+    return classSkills?.[newLevel] || `${rpgClass === 'MAGE' ? 'Encantamento' : rpgClass === 'WARRIOR' ? 'Treinamento' : 'Aprimoramento'} Lv. ${newLevel}`;
+  };
 
-    const char = { ...currentUser.rpgCharacter };
-    char.xp += amount;
+  /** Process evolution using the engine, returns the updated user */
+  const processEvolution = (character: typeof currentUser.rpgCharacter, activity: Parameters<typeof grantXp>[1], details: Parameters<typeof grantXp>[2]) => {
+    if (!currentUser || !character) return null;
 
-    let levelUp = false;
-    let oldLevel = char.level;
+    // Use the EvolutionEngine to grant XP
+    const result = grantXp(character, activity, details);
+    let updatedChar = result.character;
+    let leveledUp = result.leveledUp;
     let newSkillUnlocked = '';
+    let oldLevel = character.level;
 
-    // Check level up threshold: level * 200 XP
-    while (char.xp >= char.level * 200) {
-      char.xp -= char.level * 200;
-      char.level += 1;
-      levelUp = true;
-
-      // Stats increment based on class
-      if (char.selectedClass === 'MAGE') {
-        char.stats.strength += 2;
-        char.stats.intelligence += 6;
-        char.stats.dexterity += 2;
-        // Skill unlock
-        if (char.level === 2 && !char.unlockedSkills.includes('Teleporte Flexbox')) {
-          newSkillUnlocked = 'Teleporte Flexbox';
-        } else if (char.level === 3 && !char.unlockedSkills.includes('Fórmula de Grid')) {
-          newSkillUnlocked = 'Fórmula de Grid';
-        } else {
-          newSkillUnlocked = `Mente Fluida Lv. ${char.level}`;
-        }
-      } else if (char.selectedClass === 'WARRIOR') {
-        char.stats.strength += 6;
-        char.stats.intelligence += 2;
-        char.stats.dexterity += 2;
-        // Skill unlock
-        if (char.level === 2 && !char.unlockedSkills.includes('Escudo de Estados')) {
-          newSkillUnlocked = 'Escudo de Estados';
-        } else if (char.level === 3 && !char.unlockedSkills.includes('Loop Supremo')) {
-          newSkillUnlocked = 'Loop Supremo';
-        } else {
-          newSkillUnlocked = `Golpe Lógico Lv. ${char.level}`;
-        }
-      } else if (char.selectedClass === 'RANGER') {
-        char.stats.strength += 2;
-        char.stats.intelligence += 2;
-        char.stats.dexterity += 6;
-        // Skill unlock
-        if (char.level === 2 && !char.unlockedSkills.includes('Flecha de Asserções')) {
-          newSkillUnlocked = 'Flecha de Asserções';
-        } else if (char.level === 3 && !char.unlockedSkills.includes('Sentinela de Testes')) {
-          newSkillUnlocked = 'Sentinela de Testes';
-        } else {
-          newSkillUnlocked = `Foco Crítico Lv. ${char.level}`;
-        }
+    // Handle skill unlock on level up
+    if (leveledUp) {
+      newSkillUnlocked = getSkillForLevel(updatedChar.selectedClass, updatedChar.level);
+      if (!updatedChar.unlockedSkills.includes(newSkillUnlocked)) {
+        updatedChar.unlockedSkills = [...updatedChar.unlockedSkills, newSkillUnlocked];
       }
 
-      if (newSkillUnlocked) {
-        char.unlockedSkills.push(newSkillUnlocked);
-      }
+      // Show toast for level up
+      addToast({
+        type: 'levelup',
+        title: `🌟 Nível ${updatedChar.level}!`, 
+        description: `Seu personagem evoluiu! ${newSkillUnlocked} desbloqueada!`,
+        xpAmount: 0,
+      });
+
+      addLog(
+        'Subiu de Nível',
+        `Subiu para o Nível ${updatedChar.level} na classe ${updatedChar.selectedClass}!`,
+        'success'
+      );
     }
 
+    // Show toast for XP gained
+    if (result.xpGained > 0 && !leveledUp) {
+      addToast({
+        type: 'xp',
+        title: details.title,
+        description: details.description,
+        xpAmount: result.xpGained,
+      });
+    }
+
+    // Show toast for milestone earned
+    if (result.milestoneEarned) {
+      addToast({
+        type: 'milestone',
+        title: `🏆 ${result.milestoneEarned.title}`,
+        description: result.milestoneEarned.description,
+        xpAmount: 0,
+      });
+    }
+
+    // Build updated user
     const updatedUser = {
       ...currentUser,
-      rpgCharacter: char
+      rpgCharacter: updatedChar,
     };
 
-    // Scouting system levels
-    let rankBadge = '';
-    if (char.level === 2 && !updatedUser.unlockedBadges.includes('Scout: Explorador')) {
-      rankBadge = 'Scout: Explorador';
-    } else if (char.level === 3 && !updatedUser.unlockedBadges.includes('Scout: Guardião')) {
-      rankBadge = 'Scout: Guardião';
-    } else if (char.level >= 4 && !updatedUser.unlockedBadges.includes('Scout: Mestre Lendário')) {
-      rankBadge = 'Scout: Mestre Lendário';
-    }
-
-    if (rankBadge) {
-      updatedUser.unlockedBadges.push(rankBadge);
+    // Award badges for reaching levels (Scouting system)
+    const { level } = updatedChar;
+    if (level === 2 && !updatedUser.unlockedBadges.includes('Scout: Explorador')) {
+      updatedUser.unlockedBadges.push('Scout: Explorador');
+    } else if (level === 3 && !updatedUser.unlockedBadges.includes('Scout: Guardião')) {
+      updatedUser.unlockedBadges.push('Scout: Guardião');
+    } else if (level >= 4 && !updatedUser.unlockedBadges.includes('Scout: Mestre Lendário')) {
+      updatedUser.unlockedBadges.push('Scout: Mestre Lendário');
     }
 
     db.updateUser(updatedUser);
     refreshUser();
 
-    if (levelUp) {
+    if (leveledUp) {
       setLevelUpMessage({
         active: true,
         oldLevel,
-        newLevel: char.level,
-        newSkill: newSkillUnlocked || 'Atributos Aumentados'
+        newLevel: updatedChar.level,
+        newSkill: newSkillUnlocked || 'Atributos Aumentados',
       });
-
-      addLog(
-        'Subiu de Nível',
-        `Subiu para o Nível ${char.level} na classe ${char.selectedClass}!`,
-        'success'
-      );
     }
+
+    return updatedUser;
   };
 
   useEffect(() => {
@@ -171,15 +182,24 @@ export const CoursePlayer: React.FC<CoursePlayerProps> = ({ courseId, onBack }) 
       addLog('Aula Desmarcada', `Marcou aula como não concluída: ${activeLesson.title}`);
     } else {
       updatedUser.completedLessons.push(activeLesson.id);
-      db.updateUser(updatedUser);
-      refreshUser();
-      addLog('Aula Concluída', `Marcou aula como concluída: ${activeLesson.title}`);
-      
-      // Award XP for completing lesson
-      gainXp(50);
+      db.updateUser(updatedUser);      refreshUser();
+            addLog('Aula Concluída', `Marcou aula como concluída: ${activeLesson.title}`);
+            
+            // Award XP for completing lesson via EvolutionEngine
+            if (currentUser.rpgCharacter) {
+              processEvolution(
+                currentUser.rpgCharacter,
+                'lesson_completed',
+                {
+                  title: 'Aula Concluída',
+                  description: `Completou: ${activeLesson.title}`,
+                  relatedEntityId: activeLesson.id,
+                }
+              );
+            }
 
-      // Trigger next lesson suggestion or auto-select
-      suggestNextLesson();
+            // Trigger next lesson suggestion or auto-select
+            suggestNextLesson();
     }
   };
 
@@ -230,8 +250,18 @@ export const CoursePlayer: React.FC<CoursePlayerProps> = ({ courseId, onBack }) 
           'success'
         );
 
-        // Award 150 XP for exercises
-        gainXp(150);
+        // Award XP for exercise via EvolutionEngine
+        if (currentUser.rpgCharacter) {
+          processEvolution(
+            currentUser.rpgCharacter,
+            'exercise_passed',
+            {
+              title: 'Exercício Concluído',
+              description: `Passou no exercício: ${activeLesson.title}`,
+              relatedEntityId: activeLesson.id,
+            }
+          );
+        }
       } else {
         setTestResult({
           status: 'error',

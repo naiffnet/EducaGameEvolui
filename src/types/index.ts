@@ -20,6 +20,43 @@ export type RpgClass =
   | 'JESTER'
   | 'CHAMPION';
 
+// ─── Evolution Domain ────────────────────────────────────────────────────────
+
+/** A milestone (marco) is an achievement that contributes to leveling up */
+export interface Milestone {
+  id: string;
+  type: 'PERSONAL' | 'HERO';
+  title: string;
+  description: string;
+  source: 'lesson_completed' | 'exercise_passed' | 'high_grade' | 'project_done' | 'streak_milestone' | 'course_completed' | 'badge_earned' | 'teacher_feedback';
+  achievedAt: string; // ISO date
+  relatedEntityId?: string;
+}
+
+/** Tracks daily activity and streak data */
+export interface DailyProgress {
+  lastActivityDate: string; // ISO date of last activity
+  currentStreak: number; // consecutive days with activity
+  longestStreak: number;
+  xpGainedToday: number;
+  dailyTasksCompleted: string[]; // list of task IDs done today
+  lastDailyReset: string; // ISO date of last reset
+}
+
+/** Progression for each class the character has */
+export interface ClassProgression {
+  classType: RpgClass;
+  level: number;
+  xp: number;
+}
+
+/** Skill with level tracking */
+export interface SkillEntry {
+  name: string;
+  level: number;
+  xp: number;
+}
+
 export interface RpgCharacter {
   selectedClass: RpgClass | null;
   level: number;
@@ -30,6 +67,11 @@ export interface RpgCharacter {
     intelligence: number;
     dexterity: number;
   };
+  // Evolution system fields
+  milestones: Milestone[];
+  dailyProgress: DailyProgress;
+  classProgressions: ClassProgression[];
+  skillEntries: SkillEntry[];
 }
 
 export interface User {

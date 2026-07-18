@@ -1,7 +1,8 @@
 import React from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useSystem } from '../context/SystemContext';
-import { Sun, Moon, Eye, Type, Users, ShieldAlert, Sparkles } from 'lucide-react';
+import { Sun, Moon, Eye, Type, Users, ShieldAlert, Sparkles, Zap } from 'lucide-react';
+import { StreakIndicator } from './StreakIndicator';
 
 export const Header: React.FC = () => {
   const { currentUser, allUsers, login } = useAuth();
@@ -132,6 +133,25 @@ export const Header: React.FC = () => {
             <p style={{ fontSize: '0.75rem', margin: 0, color: 'var(--text-tertiary)' }}>Plataforma de Ensino Inclusiva</p>
           </div>
         </div>
+
+        {currentUser && currentUser.role === 'STUDENT' && currentUser.rpgCharacter && (
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <StreakIndicator dailyProgress={currentUser.rpgCharacter.dailyProgress} size="sm" />
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '4px',
+              padding: '4px 10px',
+              borderRadius: 'var(--radius-full)',
+              backgroundColor: 'var(--bg-tertiary)',
+              fontSize: '0.8rem',
+              fontWeight: '700',
+              color: 'var(--accent)',
+            }}>
+              <Zap size={14} /> +{currentUser.rpgCharacter.dailyProgress.xpGainedToday} XP
+            </div>
+          </div>
+        )}
 
         {currentUser && (
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
