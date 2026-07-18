@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { useSystem } from '../../context/SystemContext';
 import { db } from '../../db/database';
-import type { Course, Lesson } from '../../types';
+import type { Course, Lesson, RpgCharacter } from '../../types';
 import { 
   ArrowLeft, 
   PlayCircle, 
@@ -12,7 +12,7 @@ import {
   HelpCircle
 } from 'lucide-react';
 import { RpgAvatar } from '../../components/RpgAvatar';
-import { grantXp, processLevelUp, getXpForLevel } from '../../engine/EvolutionEngine';
+import { grantXp } from '../../engine/EvolutionEngine';
 import { useToast } from '../../components/EvolutionToast';
 
 interface CoursePlayerProps {
@@ -57,7 +57,7 @@ export const CoursePlayer: React.FC<CoursePlayerProps> = ({ courseId, onBack }) 
   };
 
   /** Process evolution using the engine, returns the updated user */
-  const processEvolution = (character: typeof currentUser.rpgCharacter, activity: Parameters<typeof grantXp>[1], details: Parameters<typeof grantXp>[2]) => {
+  const processEvolution = (character: RpgCharacter | undefined, activity: Parameters<typeof grantXp>[1], details: Parameters<typeof grantXp>[2]) => {
     if (!currentUser || !character) return null;
 
     // Use the EvolutionEngine to grant XP
@@ -251,7 +251,7 @@ export const CoursePlayer: React.FC<CoursePlayerProps> = ({ courseId, onBack }) 
         );
 
         // Award XP for exercise via EvolutionEngine
-        if (currentUser.rpgCharacter) {
+        if (currentUser?.rpgCharacter) {
           processEvolution(
             currentUser.rpgCharacter,
             'exercise_passed',

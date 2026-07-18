@@ -1,4 +1,4 @@
-import type { User, RpgCharacter, Milestone, DailyProgress, RpgClass } from '../types';
+import type { RpgCharacter, Milestone, DailyProgress, RpgClass } from '../types';
 
 // ─── XP & Level Configuration ────────────────────────────────────────────────
 
@@ -8,6 +8,7 @@ const XP_EXERCISE_PASS = 75;
 const XP_HIGH_GRADE = 100; // nota >= 9
 const XP_PROJECT_DONE = 500;
 const XP_STREAK_7 = 200;
+const XP_STREAK_30 = 500;
 const XP_COURSE_COMPLETE = 300;
 const XP_BADGE_EARNED = 80;
 const XP_TEACHER_FEEDBACK = 40;
@@ -272,6 +273,8 @@ export function grantXp(
       source: 'streak_milestone',
       achievedAt: new Date().toISOString(),
     });
+    updated.xp += XP_STREAK_7;
+    updated.dailyProgress.xpGainedToday += XP_STREAK_7;
   }
   if (streak === 30 && !updated.milestones.some(m => m.source === 'streak_milestone' && m.title.includes('30'))) {
     updated.milestones.push({
@@ -282,6 +285,8 @@ export function grantXp(
       source: 'streak_milestone',
       achievedAt: new Date().toISOString(),
     });
+    updated.xp += XP_STREAK_30;
+    updated.dailyProgress.xpGainedToday += XP_STREAK_30;
   }
 
   // Check level up

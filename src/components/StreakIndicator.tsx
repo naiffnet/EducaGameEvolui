@@ -1,5 +1,5 @@
 import React from 'react';
-import { Flame, Trophy, TrendingUp, Calendar } from 'lucide-react';
+import { Flame } from 'lucide-react';
 import type { DailyProgress } from '../types';
 
 interface StreakIndicatorProps {

@@ -43,18 +43,12 @@ export interface DailyProgress {
   lastDailyReset: string; // ISO date of last reset
 }
 
-/** Progression for each class the character has */
-export interface ClassProgression {
-  classType: RpgClass;
-  level: number;
+/** An activity suggested for the current day that grants extra XP when completed */
+export interface DailyTask {
+  id: string;
+  label: string;
   xp: number;
-}
-
-/** Skill with level tracking */
-export interface SkillEntry {
-  name: string;
-  level: number;
-  xp: number;
+  activity: 'lesson_watched' | 'lesson_completed' | 'exercise_passed' | 'daily_login';
 }
 
 export interface RpgCharacter {
@@ -70,8 +64,6 @@ export interface RpgCharacter {
   // Evolution system fields
   milestones: Milestone[];
   dailyProgress: DailyProgress;
-  classProgressions: ClassProgression[];
-  skillEntries: SkillEntry[];
 }
 
 export interface User {

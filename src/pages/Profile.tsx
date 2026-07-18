@@ -17,13 +17,11 @@ import {
   Award,
   ArrowLeft,
   MessageSquare,
-  GraduationCap,
-  Flame,
-  TrendingUp,
-  Calendar
+  GraduationCap
 } from 'lucide-react';
 import { DailyDashboard } from '../components/DailyDashboard';
 import { StreakIndicator } from '../components/StreakIndicator';
+import { createDefaultDailyProgress } from '../engine/EvolutionEngine';
 
 type ProfileTab = 'geral' | 'historico' | 'pareceres' | 'rpg';
 
@@ -116,7 +114,9 @@ export const Profile: React.FC<ProfileProps> = ({ userId, onBack }) => {
       level: 1,
       xp: 0,
       unlockedSkills: [],
-      stats: defaultStats
+      stats: defaultStats,
+      milestones: [],
+      dailyProgress: createDefaultDailyProgress(),
     };
 
     const initialSkill = {

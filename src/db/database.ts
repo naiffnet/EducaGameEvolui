@@ -1,4 +1,4 @@
-import type { Course, User, AuditLog, SystemConfig, AcademicRecord, GradeEntry, EnrollmentEntry, DailyProgress, Milestone, SkillEntry, ClassProgression } from '../types';
+import type { Course, User, AuditLog, SystemConfig, AcademicRecord, GradeEntry, EnrollmentEntry } from '../types';
 import { INITIAL_USERS, INITIAL_COURSES, INITIAL_AUDIT_LOGS, INITIAL_CONFIG } from './seedData';
 
 const KEYS = {
@@ -345,16 +345,6 @@ export const db = {
       needsUpdate = true;
     }
     
-    if (!char.classProgressions) {
-      (char as any).classProgressions = [];
-      needsUpdate = true;
-    }
-    
-    if (!char.skillEntries) {
-      (char as any).skillEntries = [];
-      needsUpdate = true;
-    }
-    
     if (needsUpdate) {
       this.updateUser(user);
     }
@@ -408,8 +398,6 @@ export function migrateEvolutionFields() {
             lastDailyReset: new Date().toISOString(),
           },
           milestones: (char as any).milestones || [],
-          classProgressions: (char as any).classProgressions || [],
-          skillEntries: (char as any).skillEntries || [],
         },
       };
     });

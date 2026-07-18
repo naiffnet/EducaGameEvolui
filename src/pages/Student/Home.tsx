@@ -16,19 +16,15 @@ import {
   Zap,
   Shield,
   Sword,
-  Flame,
-  TrendingUp,
-  Calendar,
-  Target
+  TrendingUp
 } from 'lucide-react';
 import { DailyDashboard } from '../../components/DailyDashboard';
 import { StreakIndicator } from '../../components/StreakIndicator';
 import { 
   getXpProgress, 
-  getMilestoneRequirements, 
-  getRemainingMilestones,
   canLevelUp,
-  grantXp
+  grantXp,
+  createDefaultDailyProgress
 } from '../../engine/EvolutionEngine';
 import { useToast } from '../../components/EvolutionToast';
 
@@ -69,7 +65,9 @@ export const Home: React.FC<HomeProps> = ({ onSelectCourse }) => {
         strength: selectedClass === 'WARRIOR' ? 28 : selectedClass === 'RANGER' ? 10 : 8,
         intelligence: selectedClass === 'MAGE' ? 24 : selectedClass === 'RANGER' ? 14 : 12,
         dexterity: selectedClass === 'RANGER' ? 26 : selectedClass === 'WARRIOR' ? 16 : 14
-      }
+      },
+      milestones: [],
+      dailyProgress: createDefaultDailyProgress(),
     };
     
     const updated = {

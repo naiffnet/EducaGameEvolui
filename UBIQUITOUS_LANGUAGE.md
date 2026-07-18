@@ -68,3 +68,4 @@
 - "XP" era usado no código anterior tanto como experiência total quanto como progresso — agora `xp` é o total acumulado, e `xpGainedToday` no `DailyProgress` é o XP ganho no dia
 - "Nível" era confundido com "dificuldade do curso" — agora `level` é exclusivamente o nível do Personagem RPG, enquanto cursos usam `difficulty`
 - "Conquista" era usado intercambiavelmente com "badge" (medalha) e "marco" — agora **Marco** é a conquista que contribui para level up, enquanto **Badge** é uma medalha cosmética
+- `ClassProgression` e `SkillEntry` existiam como campos de `RpgCharacter` mas nunca eram lidos por nenhuma lógica (progressão por classe e nível de skill não fazem parte do domínio documentado aqui) — foram removidos do código em 2026-07-18 para manter o modelo alinhado a esta linguagem ubíqua. Ver `SPEC.md` para detalhes.

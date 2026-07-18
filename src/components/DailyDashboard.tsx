@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
-import type { RpgCharacter } from '../types';
+import type { ReactNode } from 'react';
+import type { RpgCharacter, DailyTask } from '../types';
 import {
   Zap, Flame, Trophy, Target, TrendingUp, Calendar,
-  Sword, Sparkles, Shield, Clock, CheckCircle2, Gift,
+  Sparkles, Clock, CheckCircle2, Gift,
   Loader2
 } from 'lucide-react';
 import { getXpProgress, getRemainingMilestones, getMilestoneRequirements } from '../engine/EvolutionEngine';
@@ -14,11 +15,11 @@ interface DailyDashboardProps {
 
 const XP_LOGIN_BONUS_BASE = 10;
 
-const DAILY_TASKS = [
-  { id: 'watch_lesson', label: 'Assistir a uma aula (10+ min)', xp: 30, icon: <Clock size={16} />, activity: 'lesson_watched' as const },
-  { id: 'complete_lesson', label: 'Completar uma aula', xp: 50, icon: <CheckCircle2 size={16} />, activity: 'lesson_completed' as const },
-  { id: 'do_exercise', label: 'Fazer um exercício', xp: 75, icon: <Target size={16} />, activity: 'exercise_passed' as const },
-  { id: 'login', label: 'Login diário', xp: XP_LOGIN_BONUS_BASE, icon: <Gift size={16} />, activity: 'daily_login' as const },
+const DAILY_TASKS: (DailyTask & { icon: ReactNode })[] = [
+  { id: 'watch_lesson', label: 'Assistir a uma aula (10+ min)', xp: 30, icon: <Clock size={16} />, activity: 'lesson_watched' },
+  { id: 'complete_lesson', label: 'Completar uma aula', xp: 50, icon: <CheckCircle2 size={16} />, activity: 'lesson_completed' },
+  { id: 'do_exercise', label: 'Fazer um exercício', xp: 75, icon: <Target size={16} />, activity: 'exercise_passed' },
+  { id: 'login', label: 'Login diário', xp: XP_LOGIN_BONUS_BASE, icon: <Gift size={16} />, activity: 'daily_login' },
 ];
 
 export const DailyDashboard: React.FC<DailyDashboardProps> = ({ character, onCompleteTask }) => {
@@ -39,7 +40,7 @@ export const DailyDashboard: React.FC<DailyDashboardProps> = ({ character, onCom
   });
 
   const completedToday = character.dailyProgress.dailyTasksCompleted || [];
-  const allDone = dailyTasks.length > 0 && dailyTasks.every(t => completedToday.includes(t.id));
+  const allDone = DAILY_TASKS.length > 0 && DAILY_TASKS.every(t => completedToday.includes(t.id));
 
   return (
     <div className="evolution-card" style={{ padding: '24px' }}>
@@ -307,5 +308,3 @@ export const DailyDashboard: React.FC<DailyDashboardProps> = ({ character, onCom
     </div>
   );
 };
-
-const XP_LOGIN_BONUS_BASE = 10;

@@ -3,6 +3,7 @@ import { db } from '../../db/database';
 import type { User, UserRole, RpgClass, EnrollmentEntry } from '../../types';
 import { useAuth } from '../../context/AuthContext';
 import { useSystem } from '../../context/SystemContext';
+import { createDefaultDailyProgress } from '../../engine/EvolutionEngine';
 import {
   ShieldCheck, UserPlus, Search, Trash2, Eye, Edit3, Save, X,
   BookOpen, GraduationCap, Users, TrendingUp, Check, Award
@@ -265,6 +266,8 @@ export const UserManagement: React.FC = () => {
         xp: 0,
         unlockedSkills: [INITIAL_SKILL[newUserClass]],
         stats: DEFAULT_STATS[newUserClass],
+        milestones: [],
+        dailyProgress: createDefaultDailyProgress(),
       } : undefined,
     };
     db.addUser(newUser);

@@ -57,11 +57,6 @@ export const INITIAL_USERS: User[] = [
         dailyTasksCompleted: ['watch_lesson'],
         lastDailyReset: new Date().toISOString(),
       },
-      classProgressions: [],
-      skillEntries: [
-        { name: 'Alquimia das Cores', level: 1, xp: 0 },
-        { name: 'Teleporte Flexbox', level: 1, xp: 0 },
-      ],
     }
   },
   {
@@ -114,12 +109,6 @@ export const INITIAL_USERS: User[] = [
         dailyTasksCompleted: ['watch_lesson', 'complete_lesson', 'do_exercise'],
         lastDailyReset: new Date().toISOString(),
       },
-      classProgressions: [],
-      skillEntries: [
-        { name: 'Espada de Funções', level: 2, xp: 50 },
-        { name: 'Escudo de Estados', level: 1, xp: 0 },
-        { name: 'Loop Supremo', level: 1, xp: 0 },
-      ],
     }
   },
   {
@@ -156,10 +145,6 @@ export const INITIAL_USERS: User[] = [
         dailyTasksCompleted: ['watch_lesson', 'complete_lesson'],
         lastDailyReset: new Date().toISOString(),
       },
-      classProgressions: [],
-      skillEntries: [
-        { name: 'Visão WCAG', level: 1, xp: 0 },
-      ],
     }
   },
   {
