@@ -25,3 +25,8 @@ dist-ssr
 
 # Local app data (not part of the project)
 .freebuff/
+
+# Backup / temp files
+*.bak
+*.orig
+*.tmp
