@@ -1,0 +1,333 @@
+import type { Course, User, AuditLog, SystemConfig, AcademicRecord, GradeEntry, EnrollmentEntry } from '../types';
+import { INITIAL_USERS, INITIAL_COURSES, INITIAL_AUDIT_LOGS, INITIAL_CONFIG } from './seedData';
+
+const KEYS = {
+  USERS: 'lms_users',
+  COURSES: 'lms_courses',
+  LOGS: 'lms_audit_logs',
+  CONFIG: 'lms_config',
+  CURRENT_USER_ID: 'lms_current_user_id',
+  ACADEMIC_RECORDS: 'lms_academic_records',
+};
+
+// Auto-initialize LocalStorage with Seed Data if empty
+export const initializeDB = (forceReset = false) => {
+  if (forceReset || !localStorage.getItem(KEYS.USERS)) {
+    localStorage.setItem(KEYS.USERS, JSON.stringify(INITIAL_USERS));
+  }
+  if (forceReset || !localStorage.getItem(KEYS.COURSES)) {
+    localStorage.setItem(KEYS.COURSES, JSON.stringify(INITIAL_COURSES));
+  }
+  if (forceReset || !localStorage.getItem(KEYS.LOGS)) {
+    localStorage.setItem(KEYS.LOGS, JSON.stringify(INITIAL_AUDIT_LOGS));
+  }
+  if (forceReset || !localStorage.getItem(KEYS.CONFIG)) {
+    localStorage.setItem(KEYS.CONFIG, JSON.stringify(INITIAL_CONFIG));
+  }
+  if (forceReset || !localStorage.getItem(KEYS.CURRENT_USER_ID)) {
+    localStorage.setItem(KEYS.CURRENT_USER_ID, 'user-student');
+  }
+  if (forceReset || !localStorage.getItem(KEYS.ACADEMIC_RECORDS)) {
+    localStorage.setItem(KEYS.ACADEMIC_RECORDS, JSON.stringify([]));
+  }
+};
+
+// Run initialization immediately
+initializeDB();
+
+// ─── Core DB operations ───────────────────────────────────────────────────────
+export const db = {
+  // ── Users ──────────────────────────────────────────────────────────────────
+  getUsers(): User[] {
+    const data = localStorage.getItem(KEYS.USERS);
+    return data ? JSON.parse(data) : [];
+  },
+
+  saveUsers(users: User[]) {
+    localStorage.setItem(KEYS.USERS, JSON.stringify(users));
+  },
+
+  updateUser(updatedUser: User) {
+    const users = this.getUsers();
+    const index = users.findIndex(u => u.id === updatedUser.id);
+    if (index !== -1) {
+      users[index] = updatedUser;
+      this.saveUsers(users);
+    }
+  },
+
+  addUser(user: User) {
+    const users = this.getUsers();
+    users.push(user);
+    this.saveUsers(users);
+    // Initialize empty academic record
+    this.initAcademicRecord(user.id);
+  },
+
+  deleteUser(userId: string) {
+    const users = this.getUsers().filter(u => u.id !== userId);
+    this.saveUsers(users);
+    // Clean up academic record
+    const records = this.getAllAcademicRecords().filter(r => r.userId !== userId);
+    localStorage.setItem(KEYS.ACADEMIC_RECORDS, JSON.stringify(records));
+  },
+
+  // ── Courses ────────────────────────────────────────────────────────────────
+  getCourses(): Course[] {
+    const data = localStorage.getItem(KEYS.COURSES);
+    return data ? JSON.parse(data) : [];
+  },
+
+  saveCourses(courses: Course[]) {
+    localStorage.setItem(KEYS.COURSES, JSON.stringify(courses));
+  },
+
+  addCourse(course: Course) {
+    const courses = this.getCourses();
+    courses.push(course);
+    this.saveCourses(courses);
+  },
+
+  updateCourse(updatedCourse: Course) {
+    const courses = this.getCourses();
+    const index = courses.findIndex(c => c.id === updatedCourse.id);
+    if (index !== -1) {
+      courses[index] = updatedCourse;
+      this.saveCourses(courses);
+    }
+  },
+
+  // ── Logs ───────────────────────────────────────────────────────────────────
+  getLogs(): AuditLog[] {
+    const data = localStorage.getItem(KEYS.LOGS);
+    const logs: AuditLog[] = data ? JSON.parse(data) : [];
+    return logs.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+  },
+
+  addLog(userId: string, userName: string, role: string, action: string, details: string, status: 'success' | 'warning' | 'error' = 'success') {
+    const logs = this.getLogs();
+    const newLog: AuditLog = {
+      id: `log-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
+      timestamp: new Date().toISOString(),
+      userId,
+      userName,
+      userRole: role as any,
+      action,
+      details,
+      status,
+    };
+    logs.push(newLog);
+    localStorage.setItem(KEYS.LOGS, JSON.stringify(logs));
+  },
+
+  clearLogs() {
+    localStorage.setItem(KEYS.LOGS, JSON.stringify([]));
+  },
+
+  // ── Config ─────────────────────────────────────────────────────────────────
+  getConfig(): SystemConfig {
+    const data = localStorage.getItem(KEYS.CONFIG);
+    return data ? JSON.parse(data) : INITIAL_CONFIG;
+  },
+
+  saveConfig(config: SystemConfig) {
+    localStorage.setItem(KEYS.CONFIG, JSON.stringify(config));
+  },
+
+  // ── Auth/Session ───────────────────────────────────────────────────────────
+  getCurrentUserId(): string | null {
+    return localStorage.getItem(KEYS.CURRENT_USER_ID);
+  },
+
+  getCurrentUser(): User | null {
+    const userId = this.getCurrentUserId();
+    if (!userId) return null;
+    const users = this.getUsers();
+    return users.find(u => u.id === userId) || null;
+  },
+
+  setCurrentUser(userId: string) {
+    localStorage.setItem(KEYS.CURRENT_USER_ID, userId);
+    const user = this.getUsers().find(u => u.id === userId);
+    if (user) {
+      this.addLog(
+        user.id,
+        user.name,
+        user.role,
+        'Mudança de Perfil',
+        `Usuário mudou de perfil ativo para ${user.name} (${user.role}).`
+      );
+    }
+  },
+
+  logout() {
+    localStorage.removeItem(KEYS.CURRENT_USER_ID);
+  },
+
+  resetDB() {
+    initializeDB(true);
+    const currentUser = this.getCurrentUser();
+    if (currentUser) {
+      this.addLog(
+        currentUser.id,
+        currentUser.name,
+        currentUser.role,
+        'Restauração de Sistema',
+        'Banco de dados restaurado com sucesso para as configurações originais de fábrica.',
+        'warning'
+      );
+    }
+  },
+
+  // ── Academic Records ───────────────────────────────────────────────────────
+
+  getAllAcademicRecords(): AcademicRecord[] {
+    const data = localStorage.getItem(KEYS.ACADEMIC_RECORDS);
+    return data ? JSON.parse(data) : [];
+  },
+
+  initAcademicRecord(userId: string): AcademicRecord {
+    const records = this.getAllAcademicRecords();
+    const existing = records.find(r => r.userId === userId);
+    if (existing) return existing;
+
+    const user = this.getUsers().find(u => u.id === userId);
+    const courses = this.getCourses();
+
+    // Build initial enrollment history from the User's enrolledCourses
+    const enrollmentHistory: EnrollmentEntry[] = (user?.enrolledCourses || []).map(courseId => {
+      const course = courses.find(c => c.id === courseId);
+      const totalLessons = course?.modules.reduce((acc, m) => acc + m.lessons.length, 0) || 1;
+      const completed = (user?.completedLessons || []).filter(lid =>
+        course?.modules.some(m => m.lessons.some(l => l.id === lid))
+      ).length;
+      return {
+        id: `enroll-${userId}-${courseId}`,
+        courseId,
+        courseName: course?.title || courseId,
+        enrolledAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 30).toISOString(),
+        status: 'active' as const,
+        progressPercent: Math.round((completed / totalLessons) * 100),
+      };
+    });
+
+    const newRecord: AcademicRecord = {
+      userId,
+      grades: [],
+      enrollmentHistory,
+      generalObservations: '',
+      updatedAt: new Date().toISOString(),
+    };
+
+    records.push(newRecord);
+    localStorage.setItem(KEYS.ACADEMIC_RECORDS, JSON.stringify(records));
+    return newRecord;
+  },
+
+  getAcademicRecord(userId: string): AcademicRecord {
+    const records = this.getAllAcademicRecords();
+    return records.find(r => r.userId === userId) || this.initAcademicRecord(userId);
+  },
+
+  saveAcademicRecord(record: AcademicRecord) {
+    const records = this.getAllAcademicRecords();
+    const index = records.findIndex(r => r.userId === record.userId);
+    const updated = { ...record, updatedAt: new Date().toISOString() };
+    if (index !== -1) {
+      records[index] = updated;
+    } else {
+      records.push(updated);
+    }
+    localStorage.setItem(KEYS.ACADEMIC_RECORDS, JSON.stringify(records));
+  },
+
+  addGrade(userId: string, entry: Omit<GradeEntry, 'id'>): GradeEntry {
+    const record = this.getAcademicRecord(userId);
+    const newEntry: GradeEntry = { ...entry, id: `grade-${Date.now()}-${Math.random().toString(36).slice(2)}` };
+    record.grades.push(newEntry);
+    this.saveAcademicRecord(record);
+    return newEntry;
+  },
+
+  updateGrade(userId: string, entry: GradeEntry) {
+    const record = this.getAcademicRecord(userId);
+    const idx = record.grades.findIndex(g => g.id === entry.id);
+    if (idx !== -1) record.grades[idx] = entry;
+    this.saveAcademicRecord(record);
+  },
+
+  removeGrade(userId: string, gradeId: string) {
+    const record = this.getAcademicRecord(userId);
+    record.grades = record.grades.filter(g => g.id !== gradeId);
+    this.saveAcademicRecord(record);
+  },
+
+  addEnrollment(userId: string, entry: Omit<EnrollmentEntry, 'id'>): EnrollmentEntry {
+    const record = this.getAcademicRecord(userId);
+    const newEntry: EnrollmentEntry = { ...entry, id: `enroll-${Date.now()}-${Math.random().toString(36).slice(2)}` };
+    // Remove duplicate if exists
+    record.enrollmentHistory = record.enrollmentHistory.filter(e => e.courseId !== entry.courseId);
+    record.enrollmentHistory.push(newEntry);
+    this.saveAcademicRecord(record);
+
+    // Also update User.enrolledCourses
+    const users = this.getUsers();
+    const user = users.find(u => u.id === userId);
+    if (user && !user.enrolledCourses.includes(entry.courseId)) {
+      user.enrolledCourses.push(entry.courseId);
+      this.updateUser(user);
+    }
+    return newEntry;
+  },
+
+  updateEnrollmentStatus(userId: string, courseId: string, status: EnrollmentEntry['status']) {
+    const record = this.getAcademicRecord(userId);
+    const entry = record.enrollmentHistory.find(e => e.courseId === courseId);
+    if (entry) {
+      entry.status = status;
+      if (status === 'completed') entry.completedAt = new Date().toISOString();
+    }
+    this.saveAcademicRecord(record);
+
+    // Sync User.enrolledCourses
+    const users = this.getUsers();
+    const user = users.find(u => u.id === userId);
+    if (user) {
+      if (status === 'dropped') {
+        user.enrolledCourses = user.enrolledCourses.filter(id => id !== courseId);
+      }
+      this.updateUser(user);
+    }
+  },
+
+  updateGeneralObservations(userId: string, text: string) {
+    const record = this.getAcademicRecord(userId);
+    record.generalObservations = text;
+    this.saveAcademicRecord(record);
+  },
+
+  /** Compute average grade for a student (returns null if no grades) */
+  getAverageGrade(userId: string): number | null {
+    const record = this.getAcademicRecord(userId);
+    if (!record.grades.length) return null;
+    const sum = record.grades.reduce((acc, g) => acc + g.grade, 0);
+    return Math.round((sum / record.grades.length) * 10) / 10;
+  },
+
+  /** Compute overall completion percentage for a student across enrolled courses */
+  getOverallProgress(userId: string): number {
+    const user = this.getUsers().find(u => u.id === userId);
+    if (!user || !user.enrolledCourses.length) return 0;
+    const courses = this.getCourses();
+    let totalLessons = 0;
+    let completedLessons = 0;
+    user.enrolledCourses.forEach(courseId => {
+      const course = courses.find(c => c.id === courseId);
+      if (!course) return;
+      const lessons = course.modules.flatMap(m => m.lessons);
+      totalLessons += lessons.length;
+      completedLessons += lessons.filter(l => user.completedLessons.includes(l.id)).length;
+    });
+    return totalLessons === 0 ? 0 : Math.round((completedLessons / totalLessons) * 100);
+  },
+};

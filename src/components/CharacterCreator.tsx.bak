@@ -1,0 +1,198 @@
+import React, { useState } from 'react';
+import type { RpgClass } from '../types';
+import { RpgAvatar } from './RpgAvatar';
+import { Sparkles, Trophy } from 'lucide-react';
+
+interface CharacterCreatorProps {
+  onSelectClass: (selectedClass: RpgClass) => void;
+}
+
+export const CharacterCreator: React.FC<CharacterCreatorProps> = ({ onSelectClass }) => {
+  const [chosenClass, setChosenClass] = useState<RpgClass>('MAGE');
+
+  const classesConfig = [
+    {
+      id: 'MAGE' as RpgClass,
+      name: 'Mago do Design (UX/CSS)',
+      desc: 'Alquimista das cores e layouts. Focado em criar interfaces inclusivas, contraste de cores (WCAG) e animações responsivas que encantam os usuários.',
+      strength: 8,
+      intelligence: 24,
+      dexterity: 14,
+      color: 'var(--primary)',
+      bgGlow: 'var(--primary-glow)',
+      initialSkill: 'Alquimia das Cores'
+    },
+    {
+      id: 'WARRIOR' as RpgClass,
+      name: 'Guerreiro do Código (JS/TS)',
+      desc: 'Campeão da lógica e manipulação de estados. Domina estruturas de dados complexas, reduz erros em tempo de execução e destrói bugs com arrays tipados.',
+      strength: 28,
+      intelligence: 12,
+      dexterity: 16,
+      color: 'var(--accent-coral)',
+      bgGlow: 'rgba(255, 114, 83, 0.15)',
+      initialSkill: 'Espada de Funções'
+    },
+    {
+      id: 'RANGER' as RpgClass,
+      name: 'Patrulheiro da Qualidade (QA/a11y)',
+      desc: 'Escoteiro dos testes automatizados e caçador de erros. Focado em garantir cobertura, auditorias de acessibilidade e navegação por teclado sem travas.',
+      strength: 10,
+      intelligence: 14,
+      dexterity: 26,
+      color: 'var(--accent-green)',
+      bgGlow: 'rgba(57, 219, 128, 0.15)',
+      initialSkill: 'Visão WCAG'
+    }
+  ];
+
+  const activeConfig = classesConfig.find(c => c.id === chosenClass)!;
+
+  return (
+    <div 
+      style={{ 
+        maxWidth: '850px', 
+        margin: '0 auto', 
+        textAlign: 'center', 
+        padding: '30px 20px' 
+      }}
+      role="region"
+      aria-label="Criador de Personagem RPG"
+    >
+      <div style={{ marginBottom: '32px' }}>
+        <h2 style={{ fontSize: '2.2rem', fontWeight: '800', marginBottom: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
+          Escolha seu Herói de Aprendizado! <Sparkles style={{ color: 'var(--accent)' }} />
+        </h2>
+        <p style={{ color: 'var(--text-secondary)', fontSize: '1.05rem', maxWidth: '600px', margin: '0 auto' }}>
+          Toda jornada pedagógica é uma aventura. Escolha a classe que melhor se alinha com o seu estilo de estudo. Suas conquistas evoluirão seu herói!
+        </p>
+      </div>
+
+      {/* Class Selector Grid */}
+      <div 
+        style={{ 
+          display: 'grid', 
+          gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', 
+          gap: '24px', 
+          marginBottom: '40px' 
+        }}
+      >
+        {classesConfig.map((cls) => {
+          const isSelected = chosenClass === cls.id;
+          
+          return (
+            <div
+              key={cls.id}
+              className="card"
+              style={{
+                cursor: 'pointer',
+                borderColor: isSelected ? cls.color : 'var(--border)',
+                borderWidth: isSelected ? '3px' : '1px',
+                backgroundColor: isSelected ? cls.bgGlow : 'var(--bg-secondary)',
+                padding: '24px',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                gap: '16px',
+                transform: isSelected ? 'translateY(-4px)' : 'translateY(0)',
+                boxShadow: isSelected ? 'var(--shadow-lg)' : 'var(--shadow-sm)',
+                transition: 'all var(--transition-fast)'
+              }}
+              onClick={() => setChosenClass(cls.id)}
+              role="radio"
+              aria-checked={isSelected}
+              tabIndex={0}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  setChosenClass(cls.id);
+                }
+              }}
+            >
+              <RpgAvatar rpgClass={cls.id} level={1} size={90} />
+              
+              <div>
+                <h3 style={{ fontSize: '1.15rem', fontWeight: '800', margin: '0 0 4px', color: isSelected ? cls.color : 'var(--text-primary)' }}>
+                  {cls.id === 'MAGE' && 'Mago'}
+                  {cls.id === 'WARRIOR' && 'Guerreiro'}
+                  {cls.id === 'RANGER' && 'Patrulheiro'}
+                </h3>
+                <p style={{ margin: 0, fontSize: '0.8rem', fontWeight: 'bold', color: 'var(--text-tertiary)' }}>
+                  {cls.id === 'MAGE' && 'Design & Estética'}
+                  {cls.id === 'WARRIOR' && 'Algoritmos & Lógica'}
+                  {cls.id === 'RANGER' && 'Testes & Acessibilidade'}
+                </p>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Class Detailed Stats & Description Box */}
+      <div 
+        className="card" 
+        style={{ 
+          borderLeft: `6px solid ${activeConfig.color}`, 
+          textAlign: 'left', 
+          padding: '28px',
+          marginBottom: '32px',
+          backgroundColor: 'var(--bg-secondary)'
+        }}
+      >
+        <h3 style={{ fontSize: '1.3rem', fontWeight: '800', color: activeConfig.color, marginBottom: '8px' }}>
+          {activeConfig.name}
+        </h3>
+        <p style={{ fontSize: '0.95rem', color: 'var(--text-secondary)', marginBottom: '24px', lineHeight: '1.6' }}>
+          {activeConfig.desc}
+        </p>
+
+        {/* Stats Grid */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '20px' }}>
+          <div>
+            <span style={{ fontSize: '0.8rem', fontWeight: 'bold', color: 'var(--text-tertiary)', textTransform: 'uppercase' }}>Atributos Iniciais:</span>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', marginTop: '8px', fontSize: '0.9rem' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid var(--border)', paddingBottom: '4px' }}>
+                <span>Força (Lógica):</span>
+                <strong>{activeConfig.strength}</strong>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid var(--border)', paddingBottom: '4px' }}>
+                <span>Inteligência (Código):</span>
+                <strong>{activeConfig.intelligence}</strong>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid var(--border)', paddingBottom: '4px' }}>
+                <span>Destreza (Arquitetura):</span>
+                <strong>{activeConfig.dexterity}</strong>
+              </div>
+            </div>
+          </div>
+
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', justifyContent: 'center' }}>
+            <div style={{ padding: '16px', backgroundColor: 'var(--bg-tertiary)', borderRadius: 'var(--radius-md)', border: '1px solid var(--border)' }}>
+              <div style={{ fontSize: '0.75rem', fontWeight: 'bold', color: 'var(--text-tertiary)', textTransform: 'uppercase', marginBottom: '4px' }}>
+                Habilidade Inicial Desbloqueada:
+              </div>
+              <strong style={{ fontSize: '1rem', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <Trophy size={16} style={{ color: activeConfig.color }} /> {activeConfig.initialSkill}
+              </strong>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Launch Adventure Button */}
+      <button
+        className="btn btn-primary"
+        style={{ 
+          fontSize: '1.1rem', 
+          padding: '12px 36px', 
+          backgroundColor: activeConfig.color, 
+          borderColor: activeConfig.color, 
+          boxShadow: `0 8px 24px ${activeConfig.color}40`,
+          color: '#ffffff'
+        }}
+        onClick={() => onSelectClass(chosenClass)}
+      >
+        ⚔️ Iniciar Aventura Pedagógica!
+      </button>
+    </div>
+  );
+};
