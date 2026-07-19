@@ -87,14 +87,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setCurrentUser(null);
   };
 
-  const refreshUser = () => {
+  const refreshUser = useCallback(() => {
     const user = db.getCurrentUserWithEvolution() || db.getCurrentUser();
     if (user) {
       const checkedUser = runDailyCheck(user);
       setCurrentUser(checkedUser);
     }
     setAllUsers(db.getUsers());
-  };
+  }, [runDailyCheck]);
+
 
   return (
     <AuthContext.Provider value={{ currentUser, allUsers, login, logout, refreshUser, dailyLeveledUp, setDailyLeveledUp }}>
