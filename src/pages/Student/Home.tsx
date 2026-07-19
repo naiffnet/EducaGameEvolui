@@ -288,10 +288,10 @@ export const Home: React.FC<HomeProps> = ({ onSelectCourse }) => {
                 <div className="level-container">
                   {[
                     { label: 'Todos os Níveis', val: 'All', cls: 'level-capsule-purple' },
-                    { label: '7º ao 9º Ano (Iniciante)', val: 'Year 7-9', cls: 'level-capsule-green' },
+                    { label: 'Ensino Fundamental (Iniciante)', val: 'Year 7-9', cls: 'level-capsule-green' },
                     { label: 'Ensino Médio (Intermediário)', val: 'Year 10-11', cls: 'level-capsule-blue' },
-                    { label: 'Ensino Técnico (Avançado)', val: 'Year 12-13', cls: 'level-capsule-coral' },
-                    { label: 'Ensino Superior (Superior)', val: 'Year 14-15', cls: 'level-capsule-pink' },
+                    { label: 'Graduação / Técnico (Avançado)', val: 'Year 12-13', cls: 'level-capsule-coral' },
+                    { label: 'Mestrado / Doutorado (Pós-Graduação)', val: 'Year 14-15', cls: 'level-capsule-pink' },
                   ].map((level, i) => (
                     <button
                       key={i}
