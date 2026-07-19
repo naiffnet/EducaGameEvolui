@@ -30,7 +30,7 @@ function GradeBar({ grade }: { grade: number }) {
   const color = grade >= 7 ? '#22c55e' : grade >= 5 ? '#eab308' : '#ef4444';
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-      <div style={{ flex: 1, background: 'rgba(255,255,255,0.08)', borderRadius: 8, height: 8, overflow: 'hidden' }}>
+      <div style={{ flex: 1, background: 'var(--bg-tertiary)', borderRadius: 8, height: 8, overflow: 'hidden' }}>
         <div style={{ width: `${pct}%`, height: '100%', background: color, borderRadius: 8, transition: 'width 0.6s ease' }} />
       </div>
       <span style={{ minWidth: 32, textAlign: 'right', fontWeight: 700, color, fontSize: 14 }}>{grade.toFixed(1)}</span>
@@ -56,14 +56,14 @@ function RadarChart({ strength, intelligence, dexterity }: { strength: number; i
 
   return (
     <svg width={160} height={160} viewBox="0 0 160 160">
-      <polygon points={polyOuter} fill="none" stroke="rgba(255,255,255,0.1)" strokeWidth={1} />
+      <polygon points={polyOuter} fill="none" stroke="var(--border)" strokeWidth={1} />
       <polygon points={polyVal} fill="rgba(139,92,246,0.35)" stroke="#8b5cf6" strokeWidth={2} />
       {valPts.map((p, i) => (
         <circle key={i} cx={p.x} cy={p.y} r={4} fill="#8b5cf6" />
       ))}
       {outerPts.map((p, i) => (
         <text key={i} x={p.x} y={p.y + (angles[i] === -90 ? -8 : 16)} textAnchor="middle"
-          fontSize={10} fill="rgba(255,255,255,0.6)">{labels[i]}</text>
+          fontSize={10} fill="var(--text-secondary)">{labels[i]}</text>
       ))}
     </svg>
   );
@@ -72,7 +72,7 @@ function RadarChart({ strength, intelligence, dexterity }: { strength: number; i
 function SummaryCard({ icon, label, value, color }: { icon: React.ReactNode; label: string; value: string | number; color: string }) {
   return (
     <div style={{
-      background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)',
+      background: 'var(--bg-secondary)', border: '1px solid var(--border)',
       borderRadius: 16, padding: '20px 24px', display: 'flex', gap: 16, alignItems: 'center',
       flex: 1, minWidth: 160,
     }}>
@@ -80,8 +80,8 @@ function SummaryCard({ icon, label, value, color }: { icon: React.ReactNode; lab
         {icon}
       </div>
       <div>
-        <div style={{ fontSize: 22, fontWeight: 800, color: '#fff' }}>{value}</div>
-        <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.5)' }}>{label}</div>
+        <div style={{ fontSize: 22, fontWeight: 800, color: 'var(--text-primary)' }}>{value}</div>
+        <div style={{ fontSize: 13, color: 'var(--text-secondary)' }}>{label}</div>
       </div>
     </div>
   );
@@ -122,11 +122,11 @@ export const AcademicHistory: React.FC<AcademicHistoryProps> = ({ userId, onBack
           </button>
         )}
         <div>
-          <h1 style={{ fontSize: 26, fontWeight: 800, color: '#fff', margin: 0 }}>
+          <h1 style={{ fontSize: 26, fontWeight: 800, color: 'var(--text-primary)', margin: 0 }}>
             <GraduationCap size={26} style={{ marginRight: 10, verticalAlign: 'middle', color: '#8b5cf6' }} />
             Histórico Escolar
           </h1>
-          <p style={{ color: 'rgba(255,255,255,0.5)', margin: '4px 0 0' }}>{user.name} • {user.email}</p>
+          <p style={{ color: 'var(--text-secondary)', margin: '4px 0 0' }}>{user.name} • {user.email}</p>
         </div>
         <button onClick={handlePrint} className="btn btn-secondary" style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 6, padding: '8px 14px' }}>
           <Printer size={16} /> Imprimir Boletim
@@ -143,12 +143,12 @@ export const AcademicHistory: React.FC<AcademicHistoryProps> = ({ userId, onBack
 
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24, marginBottom: 32 }}>
         {/* Grade Book Table */}
-        <div style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 20, padding: 24, gridColumn: '1 / -1' }}>
-          <h2 style={{ fontSize: 18, fontWeight: 700, color: '#fff', margin: '0 0 20px', display: 'flex', alignItems: 'center', gap: 8 }}>
+        <div style={{ background: 'var(--bg-secondary)', border: '1px solid var(--border)', borderRadius: 20, padding: 24, gridColumn: '1 / -1' }}>
+          <h2 style={{ fontSize: 18, fontWeight: 700, color: 'var(--text-primary)', margin: '0 0 20px', display: 'flex', alignItems: 'center', gap: 8 }}>
             <Award size={18} color="#eab308" /> Boletim de Notas
           </h2>
           {record.grades.length === 0 ? (
-            <div style={{ textAlign: 'center', padding: '40px 0', color: 'rgba(255,255,255,0.3)' }}>
+            <div style={{ textAlign: 'center', padding: '40px 0', color: 'var(--text-tertiary)' }}>
               <Award size={40} style={{ opacity: 0.3 }} />
               <p style={{ marginTop: 12 }}>Nenhuma nota lançada ainda.</p>
             </div>
@@ -159,15 +159,15 @@ export const AcademicHistory: React.FC<AcademicHistoryProps> = ({ userId, onBack
                   <div
                     onClick={() => setExpandedGrade(expandedGrade === g.id ? null : g.id)}
                     style={{
-                      background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)',
+                      background: 'var(--bg-primary)', border: '1px solid var(--border)',
                       borderRadius: 12, padding: '14px 18px', cursor: 'pointer',
                       display: 'grid', gridTemplateColumns: '1fr 180px 100px 28px',
                       alignItems: 'center', gap: 16, transition: 'background 0.2s',
                     }}
                   >
                     <div>
-                      <div style={{ fontWeight: 600, color: '#fff', fontSize: 15 }}>{g.courseName}</div>
-                      <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.4)' }}>
+                      <div style={{ fontWeight: 600, color: 'var(--text-primary)', fontSize: 15 }}>{g.courseName}</div>
+                      <div style={{ fontSize: 12, color: 'var(--text-secondary)' }}>
                         {g.instructorName} • {new Date(g.date).toLocaleDateString('pt-BR')}
                       </div>
                     </div>
@@ -177,13 +177,13 @@ export const AcademicHistory: React.FC<AcademicHistoryProps> = ({ userId, onBack
                       background: `${CONCEPT_COLOR[g.concept]}22`, color: CONCEPT_COLOR[g.concept],
                       textAlign: 'center',
                     }}>{g.concept}</span>
-                    {expandedGrade === g.id ? <ChevronUp size={16} color="rgba(255,255,255,0.4)" /> : <ChevronDown size={16} color="rgba(255,255,255,0.4)" />}
+                    {expandedGrade === g.id ? <ChevronUp size={16} color="var(--text-tertiary)" /> : <ChevronDown size={16} color="var(--text-tertiary)" />}
                   </div>
                   {expandedGrade === g.id && g.observations && (
                     <div style={{
                       margin: '4px 0 0', padding: '12px 18px', borderRadius: '0 0 12px 12px',
                       background: 'rgba(139,92,246,0.08)', border: '1px solid rgba(139,92,246,0.2)',
-                      color: 'rgba(255,255,255,0.7)', fontSize: 14, fontStyle: 'italic',
+                      color: 'var(--text-secondary)', fontSize: 14, fontStyle: 'italic',
                     }}>
                       💬 {g.observations}
                     </div>
@@ -195,12 +195,12 @@ export const AcademicHistory: React.FC<AcademicHistoryProps> = ({ userId, onBack
         </div>
 
         {/* Enrollment History */}
-        <div style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 20, padding: 24 }}>
-          <h2 style={{ fontSize: 18, fontWeight: 700, color: '#fff', margin: '0 0 20px', display: 'flex', alignItems: 'center', gap: 8 }}>
+        <div style={{ background: 'var(--bg-secondary)', border: '1px solid var(--border)', borderRadius: 20, padding: 24 }}>
+          <h2 style={{ fontSize: 18, fontWeight: 700, color: 'var(--text-primary)', margin: '0 0 20px', display: 'flex', alignItems: 'center', gap: 8 }}>
             <BookOpen size={18} color="#3b82f6" /> Histórico de Matrículas
           </h2>
           {record.enrollmentHistory.length === 0 ? (
-            <div style={{ textAlign: 'center', padding: '30px 0', color: 'rgba(255,255,255,0.3)' }}>
+            <div style={{ textAlign: 'center', padding: '30px 0', color: 'var(--text-tertiary)' }}>
               <BookOpen size={36} style={{ opacity: 0.3 }} />
               <p style={{ marginTop: 10, fontSize: 14 }}>Nenhuma matrícula registrada.</p>
             </div>
@@ -210,19 +210,19 @@ export const AcademicHistory: React.FC<AcademicHistoryProps> = ({ userId, onBack
                 const meta = STATUS_META[e.status];
                 return (
                   <div key={e.id} style={{
-                    background: 'rgba(255,255,255,0.04)', borderRadius: 12, padding: '12px 16px',
+                    background: 'var(--bg-primary)', borderRadius: 12, padding: '12px 16px',
                     border: `1px solid ${meta.color}33`,
                   }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
-                      <span style={{ fontWeight: 600, color: '#fff', fontSize: 14 }}>{e.courseName}</span>
+                      <span style={{ fontWeight: 600, color: 'var(--text-primary)', fontSize: 14 }}>{e.courseName}</span>
                       <span style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 12, color: meta.color, fontWeight: 600 }}>
                         {meta.icon} {meta.label}
                       </span>
                     </div>
-                    <div style={{ background: 'rgba(255,255,255,0.08)', borderRadius: 6, height: 6, overflow: 'hidden', marginBottom: 6 }}>
+                    <div style={{ background: 'var(--bg-tertiary)', borderRadius: 6, height: 6, overflow: 'hidden', marginBottom: 6 }}>
                       <div style={{ width: `${e.progressPercent}%`, height: '100%', background: meta.color, transition: 'width 0.6s' }} />
                     </div>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11, color: 'rgba(255,255,255,0.4)' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11, color: 'var(--text-secondary)' }}>
                       <span>Início: {new Date(e.enrolledAt).toLocaleDateString('pt-BR')}</span>
                       <span>{e.progressPercent}% concluído</span>
                     </div>
@@ -237,7 +237,7 @@ export const AcademicHistory: React.FC<AcademicHistoryProps> = ({ userId, onBack
         <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
           {rpg && (
             <div style={{ background: 'rgba(139,92,246,0.08)', border: '1px solid rgba(139,92,246,0.2)', borderRadius: 20, padding: 24 }}>
-              <h2 style={{ fontSize: 18, fontWeight: 700, color: '#fff', margin: '0 0 16px' }}>⚔️ Stats do Personagem</h2>
+              <h2 style={{ fontSize: 18, fontWeight: 700, color: 'var(--text-primary)', margin: '0 0 16px' }}>⚔️ Stats do Personagem</h2>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                 <RadarChart strength={rpg.stats.strength} intelligence={rpg.stats.intelligence} dexterity={rpg.stats.dexterity} />
               </div>
@@ -249,7 +249,7 @@ export const AcademicHistory: React.FC<AcademicHistoryProps> = ({ userId, onBack
                 ] as [string, number][]).map(([label, val]) => (
                   <div key={label} style={{ textAlign: 'center' }}>
                     <div style={{ fontSize: 18, fontWeight: 800, color: '#8b5cf6' }}>{val}</div>
-                    <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)' }}>{label}</div>
+                    <div style={{ fontSize: 11, color: 'var(--text-secondary)' }}>{label}</div>
                   </div>
                 ))}
               </div>
@@ -258,22 +258,22 @@ export const AcademicHistory: React.FC<AcademicHistoryProps> = ({ userId, onBack
 
           {/* General Observations */}
           {record.generalObservations && (
-            <div style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 20, padding: 24 }}>
-              <h2 style={{ fontSize: 18, fontWeight: 700, color: '#fff', margin: '0 0 12px' }}>📋 Observações Gerais</h2>
-              <p style={{ color: 'rgba(255,255,255,0.7)', lineHeight: 1.7, margin: 0 }}>{record.generalObservations}</p>
+            <div style={{ background: 'var(--bg-secondary)', border: '1px solid var(--border)', borderRadius: 20, padding: 24 }}>
+              <h2 style={{ fontSize: 18, fontWeight: 700, color: 'var(--text-primary)', margin: '0 0 12px' }}>📋 Observações Gerais</h2>
+              <p style={{ color: 'var(--text-secondary)', lineHeight: 1.7, margin: 0 }}>{record.generalObservations}</p>
             </div>
           )}
 
           {/* Teacher Notes */}
           {user.teacherNotes && user.teacherNotes.length > 0 && (
-            <div style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 20, padding: 24 }}>
-              <h2 style={{ fontSize: 18, fontWeight: 700, color: '#fff', margin: '0 0 12px' }}>💬 Pareceres Pedagógicos</h2>
+            <div style={{ background: 'var(--bg-secondary)', border: '1px solid var(--border)', borderRadius: 20, padding: 24 }}>
+              <h2 style={{ fontSize: 18, fontWeight: 700, color: 'var(--text-primary)', margin: '0 0 12px' }}>💬 Pareceres Pedagógicos</h2>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
                 {user.teacherNotes.map(n => (
-                  <div key={n.id} style={{ background: 'rgba(255,255,255,0.05)', borderRadius: 12, padding: '12px 14px' }}>
+                  <div key={n.id} style={{ background: 'var(--bg-primary)', borderRadius: 12, padding: '12px 14px' }}>
                     <div style={{ fontWeight: 600, color: '#8b5cf6', fontSize: 13 }}>{n.teacherName}</div>
-                    <div style={{ color: 'rgba(255,255,255,0.7)', fontSize: 14, margin: '4px 0', lineHeight: 1.6 }}>{n.text}</div>
-                    <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.3)' }}>{new Date(n.date).toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' })}</div>
+                    <div style={{ color: 'var(--text-secondary)', fontSize: 14, margin: '4px 0', lineHeight: 1.6 }}>{n.text}</div>
+                    <div style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>{new Date(n.date).toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' })}</div>
                   </div>
                 ))}
               </div>
@@ -287,6 +287,7 @@ export const AcademicHistory: React.FC<AcademicHistoryProps> = ({ userId, onBack
         @media print {
           .no-print { display: none !important; }
           .academic-history { background: white !important; color: black !important; }
+          .academic-history * { color: black !important; border-color: #ddd !important; background: transparent !important; }
           button { display: none !important; }
         }
       `}</style>
