@@ -113,7 +113,7 @@ const AppContent: React.FC = () => {
         Pular para o conteúdo principal
       </a>
 
-      <Header />
+      <Header onProfileClick={() => { setSelectedCourseId(null); setActiveTab('profile'); }} />
       
       <MaintenanceGuard>
         <DashboardLayout activeTab={activeTab} setActiveTab={setActiveTab}>

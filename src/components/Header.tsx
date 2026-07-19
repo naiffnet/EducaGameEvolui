@@ -4,7 +4,11 @@ import { useSystem } from '../context/SystemContext';
 import { Sun, Moon, Eye, Type, Users, ShieldAlert, Sparkles, Zap } from 'lucide-react';
 import { StreakIndicator } from './StreakIndicator';
 
-export const Header: React.FC = () => {
+interface HeaderProps {
+  onProfileClick?: () => void;
+}
+
+export const Header: React.FC<HeaderProps> = ({ onProfileClick }) => {
   const { currentUser, allUsers, login } = useAuth();
   const { theme, setTheme, fontSizeMultiplier, setFontSizeMultiplier, config } = useSystem();
 
@@ -166,7 +170,8 @@ export const Header: React.FC = () => {
             </div>
             
             {/* Mock Avatar */}
-            <div 
+            <button 
+              onClick={onProfileClick}
               style={{
                 width: '42px',
                 height: '42px',
@@ -178,12 +183,23 @@ export const Header: React.FC = () => {
                 justifyContent: 'center',
                 fontWeight: '700',
                 fontSize: '1.1rem',
-                border: '2px solid var(--border)'
+                border: '2px solid var(--border)',
+                cursor: 'pointer',
+                padding: 0,
+                transition: 'transform var(--transition-fast), box-shadow var(--transition-fast)'
               }}
-              aria-hidden="true"
+              onMouseOver={(e) => {
+                e.currentTarget.style.transform = 'scale(1.05)';
+                e.currentTarget.style.boxShadow = 'var(--shadow-md)';
+              }}
+              onMouseOut={(e) => {
+                e.currentTarget.style.transform = 'scale(1)';
+                e.currentTarget.style.boxShadow = 'none';
+              }}
+              aria-label="Acessar meu perfil"
             >
               {currentUser.name[0]}
-            </div>
+            </button>
           </div>
         )}
       </div>
