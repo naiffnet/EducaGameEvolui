@@ -28,7 +28,7 @@ export interface Milestone {
   type: 'PERSONAL' | 'HERO';
   title: string;
   description: string;
-  source: 'lesson_completed' | 'exercise_passed' | 'high_grade' | 'project_done' | 'streak_milestone' | 'course_completed' | 'badge_earned' | 'teacher_feedback' | 'attendance_confirmed';
+  source: 'lesson_completed' | 'exercise_passed' | 'high_grade' | 'project_done' | 'streak_milestone' | 'course_completed' | 'badge_earned' | 'teacher_feedback' | 'attendance_confirmed' | 'mission_completed';
   achievedAt: string; // ISO date
   relatedEntityId?: string;
 }
@@ -176,4 +176,43 @@ export interface SystemConfig {
   maintenanceMode: boolean;
   allowStudentRegistration: boolean;
   systemVersion: string;
+}
+
+// ─── Missões Domain ───────────────────────────────────────────────────────────
+
+export type MissionType = 'COMMON' | 'REQUESTED' | 'BLITZ';
+
+/** Uma atividade pedagógica criada por um Instrutor, com prazo e XP próprios */
+export interface Mission {
+  id: string;
+  courseId: string;
+  instructorId: string;
+  instructorName: string;
+  title: string;
+  description: string;
+  type: MissionType;
+  xpReward: number;
+  milestoneType: 'PERSONAL' | 'HERO';
+  /** Regra M2: se milestoneType === 'HERO', isto deve ser sempre true */
+  requiresValidation: boolean;
+  /** Obrigatório e não-vazio apenas quando type === 'REQUESTED' */
+  targetStudentIds?: string[];
+  availableFrom: string; // ISO date
+  dueAt: string; // ISO date
+  relatedLessonId?: string;
+  createdAt: string; // ISO datetime
+  /** Instrutor encerrou antes do prazo original */
+  closedEarly?: boolean;
+}
+
+/** Registro de que um estudante entregou/cumpriu uma Missão */
+export interface MissionSubmission {
+  id: string;
+  missionId: string;
+  studentId: string;
+  status: 'PENDING' | 'APPROVED' | 'REJECTED';
+  evidenceText?: string;
+  submittedAt: string; // ISO datetime
+  reviewedAt?: string; // ISO datetime
+  reviewNote?: string;
 }

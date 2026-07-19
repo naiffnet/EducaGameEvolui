@@ -1,4 +1,4 @@
-import type { Course, User, AuditLog, SystemConfig, AttendanceRecord } from '../types';
+import type { Course, User, AuditLog, SystemConfig, AttendanceRecord, Mission } from '../types';
 
 export const INITIAL_USERS: User[] = [
   {
@@ -317,5 +317,55 @@ export const INITIAL_ATTENDANCE: AttendanceRecord[] = [
     xpGranted: false,
     recordedByInstructorId: 'user-instructor',
     recordedAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 2).toISOString(),
+  },
+];
+
+// Demonstração dos três tipos de Missão, para a turma do curso de React
+export const INITIAL_MISSIONS: Mission[] = [
+  {
+    id: 'mission-seed-common-1',
+    courseId: 'course-react',
+    instructorId: 'user-instructor',
+    instructorName: 'Prof. Marcos Paulo',
+    title: 'Pesquisa: Componentes Reutilizáveis',
+    description: 'Traga 2 exemplos de componentes reutilizáveis que você encontrou em sites do dia a dia, com uma frase explicando por que funcionam bem.',
+    type: 'COMMON',
+    xpReward: 120,
+    milestoneType: 'PERSONAL',
+    requiresValidation: true,
+    availableFrom: new Date(Date.now() - 1000 * 60 * 60 * 24 * 1).toISOString(),
+    dueAt: new Date(Date.now() + 1000 * 60 * 60 * 24 * 5).toISOString(),
+    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 1).toISOString(),
+  },
+  {
+    id: 'mission-seed-blitz-1',
+    courseId: 'course-react',
+    instructorId: 'user-instructor',
+    instructorName: 'Prof. Marcos Paulo',
+    title: 'Blitz: Encontre o Bug',
+    description: 'Em sala: encontre o erro de sintaxe no trecho de código mostrado no quadro e explique em uma frase o que está errado.',
+    type: 'BLITZ',
+    xpReward: 40,
+    milestoneType: 'PERSONAL',
+    requiresValidation: false,
+    availableFrom: new Date(Date.now() - 1000 * 60 * 60 * 2).toISOString(),
+    dueAt: new Date(Date.now() + 1000 * 60 * 60 * 24 * 1).toISOString(),
+    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 2).toISOString(),
+  },
+  {
+    id: 'mission-seed-requested-1',
+    courseId: 'course-react',
+    instructorId: 'user-instructor',
+    instructorName: 'Prof. Marcos Paulo',
+    title: 'Reforço: Props e Estado',
+    description: 'Refaça o exercício do Button com um novo estado de "loading" que desabilita o clique enquanto uma ação está em andamento.',
+    type: 'REQUESTED',
+    xpReward: 200,
+    milestoneType: 'HERO',
+    requiresValidation: true,
+    targetStudentIds: ['user-student-pedro'],
+    availableFrom: new Date(Date.now() - 1000 * 60 * 60 * 24 * 1).toISOString(),
+    dueAt: new Date(Date.now() + 1000 * 60 * 60 * 24 * 7).toISOString(),
+    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 1).toISOString(),
   },
 ];

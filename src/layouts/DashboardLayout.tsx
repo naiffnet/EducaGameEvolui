@@ -10,7 +10,8 @@ import {
   Terminal,
   User,
   GraduationCap,
-  ClipboardCheck
+  ClipboardCheck,
+  Swords
 } from 'lucide-react';
 
 interface DashboardLayoutProps {
@@ -44,6 +45,14 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
             >
               <BookOpen size={18} />
               <span>Meus Cursos</span>
+            </button>
+            <button
+              onClick={() => setActiveTab('mission-board')}
+              className={`nav-link ${activeTab === 'mission-board' ? 'active' : ''}`}
+              aria-current={activeTab === 'mission-board' ? 'page' : undefined}
+            >
+              <Swords size={18} />
+              <span>Quadro de Missões</span>
             </button>
             <button
               onClick={() => setActiveTab('academic-history')}
@@ -90,6 +99,14 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
             >
               <ClipboardCheck size={18} />
               <span>Chamada</span>
+            </button>
+            <button
+              onClick={() => setActiveTab('mission-editor')}
+              className={`nav-link ${activeTab === 'mission-editor' ? 'active' : ''}`}
+              aria-current={activeTab === 'mission-editor' ? 'page' : undefined}
+            >
+              <Swords size={18} />
+              <span>Missões</span>
             </button>
             <button
               onClick={() => setActiveTab('course-editor')}
@@ -160,6 +177,14 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
             >
               <GraduationCap size={18} />
               <span>Livro de Notas</span>
+            </button>
+            <button
+              onClick={() => setActiveTab('mission-editor')}
+              className={`nav-link ${activeTab === 'mission-editor' ? 'active' : ''}`}
+              aria-current={activeTab === 'mission-editor' ? 'page' : undefined}
+            >
+              <Swords size={18} />
+              <span>Missões</span>
             </button>
             <button
               onClick={() => setActiveTab('system-logs')}

@@ -14,6 +14,8 @@ import { CourseEditor } from './pages/Admin/CourseEditor';
 import { UserManagement } from './pages/Admin/UserManagement';
 import { GradeBook } from './pages/Admin/GradeBook';
 import { Attendance } from './pages/Instructor/Attendance';
+import { MissionEditor } from './pages/Instructor/MissionEditor';
+import { MissionBoard } from './components/MissionBoard';
 import { SystemStatus } from './pages/Maintenance/SystemStatus';
 import { Profile } from './pages/Profile';
 import { LevelUpModal } from './components/LevelUpModal';
@@ -86,6 +88,12 @@ const AppContent: React.FC = () => {
 
       case 'attendance':
         return <Attendance />;
+
+      case 'mission-editor':
+        return <MissionEditor />;
+
+      case 'mission-board':
+        return <MissionBoard />;
         
       case 'academic-history':
         return <AcademicHistory />;

@@ -177,8 +177,8 @@ export interface XpGrantResult {
 /** Grant XP for an activity and check for milestones/level ups */
 export function grantXp(
   character: RpgCharacter,
-  activity: 'lesson_watched' | 'lesson_completed' | 'exercise_passed' | 'high_grade' | 'project_done' | 'course_completed' | 'badge_earned' | 'teacher_feedback' | 'daily_login' | 'attendance_confirmed',
-  details: { title: string; description: string; durationMinutes?: number; relatedEntityId?: string }
+  activity: 'lesson_watched' | 'lesson_completed' | 'exercise_passed' | 'high_grade' | 'project_done' | 'course_completed' | 'badge_earned' | 'teacher_feedback' | 'daily_login' | 'attendance_confirmed' | 'mission_completed',
+  details: { title: string; description: string; durationMinutes?: number; relatedEntityId?: string; xpOverride?: number; milestoneTypeOverride?: 'PERSONAL' | 'HERO' }
 ): XpGrantResult {
   let xpGained = 0;
   const newMilestones: Milestone[] = [];
@@ -215,6 +215,11 @@ export function grantXp(
     case 'attendance_confirmed':
       xpGained = XP_ATTENDANCE;
       break;
+    case 'mission_completed':
+      // XP vem da própria Missão (details.xpOverride), não de uma constante fixa —
+      // única atividade com valor de XP variável (ver PLANO_IMPLEMENTACAO_PLATAFORMA.md)
+      xpGained = details.xpOverride ?? 0;
+      break;
   }
 
   // Check if this activity earns a milestone
@@ -227,13 +232,14 @@ export function grantXp(
     badge_earned: 'badge_earned',
     teacher_feedback: 'teacher_feedback',
     attendance_confirmed: 'attendance_confirmed',
+    mission_completed: 'mission_completed',
   };
 
   const milestoneSource = milestoneSourceMap[activity];
   if (milestoneSource) {
-    const milestoneType = (activity === 'project_done' || activity === 'course_completed' || activity === 'high_grade')
+    const milestoneType = details.milestoneTypeOverride ?? ((activity === 'project_done' || activity === 'course_completed' || activity === 'high_grade')
       ? 'HERO' as const
-      : 'PERSONAL' as const;
+      : 'PERSONAL' as const);
 
     // Check if milestone for this entity already exists
     const alreadyEarned = character.milestones.some(

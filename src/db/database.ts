@@ -1,5 +1,5 @@
-import type { Course, User, AuditLog, SystemConfig, AcademicRecord, GradeEntry, EnrollmentEntry, AttendanceRecord } from '../types';
-import { INITIAL_USERS, INITIAL_COURSES, INITIAL_AUDIT_LOGS, INITIAL_CONFIG, INITIAL_ATTENDANCE } from './seedData';
+import type { Course, User, AuditLog, SystemConfig, AcademicRecord, GradeEntry, EnrollmentEntry, AttendanceRecord, Mission, MissionSubmission } from '../types';
+import { INITIAL_USERS, INITIAL_COURSES, INITIAL_AUDIT_LOGS, INITIAL_CONFIG, INITIAL_ATTENDANCE, INITIAL_MISSIONS } from './seedData';
 
 const KEYS = {
   USERS: 'lms_users',
@@ -9,6 +9,8 @@ const KEYS = {
   CURRENT_USER_ID: 'lms_current_user_id',
   ACADEMIC_RECORDS: 'lms_academic_records',
   ATTENDANCE: 'lms_attendance',
+  MISSIONS: 'lms_missions',
+  MISSION_SUBMISSIONS: 'lms_mission_submissions',
 };
 
 // Auto-initialize LocalStorage with Seed Data if empty
@@ -33,6 +35,12 @@ export const initializeDB = (forceReset = false) => {
   }
   if (forceReset || !localStorage.getItem(KEYS.ATTENDANCE)) {
     localStorage.setItem(KEYS.ATTENDANCE, JSON.stringify(INITIAL_ATTENDANCE));
+  }
+  if (forceReset || !localStorage.getItem(KEYS.MISSIONS)) {
+    localStorage.setItem(KEYS.MISSIONS, JSON.stringify(INITIAL_MISSIONS));
+  }
+  if (forceReset || !localStorage.getItem(KEYS.MISSION_SUBMISSIONS)) {
+    localStorage.setItem(KEYS.MISSION_SUBMISSIONS, JSON.stringify([]));
   }
 };
 
@@ -365,6 +373,60 @@ export const db = {
     }
     localStorage.setItem(KEYS.ATTENDANCE, JSON.stringify(records));
     return { record, xpShouldBeGranted };
+  },
+
+  // ── Missões ────────────────────────────────────────────────────────────────
+
+  getMissions(): Mission[] {
+    const data = localStorage.getItem(KEYS.MISSIONS);
+    return data ? JSON.parse(data) : [];
+  },
+
+  saveMissions(missions: Mission[]) {
+    localStorage.setItem(KEYS.MISSIONS, JSON.stringify(missions));
+  },
+
+  addMission(mission: Mission) {
+    const missions = this.getMissions();
+    missions.push(mission);
+    this.saveMissions(missions);
+  },
+
+  updateMission(updated: Mission) {
+    const missions = this.getMissions();
+    const idx = missions.findIndex(m => m.id === updated.id);
+    if (idx !== -1) {
+      missions[idx] = updated;
+      this.saveMissions(missions);
+    }
+  },
+
+  getMissionSubmissions(): MissionSubmission[] {
+    const data = localStorage.getItem(KEYS.MISSION_SUBMISSIONS);
+    return data ? JSON.parse(data) : [];
+  },
+
+  saveMissionSubmissions(submissions: MissionSubmission[]) {
+    localStorage.setItem(KEYS.MISSION_SUBMISSIONS, JSON.stringify(submissions));
+  },
+
+  addMissionSubmission(submission: MissionSubmission) {
+    const submissions = this.getMissionSubmissions();
+    submissions.push(submission);
+    this.saveMissionSubmissions(submissions);
+  },
+
+  updateMissionSubmission(updated: MissionSubmission) {
+    const submissions = this.getMissionSubmissions();
+    const idx = submissions.findIndex(s => s.id === updated.id);
+    if (idx !== -1) {
+      submissions[idx] = updated;
+      this.saveMissionSubmissions(submissions);
+    }
+  },
+
+  getSubmissionsForStudent(studentId: string): MissionSubmission[] {
+    return this.getMissionSubmissions().filter(s => s.studentId === studentId);
   },
 
   /** Compute average grade for a student (returns null if no grades) */
