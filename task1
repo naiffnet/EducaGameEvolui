@@ -1,0 +1,20 @@
+- [/] Atualizar Tipos e Sementes do Banco de Dados
+  - [ ] Adicionar campos de identificação de usuário ao tipo `User` no `types/index.ts`
+  - [ ] Adicionar tipos `AttendanceRecord` e `Mission` no `types/index.ts`
+  - [ ] Adicionar operações de persistência e concessão de XP em `db/database.ts`
+  - [ ] Atualizar dados fictícios no `db/seedData.ts` com novas informações
+- [ ] Atualizar Telas de Perfil e Gestão de Usuários
+  - [ ] Ajustar formulários de criação/edição em `UserManagement.tsx`
+  - [ ] Mostrar novos dados cadastrais no `Profile.tsx`
+- [ ] Criar Recursos de Chamada e Turmas no Painel do Professor
+  - [ ] Implementar abas no `Dashboard.tsx`
+  - [ ] Adicionar seção de Turmas com Lista de Chamada e concessão de XP
+- [ ] Criar Painel de Criação e Conclusão de Missões
+  - [ ] Adicionar seção de criação de quests para professores no `Dashboard.tsx`
+  - [ ] Criar exibição das missões ativas/concluídas com prêmios de XP
+- [ ] Mostrar Missões na Visão do Estudante
+  - [ ] Adicionar mural de missões na `Home.tsx` do Aluno
+- [ ] Criar Assistente de Aula com IA
+  - [ ] Integrar painel interativo com geração de conteúdo modelo no `CourseEditor.tsx`
+- [ ] Validar e Compilar
+  - [ ] Executar builds locais e testar fluxo completo
