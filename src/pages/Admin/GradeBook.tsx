@@ -16,18 +16,20 @@ interface CellEditorState {
 const CONCEPT_FOR_GRADE = (g: number): GradeEntry['concept'] =>
   g >= 9 ? 'Excelente' : g >= 7 ? 'Ótimo' : g >= 6 ? 'Bom' : g >= 5 ? 'Regular' : 'Insuficiente';
 
+// Usa os tokens de tema do app (var(--success)/--warning/--danger e suas variantes -glow)
+// em vez de branco fixo, para funcionar nos temas claro, escuro e alto contraste.
 const GRADE_COLOR = (g: number | null) => {
-  if (g === null) return 'rgba(255,255,255,0.06)';
-  if (g >= 7) return 'rgba(34,197,94,0.15)';
-  if (g >= 5) return 'rgba(234,179,8,0.15)';
-  return 'rgba(239,68,68,0.15)';
+  if (g === null) return 'var(--bg-tertiary)';
+  if (g >= 7) return 'var(--success-glow)';
+  if (g >= 5) return 'var(--warning-glow)';
+  return 'var(--danger-glow)';
 };
 
 const GRADE_TEXT_COLOR = (g: number | null) => {
-  if (g === null) return 'rgba(255,255,255,0.2)';
-  if (g >= 7) return '#22c55e';
-  if (g >= 5) return '#eab308';
-  return '#ef4444';
+  if (g === null) return 'var(--text-tertiary)';
+  if (g >= 7) return 'var(--success)';
+  if (g >= 5) return 'var(--warning)';
+  return 'var(--danger)';
 };
 
 export const GradeBook: React.FC = () => {
@@ -136,7 +138,7 @@ export const GradeBook: React.FC = () => {
 
   if (currentUser?.role !== 'ADMIN' && currentUser?.role !== 'INSTRUCTOR') {
     return (
-      <div style={{ padding: 60, textAlign: 'center', color: 'rgba(255,255,255,0.4)' }}>
+      <div style={{ padding: 60, textAlign: 'center', color: 'var(--text-secondary)' }}>
         <BookOpen size={48} style={{ opacity: 0.3 }} />
         <p>Acesso restrito a professores e administradores.</p>
       </div>
@@ -147,11 +149,11 @@ export const GradeBook: React.FC = () => {
     <div style={{ padding: '24px 32px', maxWidth: 1200, margin: '0 auto' }}>
       {/* Header */}
       <div style={{ marginBottom: 28 }}>
-        <h1 style={{ fontSize: 26, fontWeight: 800, color: '#fff', margin: 0 }}>
-          <BookOpen size={24} style={{ marginRight: 10, verticalAlign: 'middle', color: '#8b5cf6' }} />
+        <h1 style={{ fontSize: 26, fontWeight: 800, color: 'var(--text-primary)', margin: 0 }}>
+          <BookOpen size={24} style={{ marginRight: 10, verticalAlign: 'middle', color: 'var(--primary)' }} />
           Livro de Notas
         </h1>
-        <p style={{ color: 'rgba(255,255,255,0.45)', margin: '6px 0 0' }}>
+        <p style={{ color: 'var(--text-secondary)', margin: '6px 0 0' }}>
           Clique em qualquer célula para lançar ou editar uma nota.
         </p>
       </div>
@@ -159,14 +161,14 @@ export const GradeBook: React.FC = () => {
       {/* Filters */}
       <div style={{ display: 'flex', gap: 12, marginBottom: 24, flexWrap: 'wrap' }}>
         <div style={{ position: 'relative', flex: 1, minWidth: 200 }}>
-          <Search size={16} style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: 'rgba(255,255,255,0.3)' }} />
+          <Search size={16} style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-tertiary)' }} />
           <input
             value={search}
             onChange={e => setSearch(e.target.value)}
             placeholder="Buscar aluno..."
             style={{
-              width: '100%', padding: '10px 12px 10px 38px', background: 'rgba(255,255,255,0.06)',
-              border: '1px solid rgba(255,255,255,0.12)', borderRadius: 10, color: '#fff',
+              width: '100%', padding: '10px 12px 10px 38px', background: 'var(--bg-tertiary)',
+              border: '1px solid var(--border)', borderRadius: 10, color: 'var(--text-primary)',
               fontSize: 14, boxSizing: 'border-box',
             }}
           />
@@ -175,8 +177,8 @@ export const GradeBook: React.FC = () => {
           value={filterCourse}
           onChange={e => setFilterCourse(e.target.value)}
           style={{
-            padding: '10px 14px', background: 'rgba(255,255,255,0.06)',
-            border: '1px solid rgba(255,255,255,0.12)', borderRadius: 10, color: '#fff', fontSize: 14,
+            padding: '10px 14px', background: 'var(--bg-tertiary)',
+            border: '1px solid var(--border)', borderRadius: 10, color: 'var(--text-primary)', fontSize: 14,
           }}
         >
           <option value="all">Todos os cursos</option>
@@ -185,17 +187,17 @@ export const GradeBook: React.FC = () => {
       </div>
 
       {/* Grid */}
-      <div style={{ overflowX: 'auto', borderRadius: 20, border: '1px solid rgba(255,255,255,0.08)' }}>
+      <div style={{ overflowX: 'auto', borderRadius: 20, border: '1px solid var(--border)' }}>
         <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: 600 }}>
           <thead>
-            <tr style={{ background: 'rgba(255,255,255,0.05)' }}>
-              <th style={{ padding: '14px 20px', textAlign: 'left', fontSize: 13, color: 'rgba(255,255,255,0.5)', fontWeight: 600, borderBottom: '1px solid rgba(255,255,255,0.08)', minWidth: 180 }}>
+            <tr style={{ background: 'var(--bg-tertiary)' }}>
+              <th style={{ padding: '14px 20px', textAlign: 'left', fontSize: 13, color: 'var(--text-secondary)', fontWeight: 600, borderBottom: '1px solid var(--border)', minWidth: 180 }}>
                 Aluno
               </th>
               {displayCourses.map(c => (
-                <th key={c.id} style={{ padding: '14px 16px', textAlign: 'center', fontSize: 12, color: 'rgba(255,255,255,0.5)', fontWeight: 600, borderBottom: '1px solid rgba(255,255,255,0.08)', minWidth: 140 }}>
-                  <div style={{ color: '#fff', fontWeight: 700, marginBottom: 4 }}>{c.title.length > 28 ? c.title.slice(0, 28) + '…' : c.title}</div>
-                  <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.3)' }}>{c.difficulty} • {c.category}</div>
+                <th key={c.id} style={{ padding: '14px 16px', textAlign: 'center', fontSize: 12, color: 'var(--text-secondary)', fontWeight: 600, borderBottom: '1px solid var(--border)', minWidth: 140 }}>
+                  <div style={{ color: 'var(--text-primary)', fontWeight: 700, marginBottom: 4 }}>{c.title.length > 28 ? c.title.slice(0, 28) + '…' : c.title}</div>
+                  <div style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>{c.difficulty} • {c.category}</div>
                   {(() => {
                     const avg = classAverage(c.id);
                     return avg !== null ? (
@@ -206,7 +208,7 @@ export const GradeBook: React.FC = () => {
                   })()}
                 </th>
               ))}
-              <th style={{ padding: '14px 16px', textAlign: 'center', fontSize: 13, color: 'rgba(255,255,255,0.5)', fontWeight: 600, borderBottom: '1px solid rgba(255,255,255,0.08)', minWidth: 90 }}>
+              <th style={{ padding: '14px 16px', textAlign: 'center', fontSize: 13, color: 'var(--text-secondary)', fontWeight: 600, borderBottom: '1px solid var(--border)', minWidth: 90 }}>
                 Média Aluno
               </th>
             </tr>
@@ -215,10 +217,10 @@ export const GradeBook: React.FC = () => {
             {filteredStudents.map((student, idx) => {
               const avg = studentAverage(student.id);
               return (
-                <tr key={student.id} style={{ background: idx % 2 === 0 ? 'transparent' : 'rgba(255,255,255,0.02)' }}>
-                  <td style={{ padding: '14px 20px', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
-                    <div style={{ fontWeight: 600, color: '#fff', fontSize: 14 }}>{student.name}</div>
-                    <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.4)' }}>{student.rpgCharacter?.selectedClass || 'Sem classe'} • Nível {student.rpgCharacter?.level || 1}</div>
+                <tr key={student.id} style={{ background: idx % 2 === 0 ? 'transparent' : 'var(--bg-tertiary)' }}>
+                  <td style={{ padding: '14px 20px', borderBottom: '1px solid var(--border)' }}>
+                    <div style={{ fontWeight: 600, color: 'var(--text-primary)', fontSize: 14 }}>{student.name}</div>
+                    <div style={{ fontSize: 12, color: 'var(--text-tertiary)' }}>{student.rpgCharacter?.selectedClass || 'Sem classe'} • Nível {student.rpgCharacter?.level || 1}</div>
                   </td>
                   {displayCourses.map(c => {
                     const grade = getGrade(student.id, c.id);
@@ -229,32 +231,32 @@ export const GradeBook: React.FC = () => {
                         onClick={() => openEditor(student.id, c.id)}
                         style={{
                           padding: '10px 12px', textAlign: 'center',
-                          borderBottom: '1px solid rgba(255,255,255,0.06)',
+                          borderBottom: '1px solid var(--border)',
                           cursor: 'pointer', transition: 'background 0.2s',
-                          background: saveFlash === flashKey ? 'rgba(34,197,94,0.2)' : GRADE_COLOR(grade?.grade ?? null),
+                          background: saveFlash === flashKey ? 'var(--success-glow)' : GRADE_COLOR(grade?.grade ?? null),
                         }}
                         title={grade ? `${grade.concept} — ${grade.instructorName}` : 'Clique para lançar nota'}
                       >
                         {saveFlash === flashKey ? (
-                          <CheckCircle size={18} color="#22c55e" />
+                          <CheckCircle size={18} color="var(--success)" />
                         ) : grade ? (
                           <div>
                             <div style={{ fontWeight: 800, fontSize: 18, color: GRADE_TEXT_COLOR(grade.grade) }}>{grade.grade.toFixed(1)}</div>
-                            <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.4)' }}>{grade.concept}</div>
+                            <div style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>{grade.concept}</div>
                           </div>
                         ) : (
-                          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4, color: 'rgba(255,255,255,0.2)' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4, color: 'var(--text-tertiary)' }}>
                             <Plus size={14} />
                           </div>
                         )}
                       </td>
                     );
                   })}
-                  <td style={{ padding: '10px 16px', textAlign: 'center', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+                  <td style={{ padding: '10px 16px', textAlign: 'center', borderBottom: '1px solid var(--border)' }}>
                     {avg !== null ? (
                       <span style={{ fontWeight: 800, fontSize: 16, color: GRADE_TEXT_COLOR(avg) }}>{avg}</span>
                     ) : (
-                      <span style={{ color: 'rgba(255,255,255,0.2)', fontSize: 13 }}>—</span>
+                      <span style={{ color: 'var(--text-tertiary)', fontSize: 13 }}>—</span>
                     )}
                   </td>
                 </tr>
@@ -263,7 +265,7 @@ export const GradeBook: React.FC = () => {
           </tbody>
         </table>
         {filteredStudents.length === 0 && (
-          <div style={{ padding: '50px 0', textAlign: 'center', color: 'rgba(255,255,255,0.3)' }}>
+          <div style={{ padding: '50px 0', textAlign: 'center', color: 'var(--text-tertiary)' }}>
             Nenhum aluno encontrado.
           </div>
         )}
