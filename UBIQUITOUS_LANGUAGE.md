@@ -62,6 +62,14 @@
 > **Dev:** "E os Marcos de Herói? Quando eles aparecem?"
 >
 > **Expert:** "Apenas em conquistas de alto impacto: nota >= 9 em uma avaliação, um projeto completo, um curso finalizado, ou um Streak de 7 ou 30 dias. Um Marco de Herói vale mais que um Pessoal para subir de nível nos níveis mais altos."
+>
+> **Dev:** "E quando o professor quer propor algo específico, tipo uma pesquisa pra próxima aula?"
+>
+> **Expert:** "Ele cria uma Missão Requisitada no Quadro de Missões da turma, com prazo e XP definidos. Se o estudante cumprir, gera uma Submissão. Se o valor for alto, a Submissão precisa de Validação do Instrutor antes de virar Marco e conceder XP."
+>
+> **Dev:** "Isso é a mesma coisa que a Tarefa Diária de 'fazer um exercício'?"
+>
+> **Expert:** "Não. Tarefa Diária é genérica e reseta todo dia, sem professor por trás. Missão tem conteúdo, prazo e autoria do Instrutor — e não reseta sozinha."
 
 ## Ambiguidades sinalizadas
 
@@ -69,3 +77,28 @@
 - "Nível" era confundido com "dificuldade do curso" — agora `level` é exclusivamente o nível do Personagem RPG, enquanto cursos usam `difficulty`
 - "Conquista" era usado intercambiavelmente com "badge" (medalha) e "marco" — agora **Marco** é a conquista que contribui para level up, enquanto **Badge** é uma medalha cosmética
 - `ClassProgression` e `SkillEntry` existiam como campos de `RpgCharacter` mas nunca eram lidos por nenhuma lógica (progressão por classe e nível de skill não fazem parte do domínio documentado aqui) — foram removidos do código em 2026-07-18 para manter o modelo alinhado a esta linguagem ubíqua. Ver `SPEC.md` para detalhes.
+
+## Missões (Sistema de Missões do Professor)
+
+| Termo | Definição | Aliases a evitar |
+|---|---|---|
+| **Missão (Mission)** | Uma atividade pedagógica criada por um Instrutor, com conteúdo, prazo e valor de XP definidos, que o estudante cumpre para evoluir | Tarefa, Atividade, Dever de casa |
+| **Missão Comum** | Missão recorrente, válida para toda uma turma/curso, disponível dentro de uma janela de tempo (ex: a semana corrente) | Missão semanal, Missão de turma |
+| **Missão Requisitada** | Missão endereçada a um estudante ou subgrupo específico, geralmente para reforço ou aprofundamento individual | Missão individual |
+| **Missão Blitz** | Missão de curta duração e alto valor de XP, com prazo curto (ex: uma aula, um dia), pensada para engajamento imediato | Missão relâmpago, Desafio rápido |
+| **Submissão (MissionSubmission)** | O registro de que um estudante entregou/cumpriu uma Missão, podendo estar pendente, aprovada ou recusada pelo Instrutor | Entrega, Resposta |
+| **Validação do Instrutor** | A aprovação manual de uma Submissão de Missão de alto valor (equivalente a um Marco de Herói), necessária antes da concessão do XP | Correção, Revisão |
+| **Quadro de Missões (MissionBoard)** | A lista de Missões ativas visível ao estudante para uma turma/curso, com seus prazos e status de conclusão | Lista de tarefas, Painel de missões |
+
+## Relacionamentos (Missões)
+
+- Uma **Missão** é criada por exatamente um **Instrutor** e pertence a exatamente um **Curso**
+- Uma **Missão** gera zero ou mais **Submissões**, uma por estudante
+- Uma **Submissão** aprovada gera exatamente um **Marco** (Pessoal ou de Herói, conforme o valor da Missão) e concede o XP definido pela Missão
+- O **Quadro de Missões** de um estudante é a união das Missões Comuns do seu Curso com as Missões Requisitadas endereçadas a ele
+- Uma **Missão Blitz** não conta para o **Streak** nem para as **Tarefas Diárias** — é um bônus pontual, não um hábito
+
+## Ambiguidades sinalizadas (Missões)
+
+- **Missão não é Tarefa Diária.** A **Tarefa Diária (DailyTask)** já documentada acima é uma sugestão genérica gerada pelo próprio sistema (assistir aula, fazer exercício, logar) e reseta todo dia — ela não tem professor, conteúdo específico nem prazo. A **Missão** é criada por um Instrutor, tem conteúdo e prazo próprios, e não reseta automaticamente. As duas convivem: a Tarefa Diária mantém o hábito diário; a Missão carrega o conteúdo pedagógico do professor.
+- **Missão não é Aula/Exercício de Curso.** `Lesson` (tipo `exercise`) já existe e concede XP ao ser concluída. Uma Missão pode *referenciar* uma Lesson (ex: "complete o exercício X até sexta") mas também pode ser algo fora do curso (ex: "traga uma pesquisa impressa amanhã"). Missão é a casca com prazo, XP e validação; a Lesson é conteúdo opcional dentro dela.
