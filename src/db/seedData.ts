@@ -1,4 +1,4 @@
-import type { Course, User, AuditLog, SystemConfig } from '../types';
+import type { Course, User, AuditLog, SystemConfig, AttendanceRecord } from '../types';
 
 export const INITIAL_USERS: User[] = [
   {
@@ -6,6 +6,7 @@ export const INITIAL_USERS: User[] = [
     name: 'Ana Silva',
     email: 'ana.silva@escola.com',
     role: 'STUDENT',
+    schoolClass: '9º Ano A',
     enrolledCourses: ['course-react', 'course-ux'],
     completedLessons: ['lesson-react-1', 'lesson-ux-1'],
     unlockedBadges: ['Primeiro Passo', 'Explorador React', 'Mestre Acessibilidade'],
@@ -64,6 +65,7 @@ export const INITIAL_USERS: User[] = [
     name: 'Pedro Alves',
     email: 'pedro.alves@escola.com',
     role: 'STUDENT',
+    schoolClass: '9º Ano A',
     enrolledCourses: ['course-react'],
     completedLessons: ['lesson-react-1'],
     unlockedBadges: ['Primeiro Passo', 'Batedor de Bugs'],
@@ -116,6 +118,7 @@ export const INITIAL_USERS: User[] = [
     name: 'Juliana Santos',
     email: 'juliana.santos@escola.com',
     role: 'STUDENT',
+    schoolClass: '9º Ano B',
     enrolledCourses: ['course-ux'],
     completedLessons: ['lesson-ux-1'],
     unlockedBadges: ['Primeiro Passo'],
@@ -292,3 +295,27 @@ export const INITIAL_CONFIG: SystemConfig = {
   allowStudentRegistration: true,
   systemVersion: '1.1.0-RPG-EVOLUTION',
 };
+
+// Some demonstration attendance history for the 9º Ano A turma (Ana e Pedro)
+export const INITIAL_ATTENDANCE: AttendanceRecord[] = [
+  {
+    id: 'att-seed-1',
+    studentId: 'user-student',
+    schoolClass: '9º Ano A',
+    date: new Date(Date.now() - 1000 * 60 * 60 * 24 * 2).toISOString().slice(0, 10),
+    present: true,
+    xpGranted: true,
+    recordedByInstructorId: 'user-instructor',
+    recordedAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 2).toISOString(),
+  },
+  {
+    id: 'att-seed-2',
+    studentId: 'user-student-pedro',
+    schoolClass: '9º Ano A',
+    date: new Date(Date.now() - 1000 * 60 * 60 * 24 * 2).toISOString().slice(0, 10),
+    present: false,
+    xpGranted: false,
+    recordedByInstructorId: 'user-instructor',
+    recordedAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 2).toISOString(),
+  },
+];

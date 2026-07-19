@@ -9,7 +9,8 @@ import {
   Settings, 
   Terminal,
   User,
-  GraduationCap
+  GraduationCap,
+  ClipboardCheck
 } from 'lucide-react';
 
 interface DashboardLayoutProps {
@@ -81,6 +82,14 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
             >
               <LayoutDashboard size={18} />
               <span>Painel do Instrutor</span>
+            </button>
+            <button
+              onClick={() => setActiveTab('attendance')}
+              className={`nav-link ${activeTab === 'attendance' ? 'active' : ''}`}
+              aria-current={activeTab === 'attendance' ? 'page' : undefined}
+            >
+              <ClipboardCheck size={18} />
+              <span>Chamada</span>
             </button>
             <button
               onClick={() => setActiveTab('course-editor')}

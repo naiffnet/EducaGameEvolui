@@ -3,7 +3,7 @@ import { useAuth } from '../../context/AuthContext';
 import { db } from '../../db/database';
 import {
   BookOpen, Award, TrendingUp, CheckCircle, Clock, XCircle,
-  ChevronDown, ChevronUp, Printer, GraduationCap, ArrowLeft
+  ChevronDown, ChevronUp, Printer, GraduationCap, ArrowLeft, ClipboardCheck
 } from 'lucide-react';
 
 interface AcademicHistoryProps {
@@ -92,6 +92,9 @@ export const AcademicHistory: React.FC<AcademicHistoryProps> = ({ userId, onBack
   const targetId = userId || loggedInUser?.id || '';
   const user = db.getUsers().find(u => u.id === targetId);
   const record = db.getAcademicRecord(targetId);
+  const attendance = useMemo(() => db.getAttendanceForStudent(targetId), [targetId]);
+  const attendancePresentCount = useMemo(() => attendance.filter(a => a.present).length, [attendance]);
+  const attendanceRate = attendance.length > 0 ? Math.round((attendancePresentCount / attendance.length) * 100) : 0;
   const [expandedGrade, setExpandedGrade] = useState<string | null>(null);
 
   const averageGrade = useMemo(() => {
@@ -233,7 +236,45 @@ export const AcademicHistory: React.FC<AcademicHistoryProps> = ({ userId, onBack
           )}
         </div>
 
-        {/* RPG Stats + Observations */}
+        {/* Attendance / Frequência */}
+        {attendance.length > 0 && (
+          <div style={{ background: 'var(--bg-secondary)', border: '1px solid var(--border)', borderRadius: 20, padding: 24 }}>
+            <h2 style={{ fontSize: 18, fontWeight: 700, color: 'var(--text-primary)', margin: '0 0 16px', display: 'flex', alignItems: 'center', gap: 8 }}>
+              <ClipboardCheck size={18} color="#22c55e" /> Frequência
+            </h2>
+            <div style={{ display: 'flex', gap: 24, marginBottom: 16 }}>
+              <div>
+                <div style={{ fontSize: 22, fontWeight: 800, color: '#22c55e' }}>{attendancePresentCount}</div>
+                <div style={{ fontSize: 12, color: 'var(--text-secondary)' }}>Presenças</div>
+              </div>
+              <div>
+                <div style={{ fontSize: 22, fontWeight: 800, color: '#ef4444' }}>{attendance.length - attendancePresentCount}</div>
+                <div style={{ fontSize: 12, color: 'var(--text-secondary)' }}>Faltas</div>
+              </div>
+              <div>
+                <div style={{ fontSize: 22, fontWeight: 800, color: 'var(--text-primary)' }}>{attendanceRate}%</div>
+                <div style={{ fontSize: 12, color: 'var(--text-secondary)' }}>Taxa de presença</div>
+              </div>
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 6, maxHeight: 220, overflowY: 'auto' }}>
+              {attendance.map(a => (
+                <div key={a.id} style={{
+                  display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                  padding: '8px 12px', borderRadius: 8, background: 'var(--bg-primary)',
+                  border: `1px solid ${a.present ? '#22c55e33' : '#ef444433'}`,
+                }}>
+                  <span style={{ fontSize: 13, color: 'var(--text-secondary)' }}>
+                    {new Date(a.date + 'T00:00:00').toLocaleDateString('pt-BR')} · {a.schoolClass}
+                  </span>
+                  <span style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 12, fontWeight: 600, color: a.present ? '#22c55e' : '#ef4444' }}>
+                    {a.present ? <CheckCircle size={14} /> : <XCircle size={14} />}
+                    {a.present ? 'Presente' : 'Falta'}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
           {rpg && (
             <div style={{ background: 'rgba(139,92,246,0.08)', border: '1px solid rgba(139,92,246,0.2)', borderRadius: 20, padding: 24 }}>

@@ -153,10 +153,11 @@ const EditRow: React.FC<EditRowProps> = ({ user, onSave, onCancel }) => {
   const [name, setName] = useState(user.name);
   const [email, setEmail] = useState(user.email);
   const [role, setRole] = useState<UserRole>(user.role);
+  const [schoolClass, setSchoolClass] = useState(user.schoolClass || '');
 
   const handleSave = () => {
     if (!name.trim() || !email.trim()) return;
-    onSave({ ...user, name: name.trim(), email: email.trim(), role });
+    onSave({ ...user, name: name.trim(), email: email.trim(), role, schoolClass: schoolClass.trim() || undefined });
   };
 
   const inputStyle: React.CSSProperties = {
@@ -166,7 +167,17 @@ const EditRow: React.FC<EditRowProps> = ({ user, onSave, onCancel }) => {
 
   return (
     <tr style={{ background: 'rgba(139,92,246,0.08)' }}>
-      <td style={{ padding: '10px 16px' }}><input style={inputStyle} value={name} onChange={e => setName(e.target.value)} /></td>
+      <td style={{ padding: '10px 16px' }}>
+        <input style={inputStyle} value={name} onChange={e => setName(e.target.value)} />
+        {role === 'STUDENT' && (
+          <input
+            style={{ ...inputStyle, marginTop: 6 }}
+            value={schoolClass}
+            onChange={e => setSchoolClass(e.target.value)}
+            placeholder="Turma (ex: 9º Ano A)"
+          />
+        )}
+      </td>
       <td style={{ padding: '10px 16px' }}><input style={inputStyle} value={email} onChange={e => setEmail(e.target.value)} type="email" /></td>
       <td style={{ padding: '10px 16px' }}>
         <select value={role} onChange={e => setRole(e.target.value as UserRole)}
@@ -208,6 +219,7 @@ export const UserManagement: React.FC = () => {
   const [newUserEmail, setNewUserEmail] = useState('');
   const [newUserRole, setNewUserRole] = useState<UserRole>('STUDENT');
   const [newUserClass, setNewUserClass] = useState<RpgClass>('MAGE');
+  const [newUserSchoolClass, setNewUserSchoolClass] = useState('');
 
   const [editingUserId, setEditingUserId] = useState<string | null>(null);
   const [enrollModalUser, setEnrollModalUser] = useState<User | null>(null);
@@ -256,6 +268,7 @@ export const UserManagement: React.FC = () => {
       name: newUserName.trim(),
       email: newUserEmail.trim(),
       role: newUserRole,
+      schoolClass: newUserRole === 'STUDENT' && newUserSchoolClass.trim() ? newUserSchoolClass.trim() : undefined,
       enrolledCourses: [],
       completedLessons: [],
       unlockedBadges: newUserRole === 'STUDENT' ? ['Recruta Arcano'] : [],
@@ -271,7 +284,7 @@ export const UserManagement: React.FC = () => {
       } : undefined,
     };
     db.addUser(newUser);
-    setNewUserName(''); setNewUserEmail(''); setNewUserRole('STUDENT'); setShowAddForm(false);
+    setNewUserName(''); setNewUserEmail(''); setNewUserRole('STUDENT'); setNewUserSchoolClass(''); setShowAddForm(false);
     loadUsers();
     addLog('Criação de Usuário', `Novo usuário criado: ${newUser.name} (${newUser.role})`, 'success');
   };
@@ -351,6 +364,13 @@ export const UserManagement: React.FC = () => {
             </div>
             {newUserRole === 'STUDENT' && (
               <div>
+                <label htmlFor="new-school-class" style={{ display: 'block', fontWeight: 'bold', marginBottom: 6 }}>Turma</label>
+                <input id="new-school-class" type="text" className="form-input" placeholder="Ex: 9º Ano A"
+                  value={newUserSchoolClass} onChange={e => setNewUserSchoolClass(e.target.value)} />
+              </div>
+            )}
+            {newUserRole === 'STUDENT' && (
+              <div>
                 <label htmlFor="new-class" style={{ display: 'block', fontWeight: 'bold', marginBottom: 6 }}>Classe RPG</label>
                 <select id="new-class" className="form-select" value={newUserClass} onChange={e => setNewUserClass(e.target.value as RpgClass)}>
                   <option value="MAGE">🔮 Arcano</option>
@@ -421,6 +441,7 @@ export const UserManagement: React.FC = () => {
                       {user.rpgCharacter && (
                         <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)' }}>
                           ⚔️ Nv.{user.rpgCharacter.level} {user.rpgCharacter.selectedClass}
+                          {user.schoolClass && <> · 🏫 {user.schoolClass}</>}
                         </div>
                       )}
                     </td>

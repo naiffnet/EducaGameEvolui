@@ -13,6 +13,7 @@ const XP_COURSE_COMPLETE = 300;
 const XP_BADGE_EARNED = 80;
 const XP_TEACHER_FEEDBACK = 40;
 const XP_LOGIN_BONUS_BASE = 10; // base + streak bonus
+const XP_ATTENDANCE = 20; // XP fixo por presença confirmada em chamada
 
 /** Get XP required for a given character level */
 export function getXpForLevel(level: number): number {
@@ -176,7 +177,7 @@ export interface XpGrantResult {
 /** Grant XP for an activity and check for milestones/level ups */
 export function grantXp(
   character: RpgCharacter,
-  activity: 'lesson_watched' | 'lesson_completed' | 'exercise_passed' | 'high_grade' | 'project_done' | 'course_completed' | 'badge_earned' | 'teacher_feedback' | 'daily_login',
+  activity: 'lesson_watched' | 'lesson_completed' | 'exercise_passed' | 'high_grade' | 'project_done' | 'course_completed' | 'badge_earned' | 'teacher_feedback' | 'daily_login' | 'attendance_confirmed',
   details: { title: string; description: string; durationMinutes?: number; relatedEntityId?: string }
 ): XpGrantResult {
   let xpGained = 0;
@@ -211,6 +212,9 @@ export function grantXp(
     case 'daily_login':
       xpGained = XP_LOGIN_BONUS_BASE + character.dailyProgress.currentStreak * 2;
       break;
+    case 'attendance_confirmed':
+      xpGained = XP_ATTENDANCE;
+      break;
   }
 
   // Check if this activity earns a milestone
@@ -222,6 +226,7 @@ export function grantXp(
     course_completed: 'course_completed',
     badge_earned: 'badge_earned',
     teacher_feedback: 'teacher_feedback',
+    attendance_confirmed: 'attendance_confirmed',
   };
 
   const milestoneSource = milestoneSourceMap[activity];

@@ -1,5 +1,5 @@
-import type { Course, User, AuditLog, SystemConfig, AcademicRecord, GradeEntry, EnrollmentEntry } from '../types';
-import { INITIAL_USERS, INITIAL_COURSES, INITIAL_AUDIT_LOGS, INITIAL_CONFIG } from './seedData';
+import type { Course, User, AuditLog, SystemConfig, AcademicRecord, GradeEntry, EnrollmentEntry, AttendanceRecord } from '../types';
+import { INITIAL_USERS, INITIAL_COURSES, INITIAL_AUDIT_LOGS, INITIAL_CONFIG, INITIAL_ATTENDANCE } from './seedData';
 
 const KEYS = {
   USERS: 'lms_users',
@@ -8,6 +8,7 @@ const KEYS = {
   CONFIG: 'lms_config',
   CURRENT_USER_ID: 'lms_current_user_id',
   ACADEMIC_RECORDS: 'lms_academic_records',
+  ATTENDANCE: 'lms_attendance',
 };
 
 // Auto-initialize LocalStorage with Seed Data if empty
@@ -29,6 +30,9 @@ export const initializeDB = (forceReset = false) => {
   }
   if (forceReset || !localStorage.getItem(KEYS.ACADEMIC_RECORDS)) {
     localStorage.setItem(KEYS.ACADEMIC_RECORDS, JSON.stringify([]));
+  }
+  if (forceReset || !localStorage.getItem(KEYS.ATTENDANCE)) {
+    localStorage.setItem(KEYS.ATTENDANCE, JSON.stringify(INITIAL_ATTENDANCE));
   }
 };
 
@@ -310,6 +314,57 @@ export const db = {
     const record = this.getAcademicRecord(userId);
     record.generalObservations = text;
     this.saveAcademicRecord(record);
+  },
+
+  // ── Turma & Chamada ────────────────────────────────────────────────────────
+
+  getAttendanceRecords(): AttendanceRecord[] {
+    const data = localStorage.getItem(KEYS.ATTENDANCE);
+    return data ? JSON.parse(data) : [];
+  },
+
+  getAttendanceForStudent(studentId: string): AttendanceRecord[] {
+    return this.getAttendanceRecords()
+      .filter(r => r.studentId === studentId)
+      .sort((a, b) => b.date.localeCompare(a.date));
+  },
+
+  getAttendanceForClassAndDate(schoolClass: string, date: string): AttendanceRecord[] {
+    return this.getAttendanceRecords().filter(r => r.schoolClass === schoolClass && r.date === date);
+  },
+
+  /**
+   * Registra a presença/falta de um estudante numa data (chave natural: studentId + date).
+   * Idempotente (Regra de Negócio B1): chamar de novo para a mesma data apenas atualiza o
+   * registro existente — nunca duplica. `xpShouldBeGranted` só vem `true` uma única vez por
+   * studentId+date, para sempre — mesmo que o instrutor alterne presente/falta várias vezes
+   * no mesmo dia. É o próprio módulo que garante essa invariante (campo `xpGranted`, que uma
+   * vez `true` nunca volta a `false`), não quem o chama.
+   */
+  recordAttendance(studentId: string, schoolClass: string, date: string, present: boolean, instructorId: string): { record: AttendanceRecord; xpShouldBeGranted: boolean } {
+    const records = this.getAttendanceRecords();
+    const idx = records.findIndex(r => r.studentId === studentId && r.date === date);
+    const existing = idx !== -1 ? records[idx] : null;
+    const xpShouldBeGranted = present && !existing?.xpGranted;
+
+    const record: AttendanceRecord = {
+      id: existing?.id ?? `att-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+      studentId,
+      schoolClass,
+      date,
+      present,
+      xpGranted: !!existing?.xpGranted || xpShouldBeGranted,
+      recordedByInstructorId: instructorId,
+      recordedAt: new Date().toISOString(),
+    };
+
+    if (idx !== -1) {
+      records[idx] = record;
+    } else {
+      records.push(record);
+    }
+    localStorage.setItem(KEYS.ATTENDANCE, JSON.stringify(records));
+    return { record, xpShouldBeGranted };
   },
 
   /** Compute average grade for a student (returns null if no grades) */

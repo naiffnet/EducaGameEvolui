@@ -28,7 +28,7 @@ export interface Milestone {
   type: 'PERSONAL' | 'HERO';
   title: string;
   description: string;
-  source: 'lesson_completed' | 'exercise_passed' | 'high_grade' | 'project_done' | 'streak_milestone' | 'course_completed' | 'badge_earned' | 'teacher_feedback';
+  source: 'lesson_completed' | 'exercise_passed' | 'high_grade' | 'project_done' | 'streak_milestone' | 'course_completed' | 'badge_earned' | 'teacher_feedback' | 'attendance_confirmed';
   achievedAt: string; // ISO date
   relatedEntityId?: string;
 }
@@ -76,6 +76,23 @@ export interface User {
   unlockedBadges: string[];
   teacherNotes: TeacherNote[];
   rpgCharacter?: RpgCharacter;
+  /** Turma administrativa do estudante (ex: "9º Ano A") — agrupamento leve, não uma entidade própria. Ver PLANO_IMPLEMENTACAO_PLATAFORMA.md */
+  schoolClass?: string;
+}
+
+// ─── Turma & Chamada Domain ───────────────────────────────────────────────────
+
+/** Registro de presença/falta de um estudante numa data. Chave natural: studentId + date */
+export interface AttendanceRecord {
+  id: string;
+  studentId: string;
+  schoolClass: string;
+  date: string; // formato YYYY-MM-DD
+  present: boolean;
+  /** Uma vez true, nunca volta a false — garante que o XP de presença nunca é concedido duas vezes no mesmo dia, mesmo que present seja alternado várias vezes */
+  xpGranted: boolean;
+  recordedByInstructorId: string;
+  recordedAt: string; // ISO datetime
 }
 
 // ─── Academic Record Domain ───────────────────────────────────────────────────

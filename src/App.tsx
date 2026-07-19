@@ -13,6 +13,7 @@ import { Dashboard as AdminDashboard } from './pages/Admin/Dashboard';
 import { CourseEditor } from './pages/Admin/CourseEditor';
 import { UserManagement } from './pages/Admin/UserManagement';
 import { GradeBook } from './pages/Admin/GradeBook';
+import { Attendance } from './pages/Instructor/Attendance';
 import { SystemStatus } from './pages/Maintenance/SystemStatus';
 import { Profile } from './pages/Profile';
 import { LevelUpModal } from './components/LevelUpModal';
@@ -82,6 +83,9 @@ const AppContent: React.FC = () => {
 
       case 'grade-book':
         return <GradeBook />;
+
+      case 'attendance':
+        return <Attendance />;
         
       case 'academic-history':
         return <AcademicHistory />;
