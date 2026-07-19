@@ -102,3 +102,18 @@
 
 - **Missão não é Tarefa Diária.** A **Tarefa Diária (DailyTask)** já documentada acima é uma sugestão genérica gerada pelo próprio sistema (assistir aula, fazer exercício, logar) e reseta todo dia — ela não tem professor, conteúdo específico nem prazo. A **Missão** é criada por um Instrutor, tem conteúdo e prazo próprios, e não reseta automaticamente. As duas convivem: a Tarefa Diária mantém o hábito diário; a Missão carrega o conteúdo pedagógico do professor.
 - **Missão não é Aula/Exercício de Curso.** `Lesson` (tipo `exercise`) já existe e concede XP ao ser concluída. Uma Missão pode *referenciar* uma Lesson (ex: "complete o exercício X até sexta") mas também pode ser algo fora do curso (ex: "traga uma pesquisa impressa amanhã"). Missão é a casca com prazo, XP e validação; a Lesson é conteúdo opcional dentro dela.
+
+## Turma, Chamada e Cadastro Estendido
+
+| Termo | Definição | Aliases a evitar |
+|---|---|---|
+| **Turma (schoolClass)** | Um rótulo textual simples (ex: "9º Ano A") que agrupa estudantes; **não** é uma entidade própria no sistema — deliberadamente, ver `PLANO_IMPLEMENTACAO_PLATAFORMA.md` | Classe, Sala |
+| **Chamada** | O ato do Instrutor registrar a presença/falta de cada aluno de uma Turma numa data | Frequência (frequência é o conceito, Chamada é o ato) |
+| **Registro de Presença (AttendanceRecord)** | O dado persistido: um aluno, uma data, presente ou não, quem registrou | Falta, Presença (isolados — o registro cobre os dois estados) |
+| **Cadastro Estendido** | Os dados administrativos do `User` além do essencial: matrícula, nascimento, telefone, turma, responsável | Ficha do aluno |
+| **Assistente de Aula** | Ferramenta no Editor de Curso que gera um rascunho de aula a partir de um tema — v1 é um gerador local por template, não uma chamada de IA externa (ver ADR 0002) | Gerador de IA, Chat de IA |
+
+## Ambiguidades sinalizadas (Turma/Chamada)
+
+- **Turma não é Curso.** `Course` já existe e é o conteúdo/currículo (aulas, exercícios). `schoolClass` é só o agrupamento administrativo de alunos (uma "sala"). Um mesmo Curso pode ter alunos de Turmas diferentes matriculados.
+- **Chamada não é Marco de frequência.** A Chamada gera XP e, por baixo dos panos, um Marco Pessoal — mas o termo "Chamada" se refere ao ato administrativo, não à recompensa. Ao discutir o Motor de Evolução, use "Marco gerado pela Chamada", não "a Chamada sobe de nível".
