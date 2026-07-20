@@ -17,7 +17,9 @@ import {
   Award,
   ArrowLeft,
   MessageSquare,
-  GraduationCap
+  GraduationCap,
+  IdCard,
+  Phone
 } from 'lucide-react';
 import { DailyDashboard } from '../components/DailyDashboard';
 import { StreakIndicator } from '../components/StreakIndicator';
@@ -305,6 +307,39 @@ export const Profile: React.FC<ProfileProps> = ({ userId, onBack }) => {
           )}
         </div>
       </div>
+
+      {/* Cadastro Estendido (somente leitura) */}
+      {targetUser.role === 'STUDENT' && (targetUser.registrationId || targetUser.birthDate || targetUser.phoneNumber || targetUser.guardianName) && (
+        <div style={{
+          display: 'flex', flexWrap: 'wrap', gap: '20px', marginBottom: '24px',
+          padding: '16px 20px', borderRadius: '14px', background: 'var(--bg-secondary)', border: '1px solid var(--border)',
+        }}>
+          {targetUser.registrationId && (
+            <div>
+              <div style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)', display: 'flex', alignItems: 'center', gap: '4px' }}><IdCard size={13} /> Matrícula</div>
+              <div style={{ color: 'var(--text-primary)', fontWeight: 600 }}>{targetUser.registrationId}</div>
+            </div>
+          )}
+          {targetUser.birthDate && (
+            <div>
+              <div style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)' }}>Nascimento</div>
+              <div style={{ color: 'var(--text-primary)', fontWeight: 600 }}>{new Date(targetUser.birthDate + 'T00:00:00').toLocaleDateString('pt-BR')}</div>
+            </div>
+          )}
+          {targetUser.phoneNumber && (
+            <div>
+              <div style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)', display: 'flex', alignItems: 'center', gap: '4px' }}><Phone size={13} /> Telefone</div>
+              <div style={{ color: 'var(--text-primary)', fontWeight: 600 }}>{targetUser.phoneNumber}</div>
+            </div>
+          )}
+          {targetUser.guardianName && (
+            <div>
+              <div style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)' }}>Responsável</div>
+              <div style={{ color: 'var(--text-primary)', fontWeight: 600 }}>{targetUser.guardianName}{targetUser.guardianPhone && ` · ${targetUser.guardianPhone}`}</div>
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Tab Navigation */}
       <div style={{ display: 'flex', gap: 4, marginBottom: 28, borderBottom: '1px solid rgba(255,255,255,0.08)', paddingBottom: 0 }}>

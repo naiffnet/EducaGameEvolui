@@ -6,7 +6,7 @@ import { useSystem } from '../../context/SystemContext';
 import { createDefaultDailyProgress } from '../../engine/EvolutionEngine';
 import {
   ShieldCheck, UserPlus, Search, Trash2, Eye, Edit3, Save, X,
-  BookOpen, GraduationCap, Users, TrendingUp, Check, Award
+  BookOpen, GraduationCap, Users, TrendingUp, Check, Award, IdCard
 } from 'lucide-react';
 import { Profile } from '../Profile';
 import { AcademicHistory } from '../Student/AcademicHistory';
@@ -39,18 +39,22 @@ const INITIAL_SKILL: Record<RpgClass, string> = {
   JESTER: 'Ilusão Cômica', CHAMPION: 'Brado do Herói',
 };
 
-function ProgressBar({ pct, color = '#8b5cf6' }: { pct: number; color?: string }) {
+function ProgressBar({ pct, color = 'var(--primary)' }: { pct: number; color?: string }) {
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-      <div style={{ flex: 1, height: 6, background: 'rgba(255,255,255,0.08)', borderRadius: 6, overflow: 'hidden' }}>
+      <div style={{ flex: 1, height: 6, background: 'var(--bg-tertiary)', borderRadius: 6, overflow: 'hidden' }}>
         <div style={{ width: `${pct}%`, height: '100%', background: color, borderRadius: 6, transition: 'width 0.5s' }} />
       </div>
-      <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.5)', minWidth: 28 }}>{pct}%</span>
+      <span style={{ fontSize: 11, color: 'var(--text-secondary)', minWidth: 28 }}>{pct}%</span>
     </div>
   );
 }
 
 // ─── Enrollment Modal ─────────────────────────────────────────────────────────
+// Nota de estilo: este modal (e o RegistrationModal logo abaixo) usam deliberadamente um
+// fundo escuro fixo, independente do tema da página — mesmo padrão usado no Livro de Notas.
+// Fundo escuro + texto claro são sempre pareados aqui, então continuam legíveis nos três
+// temas; o que precisava de correção era o restante da página (fora dos modais).
 interface EnrollModalProps {
   user: User;
   onClose: () => void;
@@ -143,6 +147,80 @@ const EnrollModal: React.FC<EnrollModalProps> = ({ user, onClose, onSave }) => {
   );
 };
 
+// ─── Registration (Cadastro Estendido) Modal ─────────────────────────────────
+interface RegistrationModalProps {
+  user: User;
+  onClose: () => void;
+  onSave: (updated: User) => void;
+}
+const RegistrationModal: React.FC<RegistrationModalProps> = ({ user, onClose, onSave }) => {
+  const [registrationId, setRegistrationId] = useState(user.registrationId || '');
+  const [birthDate, setBirthDate] = useState(user.birthDate || '');
+  const [phoneNumber, setPhoneNumber] = useState(user.phoneNumber || '');
+  const [guardianName, setGuardianName] = useState(user.guardianName || '');
+  const [guardianPhone, setGuardianPhone] = useState(user.guardianPhone || '');
+
+  const fieldStyle: React.CSSProperties = {
+    width: '100%', boxSizing: 'border-box', background: 'rgba(255,255,255,0.08)',
+    border: '1px solid rgba(139,92,246,0.4)', borderRadius: 8, padding: '10px 12px',
+    color: '#fff', fontSize: 14,
+  };
+  const labelStyle: React.CSSProperties = { display: 'block', fontSize: 12, color: 'rgba(255,255,255,0.6)', marginBottom: 6, fontWeight: 600 };
+
+  const handleSave = () => {
+    onSave({
+      ...user,
+      registrationId: registrationId.trim() || undefined,
+      birthDate: birthDate || undefined,
+      phoneNumber: phoneNumber.trim() || undefined,
+      guardianName: guardianName.trim() || undefined,
+      guardianPhone: guardianPhone.trim() || undefined,
+    });
+  };
+
+  return (
+    <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(6px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999 }}>
+      <div style={{ background: 'linear-gradient(145deg,#1e1b4b,#0f172a)', border: '1px solid rgba(139,92,246,0.3)', borderRadius: 24, padding: 32, width: 460, maxHeight: '85vh', overflowY: 'auto', boxShadow: '0 25px 60px rgba(0,0,0,0.6)' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
+          <h2 style={{ fontSize: 20, fontWeight: 800, color: '#fff', margin: 0 }}>
+            <IdCard size={18} style={{ marginRight: 8, verticalAlign: 'middle', color: '#8b5cf6' }} />
+            Cadastro — {user.name}
+          </h2>
+          <button onClick={onClose} style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.4)', cursor: 'pointer' }}><X size={20} /></button>
+        </div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+          <div>
+            <label style={labelStyle}>Matrícula</label>
+            <input style={fieldStyle} value={registrationId} onChange={e => setRegistrationId(e.target.value)} placeholder="Ex: 2026-0142" />
+          </div>
+          <div>
+            <label style={labelStyle}>Data de Nascimento</label>
+            <input type="date" style={fieldStyle} value={birthDate} onChange={e => setBirthDate(e.target.value)} />
+          </div>
+          <div>
+            <label style={labelStyle}>Telefone</label>
+            <input style={fieldStyle} value={phoneNumber} onChange={e => setPhoneNumber(e.target.value)} placeholder="(00) 00000-0000" />
+          </div>
+          <div style={{ borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: 14 }}>
+            <label style={labelStyle}>Nome do Responsável</label>
+            <input style={fieldStyle} value={guardianName} onChange={e => setGuardianName(e.target.value)} placeholder="Nome completo" />
+          </div>
+          <div>
+            <label style={labelStyle}>Telefone do Responsável</label>
+            <input style={fieldStyle} value={guardianPhone} onChange={e => setGuardianPhone(e.target.value)} placeholder="(00) 00000-0000" />
+          </div>
+        </div>
+        <div style={{ display: 'flex', gap: 10, marginTop: 24 }}>
+          <button onClick={onClose} className="btn btn-secondary" style={{ flex: 1 }}>Cancelar</button>
+          <button onClick={handleSave} className="btn btn-primary" style={{ flex: 2, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
+            <Save size={15} /> Salvar Cadastro
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 // ─── Inline Edit Row ──────────────────────────────────────────────────────────
 interface EditRowProps {
   user: User;
@@ -161,8 +239,8 @@ const EditRow: React.FC<EditRowProps> = ({ user, onSave, onCancel }) => {
   };
 
   const inputStyle: React.CSSProperties = {
-    background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(139,92,246,0.4)',
-    borderRadius: 8, padding: '6px 10px', color: '#fff', fontSize: 13, width: '100%',
+    background: 'var(--bg-tertiary)', border: '1px solid var(--primary)',
+    borderRadius: 8, padding: '6px 10px', color: 'var(--text-primary)', fontSize: 13, width: '100%',
   };
 
   return (
@@ -220,9 +298,15 @@ export const UserManagement: React.FC = () => {
   const [newUserRole, setNewUserRole] = useState<UserRole>('STUDENT');
   const [newUserClass, setNewUserClass] = useState<RpgClass>('MAGE');
   const [newUserSchoolClass, setNewUserSchoolClass] = useState('');
+  const [newUserRegistrationId, setNewUserRegistrationId] = useState('');
+  const [newUserBirthDate, setNewUserBirthDate] = useState('');
+  const [newUserPhone, setNewUserPhone] = useState('');
+  const [newUserGuardianName, setNewUserGuardianName] = useState('');
+  const [newUserGuardianPhone, setNewUserGuardianPhone] = useState('');
 
   const [editingUserId, setEditingUserId] = useState<string | null>(null);
   const [enrollModalUser, setEnrollModalUser] = useState<User | null>(null);
+  const [registrationModalUser, setRegistrationModalUser] = useState<User | null>(null);
 
   const loadUsers = useCallback(() => {
     setUsers(db.getUsers());
@@ -254,6 +338,14 @@ export const UserManagement: React.FC = () => {
     addLog('Edição de Usuário', `Dados de ${updated.name} (${updated.role}) atualizados.`, 'success');
   };
 
+  // ── Registration (Cadastro Estendido) Save ───────────────────────────────
+  const handleRegistrationSave = (updated: User) => {
+    db.updateUser(updated);
+    setRegistrationModalUser(null);
+    loadUsers();
+    addLog('Cadastro Atualizado', `Cadastro estendido de ${updated.name} atualizado.`, 'success');
+  };
+
   // ── Create User ──────────────────────────────────────────────────────────
   const handleCreateUser = (e: React.FormEvent) => {
     e.preventDefault();
@@ -269,6 +361,11 @@ export const UserManagement: React.FC = () => {
       email: newUserEmail.trim(),
       role: newUserRole,
       schoolClass: newUserRole === 'STUDENT' && newUserSchoolClass.trim() ? newUserSchoolClass.trim() : undefined,
+      registrationId: newUserRole === 'STUDENT' && newUserRegistrationId.trim() ? newUserRegistrationId.trim() : undefined,
+      birthDate: newUserRole === 'STUDENT' && newUserBirthDate ? newUserBirthDate : undefined,
+      phoneNumber: newUserRole === 'STUDENT' && newUserPhone.trim() ? newUserPhone.trim() : undefined,
+      guardianName: newUserRole === 'STUDENT' && newUserGuardianName.trim() ? newUserGuardianName.trim() : undefined,
+      guardianPhone: newUserRole === 'STUDENT' && newUserGuardianPhone.trim() ? newUserGuardianPhone.trim() : undefined,
       enrolledCourses: [],
       completedLessons: [],
       unlockedBadges: newUserRole === 'STUDENT' ? ['Recruta Arcano'] : [],
@@ -284,7 +381,9 @@ export const UserManagement: React.FC = () => {
       } : undefined,
     };
     db.addUser(newUser);
-    setNewUserName(''); setNewUserEmail(''); setNewUserRole('STUDENT'); setNewUserSchoolClass(''); setShowAddForm(false);
+    setNewUserName(''); setNewUserEmail(''); setNewUserRole('STUDENT'); setNewUserSchoolClass('');
+    setNewUserRegistrationId(''); setNewUserBirthDate(''); setNewUserPhone('');
+    setNewUserGuardianName(''); setNewUserGuardianPhone(''); setShowAddForm(false);
     loadUsers();
     addLog('Criação de Usuário', `Novo usuário criado: ${newUser.name} (${newUser.role})`, 'success');
   };
@@ -307,7 +406,7 @@ export const UserManagement: React.FC = () => {
       {/* Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 28, flexWrap: 'wrap', gap: 16 }}>
         <div>
-          <h2 style={{ fontSize: '1.6rem', fontWeight: 800, margin: '0 0 6px' }}>Gerenciamento de Usuários</h2>
+          <h2 style={{ fontSize: '1.6rem', fontWeight: 800, margin: '0 0 6px', color: 'var(--text-primary)' }}>Gerenciamento de Usuários</h2>
           <p style={{ color: 'var(--text-secondary)', margin: 0, fontSize: 14 }}>
             CRUD completo · Matrículas · Histórico Escolar · Notas · RBAC
           </p>
@@ -320,19 +419,19 @@ export const UserManagement: React.FC = () => {
       {/* Summary Cards */}
       <div style={{ display: 'flex', gap: 16, marginBottom: 28, flexWrap: 'wrap' }}>
         {[
-          { icon: <Users size={20} />, label: 'Usuários Total', value: users.length, color: '#8b5cf6' },
-          { icon: <GraduationCap size={20} />, label: 'Alunos', value: students.length, color: '#3b82f6' },
-          { icon: <TrendingUp size={20} />, label: 'Progresso Médio', value: `${avgProgress}%`, color: '#22c55e' },
-          { icon: <Award size={20} />, label: 'Notas Lançadas', value: totalGrades, color: '#eab308' },
+          { icon: <Users size={20} />, label: 'Usuários Total', value: users.length, color: 'var(--primary)' },
+          { icon: <GraduationCap size={20} />, label: 'Alunos', value: students.length, color: 'var(--accent-blue, #3b82f6)' },
+          { icon: <TrendingUp size={20} />, label: 'Progresso Médio', value: `${avgProgress}%`, color: 'var(--success)' },
+          { icon: <Award size={20} />, label: 'Notas Lançadas', value: totalGrades, color: 'var(--warning)' },
         ].map(c => (
           <div key={c.label} style={{
-            flex: 1, minWidth: 140, background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)',
+            flex: 1, minWidth: 140, background: 'var(--bg-secondary)', border: '1px solid var(--border)',
             borderRadius: 16, padding: '16px 20px', display: 'flex', gap: 12, alignItems: 'center',
           }}>
             <div style={{ width: 44, height: 44, borderRadius: 12, background: `${c.color}22`, display: 'flex', alignItems: 'center', justifyContent: 'center', color: c.color }}>{c.icon}</div>
             <div>
-              <div style={{ fontSize: 22, fontWeight: 800, color: '#fff' }}>{c.value}</div>
-              <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.45)' }}>{c.label}</div>
+              <div style={{ fontSize: 22, fontWeight: 800, color: 'var(--text-primary)' }}>{c.value}</div>
+              <div style={{ fontSize: 12, color: 'var(--text-secondary)' }}>{c.label}</div>
             </div>
           </div>
         ))}
@@ -387,6 +486,35 @@ export const UserManagement: React.FC = () => {
                 </select>
               </div>
             )}
+            {newUserRole === 'STUDENT' && (
+              <>
+                <div>
+                  <label htmlFor="new-registration-id" style={{ display: 'block', fontWeight: 'bold', marginBottom: 6 }}>Matrícula</label>
+                  <input id="new-registration-id" type="text" className="form-input" placeholder="Ex: 2026-0142"
+                    value={newUserRegistrationId} onChange={e => setNewUserRegistrationId(e.target.value)} />
+                </div>
+                <div>
+                  <label htmlFor="new-birth-date" style={{ display: 'block', fontWeight: 'bold', marginBottom: 6 }}>Data de Nascimento</label>
+                  <input id="new-birth-date" type="date" className="form-input"
+                    value={newUserBirthDate} onChange={e => setNewUserBirthDate(e.target.value)} />
+                </div>
+                <div>
+                  <label htmlFor="new-phone" style={{ display: 'block', fontWeight: 'bold', marginBottom: 6 }}>Telefone</label>
+                  <input id="new-phone" type="text" className="form-input" placeholder="(00) 00000-0000"
+                    value={newUserPhone} onChange={e => setNewUserPhone(e.target.value)} />
+                </div>
+                <div>
+                  <label htmlFor="new-guardian-name" style={{ display: 'block', fontWeight: 'bold', marginBottom: 6 }}>Nome do Responsável</label>
+                  <input id="new-guardian-name" type="text" className="form-input" placeholder="Nome completo"
+                    value={newUserGuardianName} onChange={e => setNewUserGuardianName(e.target.value)} />
+                </div>
+                <div>
+                  <label htmlFor="new-guardian-phone" style={{ display: 'block', fontWeight: 'bold', marginBottom: 6 }}>Telefone do Responsável</label>
+                  <input id="new-guardian-phone" type="text" className="form-input" placeholder="(00) 00000-0000"
+                    value={newUserGuardianPhone} onChange={e => setNewUserGuardianPhone(e.target.value)} />
+                </div>
+              </>
+            )}
             <div style={{ gridColumn: '1/-1', display: 'flex', gap: 10, marginTop: 8 }}>
               <button type="submit" className="btn btn-primary">Cadastrar</button>
               <button type="button" className="btn btn-secondary" onClick={() => setShowAddForm(false)}>Cancelar</button>
@@ -417,12 +545,12 @@ export const UserManagement: React.FC = () => {
         <div style={{ overflowX: 'auto' }}>
           <table style={{ width: '100%', borderCollapse: 'collapse' }}>
             <thead>
-              <tr style={{ background: 'rgba(255,255,255,0.04)' }}>
-                <th style={{ padding: '14px 18px', textAlign: 'left', fontSize: 13, fontWeight: 700, borderBottom: '1px solid rgba(255,255,255,0.08)' }}>Nome</th>
-                <th style={{ padding: '14px 18px', textAlign: 'left', fontSize: 13, fontWeight: 700, borderBottom: '1px solid rgba(255,255,255,0.08)' }}>Email</th>
-                <th style={{ padding: '14px 18px', textAlign: 'left', fontSize: 13, fontWeight: 700, borderBottom: '1px solid rgba(255,255,255,0.08)' }}>Perfil</th>
-                <th style={{ padding: '14px 18px', textAlign: 'left', fontSize: 13, fontWeight: 700, borderBottom: '1px solid rgba(255,255,255,0.08)', minWidth: 130 }}>Progresso</th>
-                <th style={{ padding: '14px 18px', textAlign: 'center', fontSize: 13, fontWeight: 700, borderBottom: '1px solid rgba(255,255,255,0.08)', minWidth: 280 }}>Ações</th>
+              <tr style={{ background: 'var(--bg-tertiary)' }}>
+                <th style={{ padding: '14px 18px', textAlign: 'left', fontSize: 13, fontWeight: 700, color: 'var(--text-secondary)', borderBottom: '1px solid var(--border)' }}>Nome</th>
+                <th style={{ padding: '14px 18px', textAlign: 'left', fontSize: 13, fontWeight: 700, color: 'var(--text-secondary)', borderBottom: '1px solid var(--border)' }}>Email</th>
+                <th style={{ padding: '14px 18px', textAlign: 'left', fontSize: 13, fontWeight: 700, color: 'var(--text-secondary)', borderBottom: '1px solid var(--border)' }}>Perfil</th>
+                <th style={{ padding: '14px 18px', textAlign: 'left', fontSize: 13, fontWeight: 700, color: 'var(--text-secondary)', borderBottom: '1px solid var(--border)', minWidth: 130 }}>Progresso</th>
+                <th style={{ padding: '14px 18px', textAlign: 'center', fontSize: 13, fontWeight: 700, color: 'var(--text-secondary)', borderBottom: '1px solid var(--border)', minWidth: 320 }}>Ações</th>
               </tr>
             </thead>
             <tbody>
@@ -435,35 +563,35 @@ export const UserManagement: React.FC = () => {
                 }
 
                 return (
-                  <tr key={user.id} style={{ background: idx % 2 === 0 ? 'transparent' : 'rgba(255,255,255,0.015)', transition: 'background 0.2s' }}>
-                    <td style={{ padding: '13px 18px', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
-                      <div style={{ fontWeight: 700, color: '#fff', fontSize: 14 }}>{user.name}</div>
+                  <tr key={user.id} style={{ background: idx % 2 === 0 ? 'transparent' : 'var(--bg-tertiary)', transition: 'background 0.2s' }}>
+                    <td style={{ padding: '13px 18px', borderBottom: '1px solid var(--border)' }}>
+                      <div style={{ fontWeight: 700, color: 'var(--text-primary)', fontSize: 14 }}>{user.name}</div>
                       {user.rpgCharacter && (
-                        <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)' }}>
+                        <div style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>
                           ⚔️ Nv.{user.rpgCharacter.level} {user.rpgCharacter.selectedClass}
                           {user.schoolClass && <> · 🏫 {user.schoolClass}</>}
                         </div>
                       )}
                     </td>
-                    <td style={{ padding: '13px 18px', fontSize: 13, color: 'rgba(255,255,255,0.6)', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>{user.email}</td>
-                    <td style={{ padding: '13px 18px', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+                    <td style={{ padding: '13px 18px', fontSize: 13, color: 'var(--text-secondary)', borderBottom: '1px solid var(--border)' }}>{user.email}</td>
+                    <td style={{ padding: '13px 18px', borderBottom: '1px solid var(--border)' }}>
                       <span className={`badge badge-${user.role.toLowerCase()}`}>{ROLE_LABEL[user.role]}</span>
                     </td>
-                    <td style={{ padding: '13px 18px', borderBottom: '1px solid rgba(255,255,255,0.06)', minWidth: 130 }}>
+                    <td style={{ padding: '13px 18px', borderBottom: '1px solid var(--border)', minWidth: 130 }}>
                       {progress !== null ? (
                         <div>
-                          <ProgressBar pct={progress} color={progress >= 70 ? '#22c55e' : progress >= 40 ? '#eab308' : '#ef4444'} />
+                          <ProgressBar pct={progress} color={progress >= 70 ? 'var(--success)' : progress >= 40 ? 'var(--warning)' : 'var(--danger)'} />
                           {avg !== null && (
-                            <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)', marginTop: 4 }}>
-                              Média: <span style={{ color: avg >= 7 ? '#22c55e' : avg >= 5 ? '#eab308' : '#ef4444', fontWeight: 700 }}>{avg}</span>
+                            <div style={{ fontSize: 11, color: 'var(--text-tertiary)', marginTop: 4 }}>
+                              Média: <span style={{ color: avg >= 7 ? 'var(--success)' : avg >= 5 ? 'var(--warning)' : 'var(--danger)', fontWeight: 700 }}>{avg}</span>
                             </div>
                           )}
                         </div>
                       ) : (
-                        <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.25)' }}>N/A</span>
+                        <span style={{ fontSize: 12, color: 'var(--text-tertiary)' }}>N/A</span>
                       )}
                     </td>
-                    <td style={{ padding: '10px 14px', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+                    <td style={{ padding: '10px 14px', borderBottom: '1px solid var(--border)' }}>
                       <div style={{ display: 'flex', gap: 6, justifyContent: 'center', flexWrap: 'wrap' }}>
                         <button
                           onClick={() => { setSelectedUserId(user.id); setView('profile'); }}
@@ -490,6 +618,14 @@ export const UserManagement: React.FC = () => {
                               title="Gerenciar Matrículas"
                             >
                               <BookOpen size={13} /> Matrículas
+                            </button>
+                            <button
+                              onClick={() => setRegistrationModalUser(user)}
+                              className="btn btn-secondary"
+                              style={{ padding: '5px 10px', fontSize: 12, display: 'flex', alignItems: 'center', gap: 4 }}
+                              title="Cadastro Estendido"
+                            >
+                              <IdCard size={13} /> Cadastro
                             </button>
                           </>
                         )}
@@ -535,9 +671,18 @@ export const UserManagement: React.FC = () => {
         />
       )}
 
+      {/* Registration Modal */}
+      {registrationModalUser && (
+        <RegistrationModal
+          user={registrationModalUser}
+          onClose={() => setRegistrationModalUser(null)}
+          onSave={handleRegistrationSave}
+        />
+      )}
+
       {/* RBAC Info */}
-      <div style={{ marginTop: 28, background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 16, padding: 24 }}>
-        <h3 style={{ fontSize: '1rem', marginBottom: 14, fontWeight: 800, display: 'flex', alignItems: 'center', gap: 8 }}>
+      <div style={{ marginTop: 28, background: 'var(--bg-secondary)', border: '1px solid var(--border)', borderRadius: 16, padding: 24 }}>
+        <h3 style={{ fontSize: '1rem', marginBottom: 14, fontWeight: 800, display: 'flex', alignItems: 'center', gap: 8, color: 'var(--text-primary)' }}>
           <ShieldCheck size={18} style={{ color: 'var(--success)' }} /> Controle de Acesso por Perfil (RBAC)
         </h3>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(190px,1fr))', gap: 14, fontSize: 13 }}>

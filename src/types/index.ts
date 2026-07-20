@@ -78,6 +78,12 @@ export interface User {
   rpgCharacter?: RpgCharacter;
   /** Turma administrativa do estudante (ex: "9º Ano A") — agrupamento leve, não uma entidade própria. Ver PLANO_IMPLEMENTACAO_PLATAFORMA.md */
   schoolClass?: string;
+  /** Cadastro Estendido (Entrega A) — todos opcionais para não quebrar usuários existentes */
+  registrationId?: string; // matrícula
+  birthDate?: string; // YYYY-MM-DD
+  phoneNumber?: string;
+  guardianName?: string;
+  guardianPhone?: string;
 }
 
 // ─── Turma & Chamada Domain ───────────────────────────────────────────────────
