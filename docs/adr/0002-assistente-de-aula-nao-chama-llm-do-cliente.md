@@ -1,5 +1,5 @@
 ---
-status: proposed
+status: accepted
 ---
 
 # Assistente de Aula não chama uma API de LLM diretamente do navegador

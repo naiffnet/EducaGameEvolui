@@ -1,6 +1,6 @@
 # Plano de Implementação — Turmas, Chamada, Missões e Assistente de Aula
 
-Status: **Em andamento** — A) Cadastro Estendido: pendente · B) Turma & Chamada: ✅ implementado (`bd855e9`) · C) Sistema de Missões: ✅ implementado · D) Assistente de Aula: pendente · Data: 2026-07-18 (última atualização de status: 2026-07-19)
+Status: **Completo** — A) Cadastro Estendido: ✅ implementado · B) Turma & Chamada: ✅ implementado (`bd855e9`) · C) Sistema de Missões: ✅ implementado (`1029210`) · D) Assistente de Aula: ✅ implementado (v1, gerador local — ver ADR 0002) · Data: 2026-07-18 (última atualização de status: 2026-07-19)
 
 > **Nota de consolidação:** este documento substitui e unifica dois planos que surgiram em paralelo, em sessões diferentes, para a mesma necessidade de negócio: `PLANO_IMPLEMENTACAO_MISSOES.md` (produzido aqui, com pesquisa de mecânicas de RPG) e `implementation_plan1`/`task1` (produzidos por outra ferramenta, localmente). Os três arquivos antigos foram removidos deste repositório em favor deste único documento. Nenhum dos dois planos havia sido implementado em código até esta consolidação — não houve retrabalho, só reconciliação de escopo.
 

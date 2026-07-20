@@ -1,5 +1,5 @@
 ---
-status: proposed
+status: accepted
 ---
 
 # Missões têm cadência própria (semanal, definida pelo Instrutor), separada do loop diário do Motor de Evolução

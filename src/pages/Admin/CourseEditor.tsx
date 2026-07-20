@@ -2,13 +2,15 @@ import React, { useState, useEffect } from 'react';
 import { db } from '../../db/database';
 import type { Course, Module, Lesson } from '../../types';
 import { useSystem } from '../../context/SystemContext';
+import { generateLessonDraft } from '../../engine/LessonAssistant';
 import { 
   Plus, 
   Trash2, 
   Edit, 
   Save, 
   FolderPlus, 
-  ArrowLeft
+  ArrowLeft,
+  Wand2
 } from 'lucide-react';
 
 export const CourseEditor: React.FC = () => {
@@ -36,6 +38,7 @@ export const CourseEditor: React.FC = () => {
   const [newLessonProblem, setNewLessonProblem] = useState('');
   const [newLessonSolution, setNewLessonSolution] = useState('');
   const [newLessonExplainer, setNewLessonExplainer] = useState('');
+  const [assistantTopic, setAssistantTopic] = useState('');
 
   useEffect(() => {
     setCourses(db.getCourses());
@@ -143,7 +146,23 @@ export const CourseEditor: React.FC = () => {
     setNewLessonProblem('');
     setNewLessonSolution('');
     setNewLessonExplainer('');
+    setAssistantTopic('');
     setActiveModuleId(null);
+  };
+
+  // ── Assistente de Aula (Entrega D) ───────────────────────────────────────
+  // Gerador local por template (ADR 0002) — preenche um rascunho editável nos
+  // campos do formulário acima; não substitui a revisão do instrutor.
+  const handleGenerateDraft = () => {
+    if (!assistantTopic.trim()) return;
+    const draft = generateLessonDraft(assistantTopic, newLessonType);
+    setNewLessonTitle(draft.title);
+    setNewLessonDuration(draft.duration);
+    setNewLessonContent(draft.content);
+    if (draft.problemContent !== undefined) setNewLessonProblem(draft.problemContent);
+    if (draft.solutionContent !== undefined) setNewLessonSolution(draft.solutionContent);
+    if (draft.explainerContent !== undefined) setNewLessonExplainer(draft.explainerContent);
+    addLog('Assistente de Aula', `Rascunho gerado para o tema "${assistantTopic}" (${newLessonType}).`);
   };
 
   const handleDeleteCourse = (courseId: string, title: string) => {
@@ -224,6 +243,33 @@ export const CourseEditor: React.FC = () => {
                       {activeModuleId === mod.id && (
                         <div style={{ backgroundColor: 'var(--bg-tertiary)', padding: '16px', borderRadius: 'var(--radius-md)', marginBottom: '16px', border: '1px solid var(--border)' }}>
                           <h5 style={{ fontWeight: 'bold', marginBottom: '12px' }}>Nova Aula para {mod.title}</h5>
+
+                          {/* Assistente de Aula — gerador local de rascunho, ver ADR 0002 */}
+                          <div style={{
+                            display: 'flex', gap: '8px', marginBottom: '16px', padding: '12px',
+                            background: 'var(--primary-glow, rgba(139,92,246,0.08))', border: '1px dashed var(--primary)',
+                            borderRadius: 'var(--radius-md)', alignItems: 'center', flexWrap: 'wrap',
+                          }}>
+                            <Wand2 size={16} style={{ color: 'var(--primary)', flexShrink: 0 }} />
+                            <input
+                              type="text"
+                              className="form-input"
+                              placeholder="Assistente de Aula: digite um tema (ex: Hooks do React) e gere um rascunho"
+                              value={assistantTopic}
+                              onChange={(e) => setAssistantTopic(e.target.value)}
+                              style={{ flex: 1, minWidth: '200px' }}
+                            />
+                            <button
+                              type="button"
+                              className="btn btn-secondary"
+                              onClick={handleGenerateDraft}
+                              disabled={!assistantTopic.trim()}
+                              style={{ whiteSpace: 'nowrap' }}
+                            >
+                              Gerar Rascunho
+                            </button>
+                          </div>
+
                           <form onSubmit={handleAddLesson} style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                             <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr', gap: '12px' }}>
                               <input
