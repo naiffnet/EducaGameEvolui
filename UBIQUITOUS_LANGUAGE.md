@@ -117,3 +117,19 @@
 
 - **Turma não é Curso.** `Course` já existe e é o conteúdo/currículo (aulas, exercícios). `schoolClass` é só o agrupamento administrativo de alunos (uma "sala"). Um mesmo Curso pode ter alunos de Turmas diferentes matriculados.
 - **Chamada não é Marco de frequência.** A Chamada gera XP e, por baixo dos panos, um Marco Pessoal — mas o termo "Chamada" se refere ao ato administrativo, não à recompensa. Ao discutir o Motor de Evolução, use "Marco gerado pela Chamada", não "a Chamada sobe de nível".
+
+## Portal da Família, Financeiro e Comunicação
+
+| Termo | Definição | Aliases a evitar |
+|---|---|---|
+| **Responsável (Guardian)** | Ator com papel `GUARDIAN`, vinculado a um ou mais estudantes via `GuardianLink`; acesso somente-leitura à evolução, frequência, notas e financeiro do(s) dependente(s) | Pai/mãe (nem sempre é o caso), Tutor |
+| **GuardianLink** | O vínculo entre um Responsável e um estudante — não confundir com matrícula (que vincula estudante e curso) | Vínculo familiar |
+| **Portal da Família** | A área da plataforma visível ao Responsável — somente leitura, exceto para o envio de Mensagens Diretas | Portal do Responsável |
+| **Fatura (Invoice)** | Um registro de cobrança (mensalidade) de um estudante, com status sempre recalculado (nunca gravado como fonte da verdade) | Cobrança, Boleto (não emitimos boleto de verdade) |
+| **Aviso (Announcement)** | Comunicado de um Instrutor/Admin para uma Turma inteira ou para toda a escola | Notificação (Notificação sugere push/tempo real, que não implementamos) |
+| **Mensagem Direta (DirectMessage)** | Troca assíncrona entre um Responsável e o Instrutor do curso do seu dependente — não é chat em tempo real | Chat |
+
+## Ambiguidades sinalizadas (Portal da Família/Financeiro/Comunicação)
+
+- **Responsável não tem papel múltiplo por design.** O Blueprint-fonte (`docs/blueprint/`) modela `Papel` como many-to-many por usuário; aqui, resolvemos apenas o caso do Responsável via `GuardianLink`, sem generalizar `User.role` para múltiplos papéis simultâneos (ver ADR relacionado nas decisões de implementação do plano de Fase 0/1).
+- **Fatura não é gateway de pagamento.** Uma Fatura só registra valor/vencimento/status — nunca processa um pagamento de verdade (ver ADR 0003).
