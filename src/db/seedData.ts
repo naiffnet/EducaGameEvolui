@@ -1,10 +1,15 @@
 import type { Course, User, AuditLog, SystemConfig, AttendanceRecord, Mission } from '../types';
+import { hashPassword } from '../engine/AuthUtils';
+
+/** Senha padrão de TODAS as contas semente (ambiente de demonstração). Ver Login.tsx. */
+export const SEED_DEMO_PASSWORD = 'estudar123';
 
 export const INITIAL_USERS: User[] = [
   {
     id: 'user-student',
     name: 'Ana Silva',
     email: 'ana.silva@escola.com',
+    passwordHash: hashPassword(SEED_DEMO_PASSWORD, 'ana.silva@escola.com'),
     role: 'STUDENT',
     schoolClass: '9º Ano A',
     enrolledCourses: ['course-react', 'course-ux'],
@@ -64,6 +69,7 @@ export const INITIAL_USERS: User[] = [
     id: 'user-student-pedro',
     name: 'Pedro Alves',
     email: 'pedro.alves@escola.com',
+    passwordHash: hashPassword(SEED_DEMO_PASSWORD, 'pedro.alves@escola.com'),
     role: 'STUDENT',
     schoolClass: '9º Ano A',
     enrolledCourses: ['course-react'],
@@ -117,6 +123,7 @@ export const INITIAL_USERS: User[] = [
     id: 'user-student-juliana',
     name: 'Juliana Santos',
     email: 'juliana.santos@escola.com',
+    passwordHash: hashPassword(SEED_DEMO_PASSWORD, 'juliana.santos@escola.com'),
     role: 'STUDENT',
     schoolClass: '9º Ano B',
     enrolledCourses: ['course-ux'],
@@ -154,6 +161,7 @@ export const INITIAL_USERS: User[] = [
     id: 'user-instructor',
     name: 'Prof. Marcos Paulo',
     email: 'marcos.paulo@escola.com',
+    passwordHash: hashPassword(SEED_DEMO_PASSWORD, 'marcos.paulo@escola.com'),
     role: 'INSTRUCTOR',
     enrolledCourses: [],
     completedLessons: [],
@@ -164,6 +172,7 @@ export const INITIAL_USERS: User[] = [
     id: 'user-admin',
     name: 'Mariana Costa',
     email: 'mariana.admin@escola.com',
+    passwordHash: hashPassword(SEED_DEMO_PASSWORD, 'mariana.admin@escola.com'),
     role: 'ADMIN',
     enrolledCourses: [],
     completedLessons: [],
@@ -174,6 +183,7 @@ export const INITIAL_USERS: User[] = [
     id: 'user-maintenance',
     name: 'Carlos Santos (Suporte)',
     email: 'carlos.suporte@escola.com',
+    passwordHash: hashPassword(SEED_DEMO_PASSWORD, 'carlos.suporte@escola.com'),
     role: 'MAINTENANCE',
     enrolledCourses: [],
     completedLessons: [],

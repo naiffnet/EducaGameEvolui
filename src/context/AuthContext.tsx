@@ -2,10 +2,16 @@ import React, { createContext, useContext, useState, useEffect, useCallback } fr
 import type { User } from '../types';
 import { db } from '../db/database';
 import { performDailyCheck, grantXp, shouldResetDailyProgress, createDefaultDailyProgress } from '../engine/EvolutionEngine';
+import { verifyPassword } from '../engine/AuthUtils';
 
 interface AuthContextType {
   currentUser: User | null;
   allUsers: User[];
+  initializing: boolean;
+  authError: string | null;
+  /** Login real, com senha — usado pela tela de Login */
+  loginWithPassword: (email: string, password: string) => boolean;
+  /** Troca de sessão sem senha — reservado ao "Simular Acesso" (só visível para ADMIN) */
   login: (userId: string) => void;
   logout: () => void;
   refreshUser: () => void;
@@ -19,6 +25,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [allUsers, setAllUsers] = useState<User[]>([]);
   const [dailyLeveledUp, setDailyLeveledUp] = useState(false);
+  const [initializing, setInitializing] = useState(true);
+  const [authError, setAuthError] = useState<string | null>(null);
 
   const runDailyCheck = useCallback((user: User) => {
     if (!user.rpgCharacter || user.role !== 'STUDENT') return user;
@@ -69,7 +77,25 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setCurrentUser(checkedUser);
     }
     setAllUsers(db.getUsers());
+    setInitializing(false);
   }, [runDailyCheck]);
+
+  const loginWithPassword = (email: string, password: string): boolean => {
+    const user = db.getUsers().find(u => u.email.toLowerCase() === email.trim().toLowerCase());
+    if (!user || !verifyPassword(password, user.email, user.passwordHash)) {
+      setAuthError('E-mail ou senha incorretos.');
+      return false;
+    }
+    setAuthError(null);
+    db.setCurrentUser(user.id);
+    const loaded = db.getCurrentUserWithEvolution() || db.getCurrentUser();
+    if (loaded) {
+      const checkedUser = runDailyCheck(loaded);
+      setCurrentUser(checkedUser);
+    }
+    setAllUsers(db.getUsers());
+    return true;
+  };
 
   const login = (userId: string) => {
     db.setCurrentUser(userId);
@@ -85,6 +111,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const logout = () => {
     db.logout();
     setCurrentUser(null);
+    setAuthError(null);
   };
 
   const refreshUser = useCallback(() => {
@@ -98,7 +125,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
 
   return (
-    <AuthContext.Provider value={{ currentUser, allUsers, login, logout, refreshUser, dailyLeveledUp, setDailyLeveledUp }}>
+    <AuthContext.Provider value={{ currentUser, allUsers, initializing, authError, loginWithPassword, login, logout, refreshUser, dailyLeveledUp, setDailyLeveledUp }}>
       {children}
     </AuthContext.Provider>
   );

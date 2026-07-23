@@ -1,7 +1,7 @@
 import React from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useSystem } from '../context/SystemContext';
-import { Sun, Moon, Eye, Type, Users, ShieldAlert, Sparkles, Zap } from 'lucide-react';
+import { Sun, Moon, Eye, Type, Users, ShieldAlert, Sparkles, Zap, LogOut } from 'lucide-react';
 import { StreakIndicator } from './StreakIndicator';
 
 interface HeaderProps {
@@ -9,7 +9,7 @@ interface HeaderProps {
 }
 
 export const Header: React.FC<HeaderProps> = ({ onProfileClick }) => {
-  const { currentUser, allUsers, login } = useAuth();
+  const { currentUser, allUsers, login, logout } = useAuth();
   const { theme, setTheme, fontSizeMultiplier, setFontSizeMultiplier, config } = useSystem();
 
   const handleRoleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -39,27 +39,30 @@ export const Header: React.FC<HeaderProps> = ({ onProfileClick }) => {
     <header className="header-wrapper" style={{ borderBottom: '1px solid var(--border)' }}>
       {/* Top Accessibility Bar */}
       <div className="accessibility-bar" style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', gap: '12px' }}>
-        {/* Simulation Selector */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <Users size={16} aria-hidden="true" style={{ color: 'var(--primary)' }} />
-          <label htmlFor="sim-profile-select" style={{ fontWeight: '600' }}>
-            Simular Acesso:
-          </label>
-          <select
-            id="sim-profile-select"
-            className="form-select"
-            style={{ padding: '4px 8px', fontSize: '0.85rem', width: 'auto', minWidth: '160px' }}
-            value={currentUser?.id || ''}
-            onChange={handleRoleChange}
-            aria-label="Selecione um perfil para simular acesso"
-          >
-            {allUsers.map((u) => (
-              <option key={u.id} value={u.id}>
-                {u.name} ({u.role})
-              </option>
-            ))}
-          </select>
-        </div>
+        {/* Simulation Selector — só para Admin (é uma ferramenta de pré-visualização, não um atalho de login) */}
+        {currentUser?.role === 'ADMIN' && (
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <Users size={16} aria-hidden="true" style={{ color: 'var(--primary)' }} />
+            <label htmlFor="sim-profile-select" style={{ fontWeight: '600' }}>
+              Simular Acesso:
+            </label>
+            <select
+              id="sim-profile-select"
+              className="form-select"
+              style={{ padding: '4px 8px', fontSize: '0.85rem', width: 'auto', minWidth: '160px' }}
+              value={currentUser?.id || ''}
+              onChange={handleRoleChange}
+              aria-label="Selecione um perfil para simular acesso"
+            >
+              {allUsers.map((u) => (
+                <option key={u.id} value={u.id}>
+                  {u.name} ({u.role})
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
+        {currentUser?.role !== 'ADMIN' && <div />}
 
         {/* Accessibility Buttons */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
@@ -199,6 +202,16 @@ export const Header: React.FC<HeaderProps> = ({ onProfileClick }) => {
               aria-label="Acessar meu perfil"
             >
               {currentUser.name[0]}
+            </button>
+
+            <button
+              onClick={logout}
+              className="btn btn-secondary"
+              style={{ padding: '8px 12px', fontSize: '0.8rem', display: 'flex', alignItems: 'center', gap: '6px' }}
+              aria-label="Sair da conta"
+              title="Sair"
+            >
+              <LogOut size={15} />
             </button>
           </div>
         )}

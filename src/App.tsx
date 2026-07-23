@@ -18,12 +18,13 @@ import { MissionEditor } from './pages/Instructor/MissionEditor';
 import { MissionBoard } from './components/MissionBoard';
 import { SystemStatus } from './pages/Maintenance/SystemStatus';
 import { Profile } from './pages/Profile';
+import { Login } from './pages/Login';
 import { LevelUpModal } from './components/LevelUpModal';
 import { ToastProvider } from './components/EvolutionToast';
 import { getStatGainForLevelUp } from './engine/EvolutionEngine';
 
 const AppContent: React.FC = () => {
-  const { currentUser, dailyLeveledUp, setDailyLeveledUp } = useAuth();
+  const { currentUser, dailyLeveledUp, setDailyLeveledUp, initializing } = useAuth();
   const [levelUpChar, setLevelUpChar] = useState<{ char: any; stats: any } | null>(null);
   
   // Show level up modal when daily check detects a level up
@@ -110,12 +111,16 @@ const AppContent: React.FC = () => {
     }
   };
 
-  if (!currentUser) {
+  if (initializing) {
     return (
       <div style={{ padding: '40px', textAlign: 'center', color: 'var(--text-primary)' }}>
         <h2>Carregando plataforma de ensino...</h2>
       </div>
     );
+  }
+
+  if (!currentUser) {
+    return <Login />;
   }
 
   return (

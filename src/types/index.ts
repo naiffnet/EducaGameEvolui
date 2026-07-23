@@ -84,6 +84,8 @@ export interface User {
   phoneNumber?: string;
   guardianName?: string;
   guardianPhone?: string;
+  /** Entrega I — Autenticação com Senha Real. Nunca a senha em texto puro, ver engine/AuthUtils.ts */
+  passwordHash?: string;
 }
 
 // ─── Turma & Chamada Domain ───────────────────────────────────────────────────

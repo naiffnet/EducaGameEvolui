@@ -4,9 +4,10 @@ import type { User, UserRole, RpgClass, EnrollmentEntry } from '../../types';
 import { useAuth } from '../../context/AuthContext';
 import { useSystem } from '../../context/SystemContext';
 import { createDefaultDailyProgress } from '../../engine/EvolutionEngine';
+import { hashPassword } from '../../engine/AuthUtils';
 import {
   ShieldCheck, UserPlus, Search, Trash2, Eye, Edit3, Save, X,
-  BookOpen, GraduationCap, Users, TrendingUp, Check, Award, IdCard
+  BookOpen, GraduationCap, Users, TrendingUp, Check, Award, IdCard, KeyRound
 } from 'lucide-react';
 import { Profile } from '../Profile';
 import { AcademicHistory } from '../Student/AcademicHistory';
@@ -221,6 +222,60 @@ const RegistrationModal: React.FC<RegistrationModalProps> = ({ user, onClose, on
   );
 };
 
+// ─── Password Reset Modal (Entrega I) ────────────────────────────────────────
+interface PasswordResetModalProps {
+  user: User;
+  onClose: () => void;
+  onSave: (newPassword: string) => void;
+}
+const PasswordResetModal: React.FC<PasswordResetModalProps> = ({ user, onClose, onSave }) => {
+  const [password, setPassword] = useState('');
+  const [confirm, setConfirm] = useState('');
+
+  const fieldStyle: React.CSSProperties = {
+    width: '100%', boxSizing: 'border-box', background: 'rgba(255,255,255,0.08)',
+    border: '1px solid rgba(139,92,246,0.4)', borderRadius: 8, padding: '10px 12px',
+    color: '#fff', fontSize: 14,
+  };
+  const labelStyle: React.CSSProperties = { display: 'block', fontSize: 12, color: 'rgba(255,255,255,0.6)', marginBottom: 6, fontWeight: 600 };
+
+  const canSave = password.length >= 4 && password === confirm;
+
+  return (
+    <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(6px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999 }}>
+      <div style={{ background: 'linear-gradient(145deg,#1e1b4b,#0f172a)', border: '1px solid rgba(139,92,246,0.3)', borderRadius: 24, padding: 32, width: 400, boxShadow: '0 25px 60px rgba(0,0,0,0.6)' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
+          <h2 style={{ fontSize: 20, fontWeight: 800, color: '#fff', margin: 0 }}>
+            <KeyRound size={18} style={{ marginRight: 8, verticalAlign: 'middle', color: '#8b5cf6' }} />
+            Redefinir Senha
+          </h2>
+          <button onClick={onClose} style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.4)', cursor: 'pointer' }}><X size={20} /></button>
+        </div>
+        <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: 13, marginBottom: 16 }}>Nova senha para <strong style={{ color: '#fff' }}>{user.name}</strong>.</p>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+          <div>
+            <label style={labelStyle}>Nova senha (mín. 4 caracteres)</label>
+            <input type="password" style={fieldStyle} value={password} onChange={e => setPassword(e.target.value)} autoFocus />
+          </div>
+          <div>
+            <label style={labelStyle}>Confirmar senha</label>
+            <input type="password" style={fieldStyle} value={confirm} onChange={e => setConfirm(e.target.value)} />
+          </div>
+          {password && confirm && password !== confirm && (
+            <p style={{ color: '#ef4444', fontSize: 12, margin: 0 }}>As senhas não coincidem.</p>
+          )}
+        </div>
+        <div style={{ display: 'flex', gap: 10, marginTop: 24 }}>
+          <button onClick={onClose} className="btn btn-secondary" style={{ flex: 1 }}>Cancelar</button>
+          <button onClick={() => onSave(password)} disabled={!canSave} className="btn btn-primary" style={{ flex: 2, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
+            <Save size={15} /> Salvar Senha
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 // ─── Inline Edit Row ──────────────────────────────────────────────────────────
 interface EditRowProps {
   user: User;
@@ -307,6 +362,8 @@ export const UserManagement: React.FC = () => {
   const [editingUserId, setEditingUserId] = useState<string | null>(null);
   const [enrollModalUser, setEnrollModalUser] = useState<User | null>(null);
   const [registrationModalUser, setRegistrationModalUser] = useState<User | null>(null);
+  const [passwordResetUser, setPasswordResetUser] = useState<User | null>(null);
+  const [newUserPassword, setNewUserPassword] = useState('');
 
   const loadUsers = useCallback(() => {
     setUsers(db.getUsers());
@@ -346,10 +403,24 @@ export const UserManagement: React.FC = () => {
     addLog('Cadastro Atualizado', `Cadastro estendido de ${updated.name} atualizado.`, 'success');
   };
 
+  // ── Password Reset (Entrega I) ───────────────────────────────────────────
+  const handlePasswordReset = (newPassword: string) => {
+    if (!passwordResetUser) return;
+    const updated: User = { ...passwordResetUser, passwordHash: hashPassword(newPassword, passwordResetUser.email) };
+    db.updateUser(updated);
+    setPasswordResetUser(null);
+    loadUsers();
+    addLog('Senha Redefinida', `Senha de ${updated.name} foi redefinida pelo administrador.`, 'warning');
+  };
+
   // ── Create User ──────────────────────────────────────────────────────────
   const handleCreateUser = (e: React.FormEvent) => {
     e.preventDefault();
     if (!newUserName.trim() || !newUserEmail.trim()) return;
+    if (newUserPassword.length < 4) {
+      alert('A senha deve ter pelo menos 4 caracteres.');
+      return;
+    }
     if (db.getUsers().some(u => u.email.toLowerCase() === newUserEmail.toLowerCase())) {
       alert('Este e-mail já está sendo utilizado!');
       return;
@@ -359,6 +430,7 @@ export const UserManagement: React.FC = () => {
       id: newId,
       name: newUserName.trim(),
       email: newUserEmail.trim(),
+      passwordHash: hashPassword(newUserPassword, newUserEmail.trim()),
       role: newUserRole,
       schoolClass: newUserRole === 'STUDENT' && newUserSchoolClass.trim() ? newUserSchoolClass.trim() : undefined,
       registrationId: newUserRole === 'STUDENT' && newUserRegistrationId.trim() ? newUserRegistrationId.trim() : undefined,
@@ -381,7 +453,7 @@ export const UserManagement: React.FC = () => {
       } : undefined,
     };
     db.addUser(newUser);
-    setNewUserName(''); setNewUserEmail(''); setNewUserRole('STUDENT'); setNewUserSchoolClass('');
+    setNewUserName(''); setNewUserEmail(''); setNewUserPassword(''); setNewUserRole('STUDENT'); setNewUserSchoolClass('');
     setNewUserRegistrationId(''); setNewUserBirthDate(''); setNewUserPhone('');
     setNewUserGuardianName(''); setNewUserGuardianPhone(''); setShowAddForm(false);
     loadUsers();
@@ -451,6 +523,11 @@ export const UserManagement: React.FC = () => {
               <label htmlFor="new-email" style={{ display: 'block', fontWeight: 'bold', marginBottom: 6 }}>E-mail</label>
               <input id="new-email" type="email" className="form-input" placeholder="joao@escola.com"
                 value={newUserEmail} onChange={e => setNewUserEmail(e.target.value)} required />
+            </div>
+            <div>
+              <label htmlFor="new-password" style={{ display: 'block', fontWeight: 'bold', marginBottom: 6 }}>Senha (mín. 4 caracteres)</label>
+              <input id="new-password" type="password" className="form-input" placeholder="••••••••"
+                value={newUserPassword} onChange={e => setNewUserPassword(e.target.value)} required minLength={4} />
             </div>
             <div>
               <label htmlFor="new-role" style={{ display: 'block', fontWeight: 'bold', marginBottom: 6 }}>Função</label>
@@ -638,6 +715,14 @@ export const UserManagement: React.FC = () => {
                           <Edit3 size={13} /> Editar
                         </button>
                         <button
+                          onClick={() => setPasswordResetUser(user)}
+                          className="btn btn-secondary"
+                          style={{ padding: '5px 10px', fontSize: 12, display: 'flex', alignItems: 'center', gap: 4 }}
+                          title="Redefinir senha"
+                        >
+                          <KeyRound size={13} />
+                        </button>
+                        <button
                           onClick={() => handleDeleteUser(user.id, user.name)}
                           className="btn btn-secondary"
                           style={{ padding: '5px 10px', fontSize: 12, display: 'flex', alignItems: 'center', gap: 4, color: 'var(--danger)', borderColor: 'var(--danger)' }}
@@ -677,6 +762,15 @@ export const UserManagement: React.FC = () => {
           user={registrationModalUser}
           onClose={() => setRegistrationModalUser(null)}
           onSave={handleRegistrationSave}
+        />
+      )}
+
+      {/* Password Reset Modal */}
+      {passwordResetUser && (
+        <PasswordResetModal
+          user={passwordResetUser}
+          onClose={() => setPasswordResetUser(null)}
+          onSave={handlePasswordReset}
         />
       )}
 

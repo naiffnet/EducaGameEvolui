@@ -74,7 +74,7 @@ export const MaintenanceGuard: React.FC<{ children: React.ReactNode }> = ({ chil
               border: '1px solid var(--border)'
             }}
           >
-            <strong>Nota para Avaliação:</strong> Você pode usar a barra superior para trocar o seu perfil simulado para <strong>Administrador (Admin)</strong> ou <strong>Suporte (Carlos Santos)</strong> para conseguir entrar no sistema e desativar o Modo Manutenção.
+            <strong>Nota para Avaliação:</strong> Saia da conta atual (botão <strong>Sair</strong> no cabeçalho) e entre novamente com uma conta de <strong>Administrador</strong> ou <strong>Suporte</strong> (ex: mariana.admin@escola.com ou carlos.suporte@escola.com, senha do ambiente de demonstração) para conseguir desativar o Modo Manutenção.
           </div>
 
           {/* Quick simulation helper for tester */}
