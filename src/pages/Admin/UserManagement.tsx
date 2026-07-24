@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { db } from '../../db/database';
 import type { User, UserRole, RpgClass, EnrollmentEntry } from '../../types';
 import { useAuth } from '../../context/AuthContext';
@@ -7,16 +7,25 @@ import { createDefaultDailyProgress } from '../../engine/EvolutionEngine';
 import { hashPassword } from '../../engine/AuthUtils';
 import {
   ShieldCheck, UserPlus, Search, Trash2, Eye, Edit3, Save, X,
-  BookOpen, GraduationCap, Users, TrendingUp, Check, Award, IdCard, KeyRound
+  BookOpen, GraduationCap, Users, TrendingUp, Check, Award, IdCard, KeyRound,
+  Filter, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight,
+  Briefcase, UserCheck, ShieldAlert, Sparkles, Building2
 } from 'lucide-react';
 import { Profile } from '../Profile';
 import { AcademicHistory } from '../Student/AcademicHistory';
 
 type ViewMode = 'list' | 'profile' | 'academic';
+type CategoryTab = 'ALL' | 'STUDENT' | 'INSTRUCTOR' | 'GUARDIAN' | 'MANAGEMENT' | 'ADMIN';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 const ROLE_LABEL: Record<UserRole, string> = {
-  STUDENT: 'Aluno', INSTRUCTOR: 'Professor', ADMIN: 'Administrador', MAINTENANCE: 'Suporte', GUARDIAN: 'Responsável', COORDINATOR: 'Coordenação', DIRECTOR: 'Direção'
+  STUDENT: 'Aluno',
+  INSTRUCTOR: 'Professor',
+  ADMIN: 'Administrador',
+  MAINTENANCE: 'Suporte',
+  GUARDIAN: 'Responsável',
+  COORDINATOR: 'Coordenação',
+  DIRECTOR: 'Direção'
 };
 
 const DEFAULT_STATS: Record<RpgClass, { strength: number; intelligence: number; dexterity: number }> = {
@@ -52,10 +61,6 @@ function ProgressBar({ pct, color = 'var(--primary)' }: { pct: number; color?: s
 }
 
 // ─── Enrollment Modal ─────────────────────────────────────────────────────────
-// Nota de estilo: este modal (e o RegistrationModal logo abaixo) usam deliberadamente um
-// fundo escuro fixo, independente do tema da página — mesmo padrão usado no Livro de Notas.
-// Fundo escuro + texto claro são sempre pareados aqui, então continuam legíveis nos três
-// temas; o que precisava de correção era o restante da página (fora dos modais).
 interface EnrollModalProps {
   user: User;
   onClose: () => void;
@@ -91,7 +96,7 @@ const EnrollModal: React.FC<EnrollModalProps> = ({ user, onClose, onSave }) => {
   };
 
   return (
-    <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(6px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999 }}>
+    <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.75)', backdropFilter: 'blur(6px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999 }}>
       <div style={{ background: 'linear-gradient(145deg,#1e1b4b,#0f172a)', border: '1px solid rgba(139,92,246,0.3)', borderRadius: 24, padding: 32, width: 480, maxHeight: '80vh', overflowY: 'auto', boxShadow: '0 25px 60px rgba(0,0,0,0.6)' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
           <h2 style={{ fontSize: 20, fontWeight: 800, color: '#fff', margin: 0 }}>
@@ -148,7 +153,7 @@ const EnrollModal: React.FC<EnrollModalProps> = ({ user, onClose, onSave }) => {
   );
 };
 
-// ─── Registration (Cadastro Estendido) Modal ─────────────────────────────────
+// ─── Registration Modal ───────────────────────────────────────────────────────
 interface RegistrationModalProps {
   user: User;
   onClose: () => void;
@@ -180,7 +185,7 @@ const RegistrationModal: React.FC<RegistrationModalProps> = ({ user, onClose, on
   };
 
   return (
-    <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(6px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999 }}>
+    <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.75)', backdropFilter: 'blur(6px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999 }}>
       <div style={{ background: 'linear-gradient(145deg,#1e1b4b,#0f172a)', border: '1px solid rgba(139,92,246,0.3)', borderRadius: 24, padding: 32, width: 460, maxHeight: '85vh', overflowY: 'auto', boxShadow: '0 25px 60px rgba(0,0,0,0.6)' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
           <h2 style={{ fontSize: 20, fontWeight: 800, color: '#fff', margin: 0 }}>
@@ -222,7 +227,7 @@ const RegistrationModal: React.FC<RegistrationModalProps> = ({ user, onClose, on
   );
 };
 
-// ─── Password Reset Modal (Entrega I) ────────────────────────────────────────
+// ─── Password Reset Modal ────────────────────────────────────────────────────
 interface PasswordResetModalProps {
   user: User;
   onClose: () => void;
@@ -242,7 +247,7 @@ const PasswordResetModal: React.FC<PasswordResetModalProps> = ({ user, onClose, 
   const canSave = password.length >= 4 && password === confirm;
 
   return (
-    <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(6px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999 }}>
+    <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.75)', backdropFilter: 'blur(6px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999 }}>
       <div style={{ background: 'linear-gradient(145deg,#1e1b4b,#0f172a)', border: '1px solid rgba(139,92,246,0.3)', borderRadius: 24, padding: 32, width: 400, boxShadow: '0 25px 60px rgba(0,0,0,0.6)' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
           <h2 style={{ fontSize: 20, fontWeight: 800, color: '#fff', margin: 0 }}>
@@ -276,7 +281,7 @@ const PasswordResetModal: React.FC<PasswordResetModalProps> = ({ user, onClose, 
   );
 };
 
-// ─── Guardian Link Modal (Entrega E) ──────────────────────────────────────────
+// ─── Guardian Link Modal ─────────────────────────────────────────────────────
 interface GuardianLinkModalProps {
   user: User;
   allUsers: User[];
@@ -316,7 +321,7 @@ const GuardianLinkModal: React.FC<GuardianLinkModalProps> = ({ user, allUsers, o
   };
 
   return (
-    <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(6px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999 }}>
+    <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.75)', backdropFilter: 'blur(6px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999 }}>
       <div style={{ background: 'linear-gradient(145deg,#1e1b4b,#0f172a)', border: '1px solid rgba(139,92,246,0.3)', borderRadius: 24, padding: 32, width: 480, maxHeight: '80vh', overflowY: 'auto', boxShadow: '0 25px 60px rgba(0,0,0,0.6)' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
           <h2 style={{ fontSize: 18, fontWeight: 800, color: '#fff', margin: 0, display: 'flex', alignItems: 'center', gap: 8 }}>
@@ -458,9 +463,11 @@ const EditRow: React.FC<EditRowProps> = ({ user, onSave, onCancel }) => {
           style={{ ...inputStyle, cursor: 'pointer' }}>
           <option value="STUDENT">Aluno</option>
           <option value="INSTRUCTOR">Professor</option>
+          <option value="COORDINATOR">Coordenação</option>
+          <option value="DIRECTOR">Direção</option>
+          <option value="GUARDIAN">Responsável</option>
           <option value="ADMIN">Administrador</option>
           <option value="MAINTENANCE">Suporte</option>
-          <option value="GUARDIAN">Responsável</option>
         </select>
       </td>
       <td style={{ padding: '10px 16px' }} colSpan={2}>
@@ -486,9 +493,16 @@ export const UserManagement: React.FC = () => {
   const [view, setView] = useState<ViewMode>('list');
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
 
+  // Categorization & Filtering States
+  const [activeTab, setActiveTab] = useState<CategoryTab>('ALL');
   const [searchQuery, setSearchQuery] = useState('');
-  const [roleFilter, setRoleFilter] = useState<string>('ALL');
+  const [selectedClassFilter, setSelectedClassFilter] = useState<string>('ALL');
 
+  // Pagination States
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
+
+  // Form & Modals States
   const [showAddForm, setShowAddForm] = useState(false);
   const [newUserName, setNewUserName] = useState('');
   const [newUserEmail, setNewUserEmail] = useState('');
@@ -500,13 +514,13 @@ export const UserManagement: React.FC = () => {
   const [newUserPhone, setNewUserPhone] = useState('');
   const [newUserGuardianName, setNewUserGuardianName] = useState('');
   const [newUserGuardianPhone, setNewUserGuardianPhone] = useState('');
+  const [newUserPassword, setNewUserPassword] = useState('');
 
   const [editingUserId, setEditingUserId] = useState<string | null>(null);
   const [enrollModalUser, setEnrollModalUser] = useState<User | null>(null);
   const [registrationModalUser, setRegistrationModalUser] = useState<User | null>(null);
   const [passwordResetUser, setPasswordResetUser] = useState<User | null>(null);
   const [guardianLinkUser, setGuardianLinkUser] = useState<User | null>(null);
-  const [newUserPassword, setNewUserPassword] = useState('');
 
   const loadUsers = useCallback(() => {
     setUsers(db.getUsers());
@@ -515,14 +529,77 @@ export const UserManagement: React.FC = () => {
 
   useEffect(() => { loadUsers(); }, [loadUsers]);
 
-  // ── Stats Summary ────────────────────────────────────────────────────────
-  const students = users.filter(u => u.role === 'STUDENT');
-  const avgProgress = students.length
-    ? Math.round(students.reduce((acc, s) => acc + db.getOverallProgress(s.id), 0) / students.length)
-    : 0;
-  const totalGrades = students.reduce((acc, s) => acc + db.getAcademicRecord(s.id).grades.length, 0);
+  // Reset pagination when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [activeTab, searchQuery, selectedClassFilter, itemsPerPage]);
 
-  // ── Delete ───────────────────────────────────────────────────────────────
+  // ── Available Classes Filter List ──────────────────────────────────────────
+  const availableClasses = useMemo(() => {
+    const set = new Set<string>();
+    users.forEach(u => {
+      if (u.schoolClass) set.add(u.schoolClass);
+    });
+    return Array.from(set).sort();
+  }, [users]);
+
+  // ── Tab Category Counts ────────────────────────────────────────────────────
+  const counts = useMemo(() => {
+    return {
+      ALL: users.length,
+      STUDENT: users.filter(u => u.role === 'STUDENT').length,
+      INSTRUCTOR: users.filter(u => u.role === 'INSTRUCTOR').length,
+      GUARDIAN: users.filter(u => u.role === 'GUARDIAN').length,
+      MANAGEMENT: users.filter(u => u.role === 'COORDINATOR' || u.role === 'DIRECTOR').length,
+      ADMIN: users.filter(u => u.role === 'ADMIN' || u.role === 'MAINTENANCE').length,
+    };
+  }, [users]);
+
+  // ── Metrics Summary ────────────────────────────────────────────────────────
+  const students = useMemo(() => users.filter(u => u.role === 'STUDENT'), [users]);
+  const avgProgress = useMemo(() => students.length
+    ? Math.round(students.reduce((acc, s) => acc + db.getOverallProgress(s.id), 0) / students.length)
+    : 0, [students]);
+  const totalGrades = useMemo(() => students.reduce((acc, s) => acc + db.getAcademicRecord(s.id).grades.length, 0), [students]);
+
+  // ── Filtering Logic ────────────────────────────────────────────────────────
+  const filteredUsers = useMemo(() => {
+    const q = searchQuery.toLowerCase().trim();
+    return users.filter(u => {
+      // Tab Category Filter
+      let tabMatch = true;
+      if (activeTab === 'STUDENT') tabMatch = u.role === 'STUDENT';
+      else if (activeTab === 'INSTRUCTOR') tabMatch = u.role === 'INSTRUCTOR';
+      else if (activeTab === 'GUARDIAN') tabMatch = u.role === 'GUARDIAN';
+      else if (activeTab === 'MANAGEMENT') tabMatch = u.role === 'COORDINATOR' || u.role === 'DIRECTOR';
+      else if (activeTab === 'ADMIN') tabMatch = u.role === 'ADMIN' || u.role === 'MAINTENANCE';
+
+      if (!tabMatch) return false;
+
+      // Class Filter
+      if (selectedClassFilter !== 'ALL') {
+        if (u.schoolClass !== selectedClassFilter) return false;
+      }
+
+      // Search Query Filter (Name, Email, RegistrationId, SchoolClass)
+      if (q) {
+        const nameMatch = u.name.toLowerCase().includes(q);
+        const emailMatch = u.email.toLowerCase().includes(q);
+        const regMatch = u.registrationId ? u.registrationId.toLowerCase().includes(q) : false;
+        const classMatch = u.schoolClass ? u.schoolClass.toLowerCase().includes(q) : false;
+        if (!nameMatch && !emailMatch && !regMatch && !classMatch) return false;
+      }
+
+      return true;
+    });
+  }, [users, activeTab, searchQuery, selectedClassFilter]);
+
+  // ── Pagination Calculation ─────────────────────────────────────────────────
+  const totalPages = Math.max(1, Math.ceil(filteredUsers.length / itemsPerPage));
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const paginatedUsers = filteredUsers.slice(startIndex, startIndex + itemsPerPage);
+
+  // ── Handlers ───────────────────────────────────────────────────────────────
   const handleDeleteUser = (userId: string, userName: string) => {
     if (!window.confirm(`Excluir "${userName}"? Todos os registros acadêmicos serão removidos.`)) return;
     db.deleteUser(userId);
@@ -530,7 +607,6 @@ export const UserManagement: React.FC = () => {
     addLog('Exclusão de Usuário', `Usuário ${userName} excluído da base de dados.`, 'error');
   };
 
-  // ── Inline Edit Save ─────────────────────────────────────────────────────
   const handleEditSave = (updated: User) => {
     db.updateUser(updated);
     setEditingUserId(null);
@@ -538,7 +614,6 @@ export const UserManagement: React.FC = () => {
     addLog('Edição de Usuário', `Dados de ${updated.name} (${updated.role}) atualizados.`, 'success');
   };
 
-  // ── Registration (Cadastro Estendido) Save ───────────────────────────────
   const handleRegistrationSave = (updated: User) => {
     db.updateUser(updated);
     setRegistrationModalUser(null);
@@ -546,7 +621,6 @@ export const UserManagement: React.FC = () => {
     addLog('Cadastro Atualizado', `Cadastro estendido de ${updated.name} atualizado.`, 'success');
   };
 
-  // ── Password Reset (Entrega I) ───────────────────────────────────────────
   const handlePasswordReset = (newPassword: string) => {
     if (!passwordResetUser) return;
     const updated: User = { ...passwordResetUser, passwordHash: hashPassword(newPassword, passwordResetUser.email) };
@@ -556,7 +630,6 @@ export const UserManagement: React.FC = () => {
     addLog('Senha Redefinida', `Senha de ${updated.name} foi redefinida pelo administrador.`, 'warning');
   };
 
-  // ── Create User ──────────────────────────────────────────────────────────
   const handleCreateUser = (e: React.FormEvent) => {
     e.preventDefault();
     if (!newUserName.trim() || !newUserEmail.trim()) return;
@@ -611,42 +684,49 @@ export const UserManagement: React.FC = () => {
     return <AcademicHistory userId={selectedUserId} onBack={() => { setView('list'); setSelectedUserId(null); loadUsers(); }} />;
   }
 
-  const filteredUsers = users.filter(u =>
-    (u.name.toLowerCase().includes(searchQuery.toLowerCase()) || u.email.toLowerCase().includes(searchQuery.toLowerCase())) &&
-    (roleFilter === 'ALL' || u.role === roleFilter)
-  );
+  const TABS_CONFIG: { id: CategoryTab; label: string; icon: React.ReactNode; count: number }[] = [
+    { id: 'ALL', label: 'Todos os Registros', icon: <Users size={16} />, count: counts.ALL },
+    { id: 'STUDENT', label: 'Alunos', icon: <GraduationCap size={16} />, count: counts.STUDENT },
+    { id: 'INSTRUCTOR', label: 'Professores', icon: <UserCheck size={16} />, count: counts.INSTRUCTOR },
+    { id: 'GUARDIAN', label: 'Responsáveis', icon: <Users size={16} />, count: counts.GUARDIAN },
+    { id: 'MANAGEMENT', label: 'Gestão & Coordenação', icon: <Building2 size={16} />, count: counts.MANAGEMENT },
+    { id: 'ADMIN', label: 'Admin & Suporte', icon: <ShieldAlert size={16} />, count: counts.ADMIN },
+  ];
 
   return (
-    <div style={{ maxWidth: 1100, margin: '0 auto', padding: '4px 0' }} role="region" aria-label="Gerenciador de Usuários">
+    <div style={{ maxWidth: 1200, margin: '0 auto', padding: '4px 0' }} role="region" aria-label="Gerenciador de Usuários">
       {/* Header */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 28, flexWrap: 'wrap', gap: 16 }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 24, flexWrap: 'wrap', gap: 16 }}>
         <div>
-          <h2 style={{ fontSize: '1.6rem', fontWeight: 800, margin: '0 0 6px', color: 'var(--text-primary)' }}>Gerenciamento de Usuários</h2>
+          <h2 style={{ fontSize: '1.6rem', fontWeight: 800, margin: '0 0 6px', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: 10 }}>
+            <Users size={28} style={{ color: 'var(--primary)' }} /> Gestão Integrada de Usuários
+          </h2>
           <p style={{ color: 'var(--text-secondary)', margin: 0, fontSize: 14 }}>
-            CRUD completo · Matrículas · Histórico Escolar · Notas · RBAC
+            Controle de perfis por categoria · Filtros de turma · Matrículas · Vínculos familiares · RBAC
           </p>
         </div>
-        <button className="btn btn-primary" onClick={() => setShowAddForm(!showAddForm)} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+        <button className="btn btn-primary" onClick={() => setShowAddForm(!showAddForm)} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '10px 18px', fontSize: 14 }}>
           <UserPlus size={18} /> Novo Usuário
         </button>
       </div>
 
       {/* Summary Cards */}
-      <div style={{ display: 'flex', gap: 16, marginBottom: 28, flexWrap: 'wrap' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(210px, 1fr))', gap: 16, marginBottom: 24 }}>
         {[
-          { icon: <Users size={20} />, label: 'Usuários Total', value: users.length, color: 'var(--primary)' },
-          { icon: <GraduationCap size={20} />, label: 'Alunos', value: students.length, color: 'var(--accent-blue, #3b82f6)' },
-          { icon: <TrendingUp size={20} />, label: 'Progresso Médio', value: `${avgProgress}%`, color: 'var(--success)' },
-          { icon: <Award size={20} />, label: 'Notas Lançadas', value: totalGrades, color: 'var(--warning)' },
+          { icon: <Users size={22} />, label: 'Usuários Cadastrados', value: users.length, color: 'var(--primary)' },
+          { icon: <GraduationCap size={22} />, label: 'Estudantes Ativos', value: students.length, color: '#3b82f6' },
+          { icon: <TrendingUp size={22} />, label: 'Engajamento Médio', value: `${avgProgress}%`, color: 'var(--success)' },
+          { icon: <Award size={22} />, label: 'Notas Registradas', value: totalGrades, color: '#f59e0b' },
         ].map(c => (
           <div key={c.label} style={{
-            flex: 1, minWidth: 140, background: 'var(--bg-secondary)', border: '1px solid var(--border)',
-            borderRadius: 16, padding: '16px 20px', display: 'flex', gap: 12, alignItems: 'center',
+            background: 'var(--bg-secondary)', border: '1px solid var(--border)',
+            borderRadius: 16, padding: '16px 20px', display: 'flex', gap: 14, alignItems: 'center',
+            boxShadow: '0 4px 12px rgba(0,0,0,0.03)'
           }}>
-            <div style={{ width: 44, height: 44, borderRadius: 12, background: `${c.color}22`, display: 'flex', alignItems: 'center', justifyContent: 'center', color: c.color }}>{c.icon}</div>
+            <div style={{ width: 46, height: 46, borderRadius: 14, background: `${c.color}18`, display: 'flex', alignItems: 'center', justifyContent: 'center', color: c.color }}>{c.icon}</div>
             <div>
-              <div style={{ fontSize: 22, fontWeight: 800, color: 'var(--text-primary)' }}>{c.value}</div>
-              <div style={{ fontSize: 12, color: 'var(--text-secondary)' }}>{c.label}</div>
+              <div style={{ fontSize: 24, fontWeight: 800, color: 'var(--text-primary)' }}>{c.value}</div>
+              <div style={{ fontSize: 12, color: 'var(--text-secondary)', fontWeight: 500 }}>{c.label}</div>
             </div>
           </div>
         ))}
@@ -654,44 +734,48 @@ export const UserManagement: React.FC = () => {
 
       {/* Add User Form */}
       {showAddForm && (
-        <div className="card" style={{ marginBottom: 28, borderLeft: '4px solid var(--primary)' }}>
-          <h3 style={{ fontSize: '1.1rem', fontWeight: 800, marginBottom: 16 }}>Cadastrar Novo Usuário</h3>
+        <div className="card" style={{ marginBottom: 28, borderLeft: '4px solid var(--primary)', borderRadius: 20, boxShadow: '0 8px 30px rgba(0,0,0,0.08)' }}>
+          <h3 style={{ fontSize: '1.15rem', fontWeight: 800, marginBottom: 16, display: 'flex', alignItems: 'center', gap: 8 }}>
+            <UserPlus size={20} style={{ color: 'var(--primary)' }} /> Cadastrar Novo Usuário no Sistema
+          </h3>
           <form onSubmit={handleCreateUser} style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(200px,1fr))', gap: 16 }}>
             <div>
-              <label htmlFor="new-name" style={{ display: 'block', fontWeight: 'bold', marginBottom: 6 }}>Nome Completo</label>
+              <label htmlFor="new-name" style={{ display: 'block', fontWeight: 'bold', marginBottom: 6, fontSize: 13 }}>Nome Completo</label>
               <input id="new-name" type="text" className="form-input" placeholder="Ex: João Souza"
                 value={newUserName} onChange={e => setNewUserName(e.target.value)} required />
             </div>
             <div>
-              <label htmlFor="new-email" style={{ display: 'block', fontWeight: 'bold', marginBottom: 6 }}>E-mail</label>
+              <label htmlFor="new-email" style={{ display: 'block', fontWeight: 'bold', marginBottom: 6, fontSize: 13 }}>E-mail de Acesso</label>
               <input id="new-email" type="email" className="form-input" placeholder="joao@escola.com"
                 value={newUserEmail} onChange={e => setNewUserEmail(e.target.value)} required />
             </div>
             <div>
-              <label htmlFor="new-password" style={{ display: 'block', fontWeight: 'bold', marginBottom: 6 }}>Senha (mín. 4 caracteres)</label>
+              <label htmlFor="new-password" style={{ display: 'block', fontWeight: 'bold', marginBottom: 6, fontSize: 13 }}>Senha Padrão (mín. 4 chars)</label>
               <input id="new-password" type="password" className="form-input" placeholder="••••••••"
                 value={newUserPassword} onChange={e => setNewUserPassword(e.target.value)} required minLength={4} />
             </div>
             <div>
-              <label htmlFor="new-role" style={{ display: 'block', fontWeight: 'bold', marginBottom: 6 }}>Função</label>
+              <label htmlFor="new-role" style={{ display: 'block', fontWeight: 'bold', marginBottom: 6, fontSize: 13 }}>Perfil / Função</label>
               <select id="new-role" className="form-select" value={newUserRole} onChange={e => setNewUserRole(e.target.value as UserRole)}>
                 <option value="STUDENT">Aluno</option>
                 <option value="INSTRUCTOR">Professor</option>
+                <option value="COORDINATOR">Coordenação Pedagógica</option>
+                <option value="DIRECTOR">Direção Escolar</option>
+                <option value="GUARDIAN">Responsável (Família)</option>
                 <option value="ADMIN">Administrador</option>
-                <option value="MAINTENANCE">Suporte</option>
-                <option value="GUARDIAN">Responsável</option>
+                <option value="MAINTENANCE">Suporte Técnico</option>
               </select>
             </div>
             {newUserRole === 'STUDENT' && (
               <div>
-                <label htmlFor="new-school-class" style={{ display: 'block', fontWeight: 'bold', marginBottom: 6 }}>Turma</label>
+                <label htmlFor="new-school-class" style={{ display: 'block', fontWeight: 'bold', marginBottom: 6, fontSize: 13 }}>Turma</label>
                 <input id="new-school-class" type="text" className="form-input" placeholder="Ex: 9º Ano A"
                   value={newUserSchoolClass} onChange={e => setNewUserSchoolClass(e.target.value)} />
               </div>
             )}
             {newUserRole === 'STUDENT' && (
               <div>
-                <label htmlFor="new-class" style={{ display: 'block', fontWeight: 'bold', marginBottom: 6 }}>Classe RPG</label>
+                <label htmlFor="new-class" style={{ display: 'block', fontWeight: 'bold', marginBottom: 6, fontSize: 13 }}>Classe RPG</label>
                 <select id="new-class" className="form-select" value={newUserClass} onChange={e => setNewUserClass(e.target.value as RpgClass)}>
                   <option value="MAGE">🔮 Arcano</option>
                   <option value="WARRIOR">⚔️ Cruzado</option>
@@ -710,73 +794,141 @@ export const UserManagement: React.FC = () => {
             {newUserRole === 'STUDENT' && (
               <>
                 <div>
-                  <label htmlFor="new-registration-id" style={{ display: 'block', fontWeight: 'bold', marginBottom: 6 }}>Matrícula</label>
+                  <label htmlFor="new-registration-id" style={{ display: 'block', fontWeight: 'bold', marginBottom: 6, fontSize: 13 }}>Matrícula</label>
                   <input id="new-registration-id" type="text" className="form-input" placeholder="Ex: 2026-0142"
                     value={newUserRegistrationId} onChange={e => setNewUserRegistrationId(e.target.value)} />
                 </div>
                 <div>
-                  <label htmlFor="new-birth-date" style={{ display: 'block', fontWeight: 'bold', marginBottom: 6 }}>Data de Nascimento</label>
+                  <label htmlFor="new-birth-date" style={{ display: 'block', fontWeight: 'bold', marginBottom: 6, fontSize: 13 }}>Data de Nascimento</label>
                   <input id="new-birth-date" type="date" className="form-input"
                     value={newUserBirthDate} onChange={e => setNewUserBirthDate(e.target.value)} />
                 </div>
                 <div>
-                  <label htmlFor="new-phone" style={{ display: 'block', fontWeight: 'bold', marginBottom: 6 }}>Telefone</label>
+                  <label htmlFor="new-phone" style={{ display: 'block', fontWeight: 'bold', marginBottom: 6, fontSize: 13 }}>Telefone</label>
                   <input id="new-phone" type="text" className="form-input" placeholder="(00) 00000-0000"
                     value={newUserPhone} onChange={e => setNewUserPhone(e.target.value)} />
                 </div>
                 <div>
-                  <label htmlFor="new-guardian-name" style={{ display: 'block', fontWeight: 'bold', marginBottom: 6 }}>Nome do Responsável</label>
+                  <label htmlFor="new-guardian-name" style={{ display: 'block', fontWeight: 'bold', marginBottom: 6, fontSize: 13 }}>Nome do Responsável</label>
                   <input id="new-guardian-name" type="text" className="form-input" placeholder="Nome completo"
                     value={newUserGuardianName} onChange={e => setNewUserGuardianName(e.target.value)} />
                 </div>
                 <div>
-                  <label htmlFor="new-guardian-phone" style={{ display: 'block', fontWeight: 'bold', marginBottom: 6 }}>Telefone do Responsável</label>
+                  <label htmlFor="new-guardian-phone" style={{ display: 'block', fontWeight: 'bold', marginBottom: 6, fontSize: 13 }}>Telefone do Responsável</label>
                   <input id="new-guardian-phone" type="text" className="form-input" placeholder="(00) 00000-0000"
                     value={newUserGuardianPhone} onChange={e => setNewUserGuardianPhone(e.target.value)} />
                 </div>
               </>
             )}
             <div style={{ gridColumn: '1/-1', display: 'flex', gap: 10, marginTop: 8 }}>
-              <button type="submit" className="btn btn-primary">Cadastrar</button>
+              <button type="submit" className="btn btn-primary" style={{ padding: '10px 24px' }}>Cadastrar Usuário</button>
               <button type="button" className="btn btn-secondary" onClick={() => setShowAddForm(false)}>Cancelar</button>
             </div>
           </form>
         </div>
       )}
 
-      {/* Filter Bar */}
-      <div className="card" style={{ padding: '14px 18px', marginBottom: 20, display: 'flex', gap: 14, alignItems: 'center', flexWrap: 'wrap' }}>
-        <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: 8, background: 'var(--bg-tertiary)', padding: '7px 12px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border)' }}>
+      {/* Category Tabs */}
+      <div style={{ display: 'flex', gap: 8, marginBottom: 16, overflowX: 'auto', paddingBottom: 4 }}>
+        {TABS_CONFIG.map(tab => {
+          const isActive = activeTab === tab.id;
+          return (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              style={{
+                display: 'flex', alignItems: 'center', gap: 8, padding: '10px 18px',
+                borderRadius: 14, fontSize: 13, fontWeight: 700, cursor: 'pointer',
+                border: isActive ? '1px solid var(--primary)' : '1px solid var(--border)',
+                background: isActive ? 'var(--primary)' : 'var(--bg-secondary)',
+                color: isActive ? '#fff' : 'var(--text-secondary)',
+                transition: 'all 0.2s ease', whiteSpace: 'nowrap',
+                boxShadow: isActive ? '0 4px 14px rgba(139,92,246,0.3)' : 'none'
+              }}
+            >
+              {tab.icon}
+              <span>{tab.label}</span>
+              <span style={{
+                fontSize: 11, padding: '2px 8px', borderRadius: 10,
+                background: isActive ? 'rgba(255,255,255,0.25)' : 'var(--bg-tertiary)',
+                color: isActive ? '#fff' : 'var(--text-tertiary)', fontWeight: 800
+              }}>
+                {tab.count}
+              </span>
+            </button>
+          );
+        })}
+      </div>
+
+      {/* Filter & Controls Bar */}
+      <div className="card" style={{ padding: '14px 18px', marginBottom: 20, display: 'flex', gap: 14, alignItems: 'center', flexWrap: 'wrap', borderRadius: 16 }}>
+        {/* Search Input */}
+        <div style={{ flex: 1, minWidth: 240, display: 'flex', alignItems: 'center', gap: 8, background: 'var(--bg-tertiary)', padding: '8px 14px', borderRadius: 12, border: '1px solid var(--border)' }}>
           <Search size={16} style={{ color: 'var(--text-tertiary)' }} />
-          <input type="text" placeholder="Buscar por nome ou e-mail..." value={searchQuery}
+          <input
+            type="text"
+            placeholder="Buscar por nome, e-mail, matrícula ou turma..."
+            value={searchQuery}
             onChange={e => setSearchQuery(e.target.value)}
-            style={{ border: 'none', background: 'transparent', color: 'var(--text-primary)', outline: 'none', width: '100%', fontSize: 13 }} />
+            style={{ border: 'none', background: 'transparent', color: 'var(--text-primary)', outline: 'none', width: '100%', fontSize: 13 }}
+          />
+          {searchQuery && (
+            <button onClick={() => setSearchQuery('')} style={{ background: 'none', border: 'none', color: 'var(--text-tertiary)', cursor: 'pointer', display: 'flex', padding: 0 }}>
+              <X size={14} />
+            </button>
+          )}
         </div>
-        <select className="form-select" value={roleFilter} onChange={e => setRoleFilter(e.target.value)} style={{ padding: '7px 12px', fontSize: 13 }}>
-          <option value="ALL">Todos os Perfis</option>
-          <option value="STUDENT">Alunos</option>
-          <option value="INSTRUCTOR">Professores</option>
-          <option value="ADMIN">Administradores</option>
-          <option value="MAINTENANCE">Suporte</option>
-          <option value="GUARDIAN">Responsáveis</option>
-        </select>
+
+        {/* School Class Filter */}
+        {(activeTab === 'ALL' || activeTab === 'STUDENT') && availableClasses.length > 0 && (
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+            <Filter size={14} style={{ color: 'var(--text-tertiary)' }} />
+            <select
+              className="form-select"
+              value={selectedClassFilter}
+              onChange={e => setSelectedClassFilter(e.target.value)}
+              style={{ padding: '8px 12px', fontSize: 13, borderRadius: 10 }}
+            >
+              <option value="ALL">Todas as Turmas</option>
+              {availableClasses.map(ac => (
+                <option key={ac} value={ac}>{ac}</option>
+              ))}
+            </select>
+          </div>
+        )}
+
+        {/* Page Size Selector */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, color: 'var(--text-secondary)' }}>
+          <span>Exibir:</span>
+          <select
+            className="form-select"
+            value={itemsPerPage}
+            onChange={e => setItemsPerPage(Number(e.target.value))}
+            style={{ padding: '8px 10px', fontSize: 13, borderRadius: 10 }}
+          >
+            <option value={10}>10 por pág.</option>
+            <option value={25}>25 por pág.</option>
+            <option value={50}>50 por pág.</option>
+            <option value={100}>100 por pág.</option>
+          </select>
+        </div>
       </div>
 
       {/* Users Table */}
-      <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
+      <div className="card" style={{ padding: 0, overflow: 'hidden', borderRadius: 20, boxShadow: '0 4px 20px rgba(0,0,0,0.04)' }}>
         <div style={{ overflowX: 'auto' }}>
           <table style={{ width: '100%', borderCollapse: 'collapse' }}>
             <thead>
               <tr style={{ background: 'var(--bg-tertiary)' }}>
-                <th style={{ padding: '14px 18px', textAlign: 'left', fontSize: 13, fontWeight: 700, color: 'var(--text-secondary)', borderBottom: '1px solid var(--border)' }}>Nome</th>
-                <th style={{ padding: '14px 18px', textAlign: 'left', fontSize: 13, fontWeight: 700, color: 'var(--text-secondary)', borderBottom: '1px solid var(--border)' }}>Email</th>
-                <th style={{ padding: '14px 18px', textAlign: 'left', fontSize: 13, fontWeight: 700, color: 'var(--text-secondary)', borderBottom: '1px solid var(--border)' }}>Perfil</th>
-                <th style={{ padding: '14px 18px', textAlign: 'left', fontSize: 13, fontWeight: 700, color: 'var(--text-secondary)', borderBottom: '1px solid var(--border)', minWidth: 130 }}>Progresso</th>
-                <th style={{ padding: '14px 18px', textAlign: 'center', fontSize: 13, fontWeight: 700, color: 'var(--text-secondary)', borderBottom: '1px solid var(--border)', minWidth: 320 }}>Ações</th>
+                <th style={{ padding: '14px 18px', textAlign: 'left', fontSize: 12, fontWeight: 700, color: 'var(--text-secondary)', borderBottom: '1px solid var(--border)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Usuário / Detalhes</th>
+                <th style={{ padding: '14px 18px', textAlign: 'left', fontSize: 12, fontWeight: 700, color: 'var(--text-secondary)', borderBottom: '1px solid var(--border)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Contato / Matrícula</th>
+                <th style={{ padding: '14px 18px', textAlign: 'left', fontSize: 12, fontWeight: 700, color: 'var(--text-secondary)', borderBottom: '1px solid var(--border)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Perfil / Função</th>
+                <th style={{ padding: '14px 18px', textAlign: 'left', fontSize: 12, fontWeight: 700, color: 'var(--text-secondary)', borderBottom: '1px solid var(--border)', textTransform: 'uppercase', letterSpacing: '0.5px', minWidth: 140 }}>Desempenho</th>
+                <th style={{ padding: '14px 18px', textAlign: 'center', fontSize: 12, fontWeight: 700, color: 'var(--text-secondary)', borderBottom: '1px solid var(--border)', textTransform: 'uppercase', letterSpacing: '0.5px', minWidth: 320 }}>Ações Rápidas</th>
               </tr>
             </thead>
             <tbody>
-              {filteredUsers.map((user, idx) => {
+              {paginatedUsers.map((user, idx) => {
                 const progress = user.role === 'STUDENT' ? db.getOverallProgress(user.id) : null;
                 const avg = user.role === 'STUDENT' ? db.getAverageGrade(user.id) : null;
 
@@ -786,20 +938,46 @@ export const UserManagement: React.FC = () => {
 
                 return (
                   <tr key={user.id} style={{ background: idx % 2 === 0 ? 'transparent' : 'var(--bg-tertiary)', transition: 'background 0.2s' }}>
-                    <td style={{ padding: '13px 18px', borderBottom: '1px solid var(--border)' }}>
-                      <div style={{ fontWeight: 700, color: 'var(--text-primary)', fontSize: 14 }}>{user.name}</div>
-                      {user.rpgCharacter && (
-                        <div style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>
-                          ⚔️ Nv.{user.rpgCharacter.level} {user.rpgCharacter.selectedClass}
-                          {user.schoolClass && <> · 🏫 {user.schoolClass}</>}
+                    <td style={{ padding: '14px 18px', borderBottom: '1px solid var(--border)' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                        <div style={{
+                          width: 38, height: 38, borderRadius: 12,
+                          background: user.role === 'STUDENT' ? 'rgba(139,92,246,0.15)' : user.role === 'INSTRUCTOR' ? 'rgba(59,130,246,0.15)' : 'rgba(245,158,11,0.15)',
+                          display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800,
+                          color: user.role === 'STUDENT' ? '#8b5cf6' : user.role === 'INSTRUCTOR' ? '#3b82f6' : '#f59e0b', fontSize: 14
+                        }}>
+                          {user.name.charAt(0).toUpperCase()}
+                        </div>
+                        <div>
+                          <div style={{ fontWeight: 700, color: 'var(--text-primary)', fontSize: 14 }}>{user.name}</div>
+                          {user.rpgCharacter ? (
+                            <div style={{ fontSize: 11, color: 'var(--text-tertiary)', display: 'flex', gap: 6, flexWrap: 'wrap', marginTop: 2 }}>
+                              <span>⚔️ Nv.{user.rpgCharacter.level} {user.rpgCharacter.selectedClass}</span>
+                              {user.schoolClass && <span style={{ color: 'var(--primary)', fontWeight: 600 }}>· 🏫 {user.schoolClass}</span>}
+                            </div>
+                          ) : (
+                            user.schoolClass && <div style={{ fontSize: 11, color: 'var(--primary)', fontWeight: 600 }}>🏫 {user.schoolClass}</div>
+                          )}
+                        </div>
+                      </div>
+                    </td>
+
+                    <td style={{ padding: '14px 18px', fontSize: 13, color: 'var(--text-secondary)', borderBottom: '1px solid var(--border)' }}>
+                      <div>{user.email}</div>
+                      {user.registrationId && (
+                        <div style={{ fontSize: 11, color: 'var(--text-tertiary)', marginTop: 2 }}>
+                          Matrícula: <strong style={{ color: 'var(--text-secondary)' }}>{user.registrationId}</strong>
                         </div>
                       )}
                     </td>
-                    <td style={{ padding: '13px 18px', fontSize: 13, color: 'var(--text-secondary)', borderBottom: '1px solid var(--border)' }}>{user.email}</td>
-                    <td style={{ padding: '13px 18px', borderBottom: '1px solid var(--border)' }}>
-                      <span className={`badge badge-${user.role.toLowerCase()}`}>{ROLE_LABEL[user.role]}</span>
+
+                    <td style={{ padding: '14px 18px', borderBottom: '1px solid var(--border)' }}>
+                      <span className={`badge badge-${user.role.toLowerCase()}`} style={{ fontWeight: 700, padding: '4px 10px', borderRadius: 8 }}>
+                        {ROLE_LABEL[user.role]}
+                      </span>
                     </td>
-                    <td style={{ padding: '13px 18px', borderBottom: '1px solid var(--border)', minWidth: 130 }}>
+
+                    <td style={{ padding: '14px 18px', borderBottom: '1px solid var(--border)', minWidth: 140 }}>
                       {progress !== null ? (
                         <div>
                           <ProgressBar pct={progress} color={progress >= 70 ? 'var(--success)' : progress >= 40 ? 'var(--warning)' : 'var(--danger)'} />
@@ -813,16 +991,18 @@ export const UserManagement: React.FC = () => {
                         <span style={{ fontSize: 12, color: 'var(--text-tertiary)' }}>N/A</span>
                       )}
                     </td>
-                    <td style={{ padding: '10px 14px', borderBottom: '1px solid var(--border)' }}>
+
+                    <td style={{ padding: '12px 14px', borderBottom: '1px solid var(--border)' }}>
                       <div style={{ display: 'flex', gap: 6, justifyContent: 'center', flexWrap: 'wrap' }}>
                         <button
                           onClick={() => { setSelectedUserId(user.id); setView('profile'); }}
                           className="btn btn-primary"
                           style={{ padding: '5px 10px', fontSize: 12, display: 'flex', alignItems: 'center', gap: 4 }}
-                          title="Ver Perfil"
+                          title="Ver Perfil Detalhado"
                         >
                           <Eye size={13} /> Perfil
                         </button>
+
                         {user.role === 'STUDENT' && (
                           <>
                             <button
@@ -851,6 +1031,7 @@ export const UserManagement: React.FC = () => {
                             </button>
                           </>
                         )}
+
                         {(user.role === 'GUARDIAN' || user.role === 'STUDENT') && (
                           <button
                             onClick={() => setGuardianLinkUser(user)}
@@ -861,27 +1042,30 @@ export const UserManagement: React.FC = () => {
                             <Users size={13} /> Vínculos
                           </button>
                         )}
+
                         <button
                           onClick={() => setEditingUserId(user.id)}
                           className="btn btn-secondary"
                           style={{ padding: '5px 10px', fontSize: 12, display: 'flex', alignItems: 'center', gap: 4 }}
-                          title="Editar inline"
+                          title="Editar Registro"
                         >
                           <Edit3 size={13} /> Editar
                         </button>
+
                         <button
                           onClick={() => setPasswordResetUser(user)}
                           className="btn btn-secondary"
                           style={{ padding: '5px 10px', fontSize: 12, display: 'flex', alignItems: 'center', gap: 4 }}
-                          title="Redefinir senha"
+                          title="Redefinir Senha de Acesso"
                         >
                           <KeyRound size={13} />
                         </button>
+
                         <button
                           onClick={() => handleDeleteUser(user.id, user.name)}
                           className="btn btn-secondary"
                           style={{ padding: '5px 10px', fontSize: 12, display: 'flex', alignItems: 'center', gap: 4, color: 'var(--danger)', borderColor: 'var(--danger)' }}
-                          title="Excluir usuário"
+                          title="Excluir Usuário"
                         >
                           <Trash2 size={13} />
                         </button>
@@ -890,16 +1074,75 @@ export const UserManagement: React.FC = () => {
                   </tr>
                 );
               })}
+
               {filteredUsers.length === 0 && (
                 <tr>
-                  <td colSpan={5} style={{ textAlign: 'center', padding: '40px', color: 'var(--text-tertiary)' }}>
-                    Nenhum usuário encontrado.
+                  <td colSpan={5} style={{ textAlign: 'center', padding: '48px 20px', color: 'var(--text-tertiary)' }}>
+                    <div style={{ fontSize: 15, fontWeight: 600, color: 'var(--text-secondary)', marginBottom: 4 }}>Nenhum usuário encontrado</div>
+                    <div style={{ fontSize: 13 }}>Tente ajustar a busca por nome/e-mail ou trocar de aba.</div>
                   </td>
                 </tr>
               )}
             </tbody>
           </table>
         </div>
+
+        {/* Pagination Controls Footer */}
+        {filteredUsers.length > 0 && (
+          <div style={{
+            display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+            padding: '14px 20px', background: 'var(--bg-tertiary)', borderTop: '1px solid var(--border)',
+            flexWrap: 'wrap', gap: 12, fontSize: 13, color: 'var(--text-secondary)'
+          }}>
+            <div>
+              Exibindo <strong style={{ color: 'var(--text-primary)' }}>{startIndex + 1}</strong> a <strong style={{ color: 'var(--text-primary)' }}>{Math.min(startIndex + itemsPerPage, filteredUsers.length)}</strong> de <strong style={{ color: 'var(--text-primary)' }}>{filteredUsers.length}</strong> usuários
+            </div>
+
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+              <button
+                onClick={() => setCurrentPage(1)}
+                disabled={currentPage === 1}
+                className="btn btn-secondary"
+                style={{ padding: '4px 8px', fontSize: 12, opacity: currentPage === 1 ? 0.4 : 1, cursor: currentPage === 1 ? 'not-allowed' : 'pointer' }}
+                title="Primeira Página"
+              >
+                <ChevronsLeft size={16} />
+              </button>
+              <button
+                onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                disabled={currentPage === 1}
+                className="btn btn-secondary"
+                style={{ padding: '4px 8px', fontSize: 12, opacity: currentPage === 1 ? 0.4 : 1, cursor: currentPage === 1 ? 'not-allowed' : 'pointer' }}
+                title="Página Anterior"
+              >
+                <ChevronLeft size={16} />
+              </button>
+
+              <span style={{ padding: '0 8px', fontWeight: 600 }}>
+                Página <strong style={{ color: 'var(--text-primary)' }}>{currentPage}</strong> de {totalPages}
+              </span>
+
+              <button
+                onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                disabled={currentPage === totalPages}
+                className="btn btn-secondary"
+                style={{ padding: '4px 8px', fontSize: 12, opacity: currentPage === totalPages ? 0.4 : 1, cursor: currentPage === totalPages ? 'not-allowed' : 'pointer' }}
+                title="Próxima Página"
+              >
+                <ChevronRight size={16} />
+              </button>
+              <button
+                onClick={() => setCurrentPage(totalPages)}
+                disabled={currentPage === totalPages}
+                className="btn btn-secondary"
+                style={{ padding: '4px 8px', fontSize: 12, opacity: currentPage === totalPages ? 0.4 : 1, cursor: currentPage === totalPages ? 'not-allowed' : 'pointer' }}
+                title="Última Página"
+              >
+                <ChevronsRight size={16} />
+              </button>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Enrollment Modal */}
@@ -947,9 +1190,10 @@ export const UserManagement: React.FC = () => {
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(190px,1fr))', gap: 14, fontSize: 13 }}>
           {[
             { label: 'Aluno', color: 'var(--primary)', desc: 'Catálogo, player de aulas, progresso, exercícios, histórico escolar.' },
-            { label: 'Professor', color: 'var(--accent)', desc: 'Painel do instrutor, editor de cursos, livro de notas, pareceres.' },
-            { label: 'Administrador', color: 'var(--danger)', desc: 'Controle total: cursos, usuários, matrículas, notas, auditoria.' },
-            { label: 'Suporte', color: 'var(--warning)', desc: 'Modo de manutenção e auditoria de logs operacionais.' },
+            { label: 'Professor', color: 'var(--accent)', desc: 'Painel do instrutor, editor de cursos, diário de classe e missões.' },
+            { label: 'Coordenação / Direção', color: '#ec4899', desc: 'Painel pedagógico, diagnósticos de engajamento e relatórios.' },
+            { label: 'Responsável', color: '#10b981', desc: 'Portal da Família em modo leitura, boletins e extrato financeiro.' },
+            { label: 'Administrador', color: 'var(--danger)', desc: 'Controle total: cursos, usuários, matrículas, notas e financeiro.' },
           ].map(r => (
             <div key={r.label}>
               <strong style={{ color: r.color }}>{r.label}</strong>
