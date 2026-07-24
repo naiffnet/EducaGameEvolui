@@ -1,14 +1,16 @@
 import React, { useState } from 'react';
-import type { RpgClass } from '../types';
+import type { RpgClass, RpgGender } from '../types';
+import { getRpgClassName } from '../types';
 import { RpgAvatar } from './RpgAvatar';
-import { Sparkles, Trophy } from 'lucide-react';
+import { Sparkles, Trophy, User } from 'lucide-react';
 
 interface CharacterCreatorProps {
-  onSelectClass: (selectedClass: RpgClass) => void;
+  onSelectClass: (selectedClass: RpgClass, gender?: RpgGender) => void;
 }
 
 export const CharacterCreator: React.FC<CharacterCreatorProps> = ({ onSelectClass }) => {
   const [chosenClass, setChosenClass] = useState<RpgClass>('MAGE');
+  const [chosenGender, setChosenGender] = useState<RpgGender>('MALE');
 
   const classesConfig = [
     { id: 'MAGE' as RpgClass, name: 'Arcano', specialty: 'Mago das Estrelas', desc: 'Nascido sob uma constelacao rara, o Arcano domina as leis ocultas do cosmos. Seus feiticos reescrevem a realidade e sua sabedoria e temida pelos mais antigos dragoes.', strength: 8, intelligence: 30, dexterity: 14, color: '#7d62ff', bgGlow: 'rgba(125,98,255,0.15)', initialSkill: 'Projetil Arcano' },
@@ -41,9 +43,30 @@ export const CharacterCreator: React.FC<CharacterCreatorProps> = ({ onSelectClas
         <h2 style={{ fontSize: '2.2rem', fontWeight: '800', marginBottom: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
           Escolha seu Herói de Aprendizado! <Sparkles style={{ color: 'var(--accent)' }} />
         </h2>
-        <p style={{ color: 'var(--text-secondary)', fontSize: '1.05rem', maxWidth: '600px', margin: '0 auto' }}>
+        <p style={{ color: 'var(--text-secondary)', fontSize: '1.05rem', maxWidth: '600px', margin: '0 auto 20px' }}>
           Toda jornada pedagógica é uma aventura. Escolha a classe que melhor se alinha com o seu estilo de estudo. Suas conquistas evoluirão seu herói!
         </p>
+
+        {/* Gender Toggle Selector */}
+        <div style={{ display: 'inline-flex', alignItems: 'center', gap: 10, background: 'var(--bg-secondary)', padding: '6px 14px', borderRadius: 20, border: '1px solid var(--border)' }}>
+          <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: 4 }}>
+            <User size={15} /> Gênero:
+          </span>
+          <button
+            onClick={() => setChosenGender('MALE')}
+            className={`btn ${chosenGender === 'MALE' ? 'btn-primary' : 'btn-secondary'}`}
+            style={{ padding: '4px 14px', fontSize: 12, borderRadius: 14 }}
+          >
+            ♂ Masculino
+          </button>
+          <button
+            onClick={() => setChosenGender('FEMALE')}
+            className={`btn ${chosenGender === 'FEMALE' ? 'btn-primary' : 'btn-secondary'}`}
+            style={{ padding: '4px 14px', fontSize: 12, borderRadius: 14 }}
+          >
+            ♀ Feminino
+          </button>
+        </div>
       </div>
 
       {/* Class Selector Grid */}
@@ -86,11 +109,11 @@ export const CharacterCreator: React.FC<CharacterCreatorProps> = ({ onSelectClas
                 }
               }}
             >
-              <RpgAvatar rpgClass={cls.id} level={1} size={72} />
+              <RpgAvatar rpgClass={cls.id} level={1} size={72} gender={chosenGender} />
               
               <div style={{ textAlign: 'center' }}>
                 <div style={{ fontSize: '0.76rem', fontWeight: '800', color: isSelected ? cls.color : 'var(--text-primary)', lineHeight: 1.2, marginBottom: '2px' }}>
-                  {cls.name}
+                  {getRpgClassName(cls.id, chosenGender)}
                 </div>
                 <div style={{ fontSize: '0.62rem', color: 'var(--text-tertiary)' }}>
                   {cls.specialty}
@@ -113,10 +136,10 @@ export const CharacterCreator: React.FC<CharacterCreatorProps> = ({ onSelectClas
         }}
       >
         <div style={{ display: 'flex', gap: '24px', alignItems: 'flex-start', flexWrap: 'wrap' }}>
-          <RpgAvatar rpgClass={activeConfig.id} level={2} size={100} avatarStyle="EPIC_ADULT" />
+          <RpgAvatar rpgClass={activeConfig.id} level={2} size={100} gender={chosenGender} />
           <div style={{ flex: 1, minWidth: '240px' }}>
             <h3 style={{ fontSize: '1.3rem', fontWeight: '800', color: activeConfig.color, marginBottom: '4px' }}>
-              {activeConfig.name}
+              {getRpgClassName(activeConfig.id, chosenGender)}
             </h3>
             <div style={{ fontSize: '0.78rem', fontWeight: 'bold', color: 'var(--text-tertiary)', marginBottom: '10px', textTransform: 'uppercase' }}>{activeConfig.specialty}</div>
             <p style={{ fontSize: '0.95rem', color: 'var(--text-secondary)', marginBottom: '20px', lineHeight: '1.6' }}>
@@ -172,9 +195,9 @@ export const CharacterCreator: React.FC<CharacterCreatorProps> = ({ onSelectClas
           boxShadow: `0 8px 24px ${activeConfig.color}40`,
           color: '#ffffff'
         }}
-        onClick={() => onSelectClass(chosenClass)}
+        onClick={() => onSelectClass(chosenClass, chosenGender)}
       >
-        Iniciar Aventura como {activeConfig.name}!
+        Iniciar Aventura como {getRpgClassName(activeConfig.id, chosenGender)}!
       </button>
     </div>
   );

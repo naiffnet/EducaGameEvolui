@@ -1,10 +1,11 @@
 import React from "react";
-import type { RpgClass } from "../types";
+import type { RpgClass, RpgGender } from "../types";
 
 interface RpgAvatarProps {
   rpgClass: RpgClass | null;
   level: number;
   size?: number;
+  gender?: RpgGender;
   ariaLabel?: string;
   avatarStyle?: 'EPIC_ADULT' | 'JUNIOR';
   birthDate?: string;
@@ -14,6 +15,7 @@ export const RpgAvatar: React.FC<RpgAvatarProps> = ({
   rpgClass, 
   level, 
   size = 120, 
+  gender = 'MALE',
   ariaLabel, 
 }) => {
   const label = ariaLabel || "Heroi " + (rpgClass || "?") + " nv" + level;
@@ -38,6 +40,11 @@ export const RpgAvatar: React.FC<RpgAvatarProps> = ({
     rpgClass === "SMITH" ? "#fb923c" :
     rpgClass === "PYROMANCER" ? "#ef4444" :
     rpgClass === "PIRATE" ? "#f59e0b" : "#eab308";
+
+  // Image source path prioritizing gender variant file
+  const imageSrc = gender === 'FEMALE' 
+    ? `/pixel_art/${rpgClass}_FEMALE.png` 
+    : `/pixel_art/${rpgClass}.png`;
 
   return (
     <svg 
@@ -71,7 +78,7 @@ export const RpgAvatar: React.FC<RpgAvatarProps> = ({
 
       {/* Pixel Art Character Image Portrait */}
       <image 
-        href={`/pixel_art/${rpgClass}.png`} 
+        href={imageSrc} 
         x="6" 
         y="6" 
         width="108" 

@@ -22,6 +22,7 @@ import { type RpgClass } from '../types';
 interface ClassGuideInfo {
   id: RpgClass;
   name: string;
+  nameFemale: string;
   symbol: string;
   color: string;
   bgGlow: string;
@@ -36,6 +37,7 @@ const CLASS_GUIDES: ClassGuideInfo[] = [
   {
     id: 'MAGE',
     name: 'Mago',
+    nameFemale: 'Maga',
     symbol: '🔮',
     color: '#7d62ff',
     bgGlow: 'rgba(125,98,255,0.15)',
@@ -48,6 +50,7 @@ const CLASS_GUIDES: ClassGuideInfo[] = [
   {
     id: 'WARRIOR',
     name: 'Guerreiro',
+    nameFemale: 'Guerreira',
     symbol: '⚔️',
     color: '#ff7253',
     bgGlow: 'rgba(255,114,83,0.15)',
@@ -60,6 +63,7 @@ const CLASS_GUIDES: ClassGuideInfo[] = [
   {
     id: 'RANGER',
     name: 'Caçador',
+    nameFemale: 'Caçadora',
     symbol: '🏹',
     color: '#39db80',
     bgGlow: 'rgba(57,219,128,0.15)',
@@ -72,6 +76,7 @@ const CLASS_GUIDES: ClassGuideInfo[] = [
   {
     id: 'NECROMANCER',
     name: 'Necromante',
+    nameFemale: 'Necromante',
     symbol: '💀',
     color: '#b794f4',
     bgGlow: 'rgba(183,148,244,0.15)',
@@ -83,7 +88,8 @@ const CLASS_GUIDES: ClassGuideInfo[] = [
   },
   {
     id: 'QUEEN',
-    name: 'Rainha',
+    name: 'Rei',
+    nameFemale: 'Rainha',
     symbol: '👑',
     color: '#ffd700',
     bgGlow: 'rgba(255,215,0,0.15)',
@@ -96,6 +102,7 @@ const CLASS_GUIDES: ClassGuideInfo[] = [
   {
     id: 'SCHOLAR',
     name: 'Erudito',
+    nameFemale: 'Erudita',
     symbol: '📚',
     color: '#63b3ed',
     bgGlow: 'rgba(99,179,237,0.15)',
@@ -108,6 +115,7 @@ const CLASS_GUIDES: ClassGuideInfo[] = [
   {
     id: 'SMITH',
     name: 'Ferreiro',
+    nameFemale: 'Ferreira',
     symbol: '🔨',
     color: '#f6ad55',
     bgGlow: 'rgba(246,173,85,0.15)',
@@ -120,6 +128,7 @@ const CLASS_GUIDES: ClassGuideInfo[] = [
   {
     id: 'PYROMANCER',
     name: 'Dobrador de Fogo',
+    nameFemale: 'Dobradora de Fogo',
     symbol: '🔥',
     color: '#ff9f43',
     bgGlow: 'rgba(255,159,67,0.15)',
@@ -132,6 +141,7 @@ const CLASS_GUIDES: ClassGuideInfo[] = [
   {
     id: 'PIRATE',
     name: 'Pirata',
+    nameFemale: 'Pirata',
     symbol: '🏴‍☠️',
     color: '#fbd38d',
     bgGlow: 'rgba(251,211,141,0.15)',
@@ -144,25 +154,27 @@ const CLASS_GUIDES: ClassGuideInfo[] = [
   {
     id: 'JESTER',
     name: 'Bufão',
+    nameFemale: 'Ilusionista',
     symbol: '🎭',
     color: '#f6e05e',
     bgGlow: 'rgba(246,224,94,0.15)',
     pedagogicalProfile: 'Pensamento Lateral (Out of the Box), Comunicação Criativa e Gamificação de Desafios.',
     futureCareerPrep: 'Prepara para UX/UI Design, Game Design, marketing criativo e facilitação de dinâmicas em equipe.',
     baseStats: { strength: 8, intelligence: 22, dexterity: 30 },
-    initialSkill: 'Ilusão Cômica',
+    initialSkill: 'Ilusao Comica',
     evolutionStrategy: 'Personalize seu avatar, equipe títulos na loja e participe com criatividade das tarefas diárias.'
   },
   {
     id: 'CHAMPION',
     name: 'Campeão',
+    nameFemale: 'Campeã',
     symbol: '🏆',
     color: '#c6a94b',
     bgGlow: 'rgba(198,169,75,0.15)',
     pedagogicalProfile: 'Alta Performance Multidisciplinar, Excelência Acadêmica e Liderança Exemplar.',
     futureCareerPrep: 'Prepara para cargos de liderança executiva (CTO, Lead Architect) e gestão pedagógica de alto nível.',
     baseStats: { strength: 24, intelligence: 22, dexterity: 22 },
-    initialSkill: 'Brado do Herói',
+    initialSkill: 'Brado do Heroi',
     evolutionStrategy: 'Mantenha notas acima de 9.0 no boletim, atinja o Nível 5+ e lidere a turma nos desafios de Boss.'
   }
 ];
@@ -305,7 +317,7 @@ export const GamificationManual: React.FC = () => {
               </div>
               <div>
                 <h3 style={{ fontSize: '1.7rem', fontWeight: 800, margin: '0 0 4px', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: 8 }}>
-                  <span>{activeClassGuide.symbol}</span> {activeClassGuide.name}
+                  <span>{activeClassGuide.symbol}</span> {activeClassGuide.name === activeClassGuide.nameFemale ? activeClassGuide.name : `${activeClassGuide.name} / ${activeClassGuide.nameFemale}`}
                 </h3>
                 <div style={{ fontSize: 13, fontWeight: 700, color: activeClassGuide.color }}>
                   ⚡ Habilidade Inicial: {activeClassGuide.initialSkill}

@@ -261,6 +261,7 @@ export const Profile: React.FC<ProfileProps> = ({ userId, onBack }) => {
               rpgClass={targetUser.rpgCharacter.selectedClass} 
               level={targetUser.rpgCharacter.level} 
               size={100}
+              gender={targetUser.rpgCharacter.gender || 'MALE'}
               avatarStyle={targetUser.rpgCharacter.avatarStyle || 'EPIC_ADULT'}
               birthDate={targetUser.birthDate}
             />
@@ -296,7 +297,7 @@ export const Profile: React.FC<ProfileProps> = ({ userId, onBack }) => {
             </p>
             {targetUser.rpgCharacter?.selectedClass && (
               <p style={{ margin: '6px 0 0', fontWeight: 'bold', color: 'var(--accent)' }}>
-                Nível {targetUser.rpgCharacter.level} — {getRpgClassName(targetUser.rpgCharacter.selectedClass)}
+                Nível {targetUser.rpgCharacter.level} — {getRpgClassName(targetUser.rpgCharacter.selectedClass, targetUser.rpgCharacter.gender || 'MALE')}
               </p>
             )}
           </div>
@@ -503,6 +504,36 @@ export const Profile: React.FC<ProfileProps> = ({ userId, onBack }) => {
                       }}
                     >
                       🎒 Estilo Jovem Aprendiz
+                    </button>
+                  </div>
+                </div>
+
+                <div style={{ borderTop: '1px solid var(--border)', paddingTop: '20px', marginBottom: '20px' }}>
+                  <h4 style={{ fontSize: '0.95rem', fontWeight: '800', marginBottom: '12px', color: 'var(--text-secondary)' }}>Gênero do Personagem</h4>
+                  <div style={{ display: 'flex', gap: '8px' }}>
+                    <button
+                      className={`btn ${targetUser.rpgCharacter?.gender !== 'FEMALE' ? 'btn-primary' : 'btn-secondary'}`}
+                      style={{ padding: '6px 16px', fontSize: '0.85rem' }}
+                      onClick={() => {
+                        if (!targetUser.rpgCharacter) return;
+                        const updated = { ...targetUser, rpgCharacter: { ...targetUser.rpgCharacter, gender: 'MALE' as const } };
+                        db.updateUser(updated);
+                        if (isSelf) refreshUser();
+                      }}
+                    >
+                      ♂ Masculino
+                    </button>
+                    <button
+                      className={`btn ${targetUser.rpgCharacter?.gender === 'FEMALE' ? 'btn-primary' : 'btn-secondary'}`}
+                      style={{ padding: '6px 16px', fontSize: '0.85rem' }}
+                      onClick={() => {
+                        if (!targetUser.rpgCharacter) return;
+                        const updated = { ...targetUser, rpgCharacter: { ...targetUser.rpgCharacter, gender: 'FEMALE' as const } };
+                        db.updateUser(updated);
+                        if (isSelf) refreshUser();
+                      }}
+                    >
+                      ♀ Feminino
                     </button>
                   </div>
                 </div>

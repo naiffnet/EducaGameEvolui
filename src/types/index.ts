@@ -120,6 +120,22 @@ export type RpgClass =
   | 'JESTER'
   | 'CHAMPION';
 
+export type RpgGender = 'MALE' | 'FEMALE';
+
+export const RPG_CLASS_GENDER_NAMES: Record<RpgClass, Record<RpgGender, string>> = {
+  MAGE: { MALE: 'Mago', FEMALE: 'Maga' },
+  WARRIOR: { MALE: 'Guerreiro', FEMALE: 'Guerreira' },
+  RANGER: { MALE: 'Caçador', FEMALE: 'Caçadora' },
+  NECROMANCER: { MALE: 'Necromante', FEMALE: 'Necromante' },
+  QUEEN: { MALE: 'Rei', FEMALE: 'Rainha' },
+  SCHOLAR: { MALE: 'Erudito', FEMALE: 'Erudita' },
+  SMITH: { MALE: 'Ferreiro', FEMALE: 'Ferreira' },
+  PYROMANCER: { MALE: 'Dobrador de Fogo', FEMALE: 'Dobradora de Fogo' },
+  PIRATE: { MALE: 'Pirata', FEMALE: 'Pirata' },
+  JESTER: { MALE: 'Bufão', FEMALE: 'Ilusionista' },
+  CHAMPION: { MALE: 'Campeão', FEMALE: 'Campeã' },
+};
+
 export const RPG_CLASS_NAMES: Record<RpgClass, string> = {
   MAGE: 'Mago',
   WARRIOR: 'Guerreiro',
@@ -134,8 +150,10 @@ export const RPG_CLASS_NAMES: Record<RpgClass, string> = {
   CHAMPION: 'Campeão',
 };
 
-export function getRpgClassName(rpgClass: RpgClass | null | undefined): string {
+export function getRpgClassName(rpgClass: RpgClass | null | undefined, gender: RpgGender = 'MALE'): string {
   if (!rpgClass) return 'Sem Classe';
+  const names = RPG_CLASS_GENDER_NAMES[rpgClass];
+  if (names && names[gender]) return names[gender];
   return RPG_CLASS_NAMES[rpgClass] || rpgClass;
 }
 
@@ -196,6 +214,7 @@ export interface DailyTask {
 
 export interface RpgCharacter {
   selectedClass: RpgClass | null;
+  gender?: RpgGender;
   level: number;
   xp: number;
   avatarStyle?: 'EPIC_ADULT' | 'JUNIOR';
