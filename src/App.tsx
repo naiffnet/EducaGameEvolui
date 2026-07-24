@@ -23,6 +23,7 @@ import { PedagogicalDashboard } from './pages/Management/PedagogicalDashboard';
 import { SkillTree } from './components/SkillTree';
 import { InventoryShop } from './components/InventoryShop';
 import { ClassBossFight } from './components/ClassBossFight';
+import { GamificationManual } from './components/GamificationManual';
 import { SupportCenter } from './components/SupportCenter';
 import { SystemStatus } from './pages/Maintenance/SystemStatus';
 import { Profile } from './pages/Profile';
@@ -100,6 +101,9 @@ const AppContent: React.FC = () => {
 
       case 'boss-fight':
         return <ClassBossFight />;
+
+      case 'gamification-manual':
+        return <GamificationManual />;
 
       case 'support-center':
         return <SupportCenter />;

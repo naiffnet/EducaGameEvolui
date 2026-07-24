@@ -93,6 +93,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
               { id: 'skill-tree', label: 'Habilidades RPG', icon: <Award size={17} /> },
               { id: 'boss-fight', label: 'Boss Fight da Turma', icon: <Swords size={17} style={{ color: 'var(--danger)' }} />, badge: 'TURMA', badgeColor: 'var(--danger)' },
               { id: 'inventory-shop', label: 'Loja de Recompensas', icon: <ShoppingBag size={17} style={{ color: 'var(--accent)' }} /> },
+              { id: 'gamification-manual', label: 'Manual Pedagógico', icon: <BookOpen size={17} style={{ color: 'var(--primary)' }} /> },
             ]
           },
           {
@@ -130,6 +131,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
               { id: 'course-editor', label: 'Editor de Cursos', icon: <Edit3 size={17} /> },
               { id: 'mission-editor', label: 'Editor de Missões', icon: <Swords size={17} /> },
               { id: 'boss-fight', label: 'Boss Fight da Turma', icon: <Swords size={17} style={{ color: 'var(--danger)' }} /> },
+              { id: 'gamification-manual', label: 'Manual Pedagógico', icon: <BookOpen size={17} style={{ color: 'var(--primary)' }} /> },
             ]
           },
           {
@@ -158,6 +160,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
               { id: 'user-management', label: 'Alunos e Turmas', icon: <Users size={17} /> },
               { id: 'grade-book', label: 'Boletins & Notas', icon: <GraduationCap size={17} /> },
               { id: 'financial', label: 'Financeiro Escolar', icon: <DollarSign size={17} /> },
+              { id: 'gamification-manual', label: 'Manual Pedagógico', icon: <BookOpen size={17} style={{ color: 'var(--primary)' }} /> },
             ]
           },
           {
@@ -197,6 +200,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
               { id: 'course-editor', label: 'Editor de Cursos', icon: <Edit3 size={17} /> },
               { id: 'mission-editor', label: 'Editor de Missões', icon: <Swords size={17} /> },
               { id: 'boss-fight', label: 'Boss Fight da Turma', icon: <Swords size={17} style={{ color: 'var(--danger)' }} /> },
+              { id: 'gamification-manual', label: 'Manual Pedagógico', icon: <BookOpen size={17} style={{ color: 'var(--primary)' }} /> },
             ]
           },
           {
@@ -223,6 +227,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
             items: [
               { id: 'family-portal', label: 'Portal da Família', icon: <Users size={17} /> },
               { id: 'home', label: 'Catálogo de Cursos', icon: <BookOpen size={17} /> },
+              { id: 'gamification-manual', label: 'Manual Pedagógico', icon: <BookOpen size={17} style={{ color: 'var(--primary)' }} /> },
               { id: 'profile', label: 'Meu Perfil', icon: <User size={17} /> },
             ]
           }
