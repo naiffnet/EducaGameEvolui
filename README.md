@@ -44,10 +44,19 @@
 
 ### 🎓 Para o Estudante
 - **Jornada de Aprendizado Gamificada:** Ganhe XP ao assistir aulas, realizar exercícios e manter uma frequência regular.
-- **Evolução de Personagem:** Suba de nível, desbloqueie badges, escolha classes (Guerreiro, Mago, Arqueiro, Ladino) e personalize seu **Avatar RPG**.
+- **Evolução de Personagem & Duplo Gênero:** Suba de nível, escolha entre **11 Classes RPG** com nomenclaturas e avatares ajustados ao gênero (♂/♀) em Pixel Art (Guerreiro/Guerreira, Rei/Rainha, Dobrador/Dobradora de Fogo, etc.).
 - **Quadro de Missões:** Missões Comuns (turma toda), Requisitadas (específicas) e Blitz (conclusão rápida), com bônus por cumprimento semanal.
 - **Árvore de Habilidades & Chefe de Turma:** Desbloqueie habilidades na Skill Tree e participe de batalhas colaborativas contra Chefes de Turma baseadas no progresso acadêmico coletivo.
-- **Onboarding Interativo:** Tutorial em 4 passos e atribuição automática da "Missão de Boas-Vindas" no primeiro login.
+- **Manual Pedagógico da Gameficação:** Manual completo disponível para todos os alunos explicando como a gamificação desenvolve competências para futuras carreiras (DevOps, QA, Inovação, Lógica e Gestão).
+
+### 🏫 Marca da Escola Contratante (White-Label Branding)
+- **Identidade da Instituição:** Personalização em tempo real do Nome da Escola e URL/Caminho da Logomarca através do Painel de Manutenção.
+- **Adaptação Total:** Exibição da marca da escola na tela de Login, no Cabeçalho Superior (`Header`) e na Barra Lateral (`Sidebar`).
+
+### 📱 Menu Lateral Responsivo & Ajustável (`Sidebar`)
+- **Menu Expansível (290px) e Colapsável (80px):** Alternância com 1 clique para o Modo Apenas Ícones.
+- **Tooltips Flutuantes no Hover:** Exibição instantânea do nome da seção ao passar o mouse sobre os ícones no menu recolhido.
+- **Persistência de Preferência:** O estado do menu é memorizado no navegador (`localStorage`).
 
 ### 👨‍🏫 Para o Instrutor / Professor (Mestre de Jogo)
 - **Diário de Classe & Chamada:** Registro fácil de presença/falta da turma com concessão automática e **idempotente** de 20 XP por presença confirmada.
@@ -62,6 +71,7 @@
 
 ### ⚙️ Para a Administração Escolar
 - **Gestão Completa de Usuários:** Cadastro estendido com matrícula, data de nascimento, telefone, responsável e definição de senhas.
+- **Edição Reativa de Perfil:** Alteração imediata de cargos, turmas, gênero RPG e avatares sem necessidade de recarregar a página.
 - **Financeiro Básico:** Lançamento de faturas/mensalidades, baixa manual de pagamento e recalculo automático do status atrasado (`OVERDUE`).
 - **Avisos Globais:** Publicação de comunicados direcionados a toda a escola (`SCHOOL`) ou turmas específicas (`schoolClass`).
 
