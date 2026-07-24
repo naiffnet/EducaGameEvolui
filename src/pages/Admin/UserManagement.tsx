@@ -268,7 +268,7 @@ const PasswordResetModal: React.FC<PasswordResetModalProps> = ({ user, onClose, 
               <button
                 type="button"
                 onClick={() => setShowPass(!showPass)}
-                style={{ position: 'absolute', right: 10, background: 'none', border: 'none', color: 'rgba(255,255,255,0.6)', cursor: 'pointer', display: 'flex', alignItems: 'center', padding: 4 }}
+                style={{ position: 'absolute', right: 10, background: 'none', border: 'none', color: '#a78bfa', cursor: 'pointer', display: 'flex', alignItems: 'center', padding: 6 }}
                 title={showPass ? 'Ocultar senha' : 'Revelar senha'}
               >
                 {showPass ? <EyeOff size={16} /> : <Eye size={16} />}
@@ -282,7 +282,7 @@ const PasswordResetModal: React.FC<PasswordResetModalProps> = ({ user, onClose, 
               <button
                 type="button"
                 onClick={() => setShowConfirm(!showConfirm)}
-                style={{ position: 'absolute', right: 10, background: 'none', border: 'none', color: 'rgba(255,255,255,0.6)', cursor: 'pointer', display: 'flex', alignItems: 'center', padding: 4 }}
+                style={{ position: 'absolute', right: 10, background: 'none', border: 'none', color: '#a78bfa', cursor: 'pointer', display: 'flex', alignItems: 'center', padding: 6 }}
                 title={showConfirm ? 'Ocultar senha' : 'Revelar senha'}
               >
                 {showConfirm ? <EyeOff size={16} /> : <Eye size={16} />}
@@ -717,6 +717,21 @@ export const UserManagement: React.FC = () => {
     { id: 'ADMIN', label: 'Admin & Suporte', icon: <ShieldAlert size={16} />, count: counts.ADMIN },
   ];
 
+  if (view === 'profile' && selectedUserId) {
+    return (
+      <div style={{ maxWidth: 1200, margin: '0 auto', textAlign: 'left' }}>
+        <button
+          onClick={() => { setView('list'); setSelectedUserId(null); }}
+          className="btn btn-secondary"
+          style={{ display: 'inline-flex', alignItems: 'center', gap: 6, marginBottom: 20, padding: '8px 16px' }}
+        >
+          <ChevronLeft size={18} /> Voltar para a Gestão de Usuários
+        </button>
+        <Profile userId={selectedUserId} onBack={() => { setView('list'); setSelectedUserId(null); }} />
+      </div>
+    );
+  }
+
   return (
     <div style={{ maxWidth: 1200, margin: '0 auto', padding: '4px 0' }} role="region" aria-label="Gerenciador de Usuários">
       {/* Header */}
@@ -781,7 +796,7 @@ export const UserManagement: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => setShowNewUserPassword(!showNewUserPassword)}
-                  style={{ position: 'absolute', right: 10, background: 'none', border: 'none', color: 'var(--text-tertiary)', cursor: 'pointer', display: 'flex', alignItems: 'center', padding: 4 }}
+                  style={{ position: 'absolute', right: 10, background: 'none', border: 'none', color: 'var(--primary)', cursor: 'pointer', display: 'flex', alignItems: 'center', padding: 6 }}
                   title={showNewUserPassword ? 'Ocultar senha' : 'Revelar senha'}
                 >
                   {showNewUserPassword ? <EyeOff size={16} /> : <Eye size={16} />}

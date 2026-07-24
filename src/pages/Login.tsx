@@ -79,14 +79,14 @@ export const Login: React.FC = () => {
               style={{
                 position: 'absolute',
                 right: '10px',
-                background: 'none',
+                background: 'transparent',
                 border: 'none',
-                color: 'var(--text-tertiary)',
+                color: 'var(--primary)',
                 cursor: 'pointer',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                padding: '4px',
+                padding: '6px',
               }}
               title={showPassword ? 'Ocultar senha' : 'Revelar senha'}
               aria-label={showPassword ? 'Ocultar senha' : 'Revelar senha'}
