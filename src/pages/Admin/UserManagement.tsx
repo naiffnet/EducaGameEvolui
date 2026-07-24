@@ -9,7 +9,7 @@ import {
   ShieldCheck, UserPlus, Search, Trash2, Eye, Edit3, Save, X,
   BookOpen, GraduationCap, Users, TrendingUp, Check, Award, IdCard, KeyRound,
   Filter, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight,
-  Briefcase, UserCheck, ShieldAlert, Sparkles, Building2
+  UserCheck, ShieldAlert, Building2
 } from 'lucide-react';
 import { Profile } from '../Profile';
 import { AcademicHistory } from '../Student/AcademicHistory';
