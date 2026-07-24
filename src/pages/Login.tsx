@@ -22,6 +22,17 @@ export const Login: React.FC = () => {
 
   const schoolName = config.schoolName || 'Colégio Evoluir & Saber';
 
+  const getFirstName = (fullName?: string, fallback = '') => {
+    if (!fullName) return fallback;
+    return fullName.trim().split(' ')[0];
+  };
+
+  const studentUser = db.getUsers().find(u => u.role === 'STUDENT');
+  const instructorUser = db.getUsers().find(u => u.role === 'INSTRUCTOR');
+  const guardianUser = db.getUsers().find(u => u.role === 'GUARDIAN');
+  const coordUser = db.getUsers().find(u => u.role === 'COORDINATOR' || u.role === 'DIRECTOR');
+  const adminUser = db.getUsers().find(u => u.role === 'ADMIN');
+
   return (
     <div style={{
       minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
@@ -55,7 +66,7 @@ export const Login: React.FC = () => {
       <form
         onSubmit={handleSubmit}
         style={{
-          width: '100%', maxWidth: '380px', backgroundColor: 'var(--bg-secondary)', border: '1px solid var(--border)',
+          width: '100%', maxWidth: '400px', backgroundColor: 'var(--bg-secondary)', border: '1px solid var(--border)',
           borderRadius: 'var(--radius-lg)', padding: '32px', boxShadow: 'var(--shadow-lg)',
           display: 'flex', flexDirection: 'column', gap: '16px',
         }}
@@ -137,78 +148,90 @@ export const Login: React.FC = () => {
           borderRadius: 'var(--radius-md)', fontSize: '0.8rem', display: 'flex', flexDirection: 'column', gap: 10,
         }}>
           <div style={{ fontWeight: 700, color: 'var(--text-secondary)' }}>⚡ Atalhos de Acesso Rápido (Demonstração):</div>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(135px, 1fr))', gap: 8 }}>
             <button
               type="button"
               className="btn btn-secondary"
-              style={{ fontSize: 12, padding: '6px 8px', textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap' }}
+              style={{ fontSize: 12, padding: '7px 8px', display: 'flex', alignItems: 'center', justifyContent: 'center', minWidth: 0 }}
+              title={`Entrar como ${studentUser?.name || 'Ana Silva'}`}
               onClick={() => {
-                const student = db.getUsers().find(u => u.role === 'STUDENT');
-                const targetEmail = student ? student.email : 'ana.silva@escola.com';
+                const targetEmail = studentUser ? studentUser.email : 'ana.silva@escola.com';
                 setEmail(targetEmail);
                 setPassword(SEED_DEMO_PASSWORD);
                 loginWithPassword(targetEmail, SEED_DEMO_PASSWORD);
               }}
             >
-              🎓 Estudante ({db.getUsers().find(u => u.role === 'STUDENT')?.name || 'Ana'})
+              <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                🎓 Estudante ({getFirstName(studentUser?.name, 'Ana')})
+              </span>
             </button>
 
             <button
               type="button"
               className="btn btn-secondary"
-              style={{ fontSize: 12, padding: '6px 8px', textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap' }}
+              style={{ fontSize: 12, padding: '7px 8px', display: 'flex', alignItems: 'center', justifyContent: 'center', minWidth: 0 }}
+              title={`Entrar como ${instructorUser?.name || 'Prof. Marcos'}`}
               onClick={() => {
-                const instructor = db.getUsers().find(u => u.role === 'INSTRUCTOR');
-                const targetEmail = instructor ? instructor.email : 'marcos.paulo@escola.com';
+                const targetEmail = instructorUser ? instructorUser.email : 'marcos.paulo@escola.com';
                 setEmail(targetEmail);
                 setPassword(SEED_DEMO_PASSWORD);
                 loginWithPassword(targetEmail, SEED_DEMO_PASSWORD);
               }}
             >
-              👨‍🏫 Professor
+              <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                👨‍🏫 Professor ({getFirstName(instructorUser?.name, 'Marcos')})
+              </span>
             </button>
 
             <button
               type="button"
               className="btn btn-secondary"
-              style={{ fontSize: 12, padding: '6px 8px', textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap' }}
+              style={{ fontSize: 12, padding: '7px 8px', display: 'flex', alignItems: 'center', justifyContent: 'center', minWidth: 0 }}
+              title={`Entrar como ${guardianUser?.name || 'Paulo Silva'}`}
               onClick={() => {
-                const guardian = db.getUsers().find(u => u.role === 'GUARDIAN');
-                const targetEmail = guardian ? guardian.email : 'paulo.silva@escola.com';
+                const targetEmail = guardianUser ? guardianUser.email : 'paulo.silva@escola.com';
                 setEmail(targetEmail);
                 setPassword(SEED_DEMO_PASSWORD);
                 loginWithPassword(targetEmail, SEED_DEMO_PASSWORD);
               }}
             >
-              👨‍👩‍👧 Responsável
+              <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                👨‍👩‍👧 Responsável ({getFirstName(guardianUser?.name, 'Paulo')})
+              </span>
             </button>
 
             <button
               type="button"
               className="btn btn-secondary"
-              style={{ fontSize: 12, padding: '6px 8px', textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap' }}
+              style={{ fontSize: 12, padding: '7px 8px', display: 'flex', alignItems: 'center', justifyContent: 'center', minWidth: 0 }}
+              title={`Entrar como ${adminUser?.name || 'Mariana Admin'}`}
               onClick={() => {
-                const admin = db.getUsers().find(u => u.role === 'ADMIN');
-                const targetEmail = admin ? admin.email : 'mariana.admin@escola.com';
+                const targetEmail = adminUser ? adminUser.email : 'mariana.admin@escola.com';
                 setEmail(targetEmail);
                 setPassword(SEED_DEMO_PASSWORD);
                 loginWithPassword(targetEmail, SEED_DEMO_PASSWORD);
               }}
             >
-              👑 Admin
+              <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                👑 Admin ({getFirstName(adminUser?.name, 'Mariana')})
+              </span>
             </button>
 
             <button
               type="button"
               className="btn btn-secondary"
-              style={{ fontSize: 12, padding: '6px 8px', textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap' }}
+              style={{ fontSize: 12, padding: '7px 8px', display: 'flex', alignItems: 'center', justifyContent: 'center', minWidth: 0 }}
+              title={`Entrar como ${coordUser?.name || 'Carla Coordenação'}`}
               onClick={() => {
-                setEmail('carla.coordenacao@escola.com');
+                const targetEmail = coordUser ? coordUser.email : 'carla.coordenacao@escola.com';
+                setEmail(targetEmail);
                 setPassword(SEED_DEMO_PASSWORD);
-                loginWithPassword('carla.coordenacao@escola.com', SEED_DEMO_PASSWORD);
+                loginWithPassword(targetEmail, SEED_DEMO_PASSWORD);
               }}
             >
-              🏛️ Coordenação
+              <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                🏛️ Coordenação ({getFirstName(coordUser?.name, 'Carla')})
+              </span>
             </button>
           </div>
           <div style={{ fontSize: 11, color: 'var(--text-tertiary)', marginTop: 4 }}>
