@@ -290,20 +290,25 @@ export const GamificationManual: React.FC = () => {
           boxShadow: `0 10px 30px ${activeClassGuide.color}22`
         }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 20, marginBottom: 24 }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 18 }}>
               <div style={{
-                width: 64, height: 64, borderRadius: 20,
+                width: 80, height: 80, borderRadius: 20,
                 background: activeClassGuide.bgGlow, border: `2px solid ${activeClassGuide.color}`,
-                display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '2.2rem'
+                overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                boxShadow: `0 4px 14px ${activeClassGuide.color}44`, flexShrink: 0
               }}>
-                {activeClassGuide.symbol}
+                <img 
+                  src={`/pixel_art/${activeClassGuide.id}.png`} 
+                  alt={activeClassGuide.name}
+                  style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                />
               </div>
               <div>
-                <h3 style={{ fontSize: '1.6rem', fontWeight: 800, margin: '0 0 4px', color: 'var(--text-primary)' }}>
-                  {activeClassGuide.name}
+                <h3 style={{ fontSize: '1.7rem', fontWeight: 800, margin: '0 0 4px', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <span>{activeClassGuide.symbol}</span> {activeClassGuide.name}
                 </h3>
-                <div style={{ fontSize: 12, fontWeight: 700, color: activeClassGuide.color }}>
-                  Habilidade Inicial: {activeClassGuide.initialSkill}
+                <div style={{ fontSize: 13, fontWeight: 700, color: activeClassGuide.color }}>
+                  ⚡ Habilidade Inicial: {activeClassGuide.initialSkill}
                 </div>
               </div>
             </div>
