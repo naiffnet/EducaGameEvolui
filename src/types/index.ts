@@ -139,6 +139,30 @@ export function getRpgClassName(rpgClass: RpgClass | null | undefined): string {
   return RPG_CLASS_NAMES[rpgClass] || rpgClass;
 }
 
+export const RARITY_LABELS: Record<ItemRarity, string> = {
+  COMMON: 'Comum',
+  RARE: 'Raro',
+  EPIC: 'Épico',
+  LEGENDARY: 'Lendário',
+};
+
+export const MILESTONE_TYPE_LABELS: Record<'PERSONAL' | 'HERO', string> = {
+  PERSONAL: 'Marco Pessoal',
+  HERO: 'Marco de Herói',
+};
+
+export const MISSION_TYPE_LABELS: Record<'COMMON' | 'REQUESTED' | 'BLITZ', string> = {
+  COMMON: 'Missão Comum',
+  REQUESTED: 'Missão Requisitada',
+  BLITZ: 'Missão Blitz',
+};
+
+export const SKILL_CATEGORY_LABELS: Record<'PASSIVE' | 'ACTIVE' | 'ULTIMATE', string> = {
+  PASSIVE: 'Passiva',
+  ACTIVE: 'Ativa',
+  ULTIMATE: 'Suprema',
+};
+
 // ─── Evolution Domain ────────────────────────────────────────────────────────
 
 /** A milestone (marco) is an achievement that contributes to leveling up */

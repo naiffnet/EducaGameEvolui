@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { db } from '../db/database';
+import { RARITY_LABELS } from '../types';
 import type { InventoryItem, UserInventory } from '../types';
 import { ShoppingBag, Coins, Check } from 'lucide-react';
 
@@ -111,7 +112,7 @@ export const InventoryShop: React.FC = () => {
                 <div>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
                     <span className="badge badge-primary" style={{ fontSize: 9 }}>
-                      {item.rarity}
+                      {RARITY_LABELS[item.rarity] || item.rarity}
                     </span>
                     <span style={{ fontSize: 13, fontWeight: 800, color: 'var(--accent)', display: 'flex', alignItems: 'center', gap: 4 }}>
                       <Coins size={14} /> {item.cost}
