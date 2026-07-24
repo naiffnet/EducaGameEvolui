@@ -702,32 +702,30 @@ export const UserManagement: React.FC = () => {
 
   // ── Sub-views ────────────────────────────────────────────────────────────
   if (view === 'profile' && selectedUserId) {
-    return <Profile userId={selectedUserId} onBack={() => { setView('list'); setSelectedUserId(null); loadUsers(); }} />;
-  }
-  if (view === 'academic' && selectedUserId) {
-    return <AcademicHistory userId={selectedUserId} onBack={() => { setView('list'); setSelectedUserId(null); loadUsers(); }} />;
-  }
-
-  const TABS_CONFIG: { id: CategoryTab; label: string; icon: React.ReactNode; count: number }[] = [
-    { id: 'ALL', label: 'Todos os Registros', icon: <Users size={16} />, count: counts.ALL },
-    { id: 'STUDENT', label: 'Alunos', icon: <GraduationCap size={16} />, count: counts.STUDENT },
-    { id: 'INSTRUCTOR', label: 'Professores', icon: <UserCheck size={16} />, count: counts.INSTRUCTOR },
-    { id: 'GUARDIAN', label: 'Responsáveis', icon: <Users size={16} />, count: counts.GUARDIAN },
-    { id: 'MANAGEMENT', label: 'Gestão & Coordenação', icon: <Building2 size={16} />, count: counts.MANAGEMENT },
-    { id: 'ADMIN', label: 'Admin & Suporte', icon: <ShieldAlert size={16} />, count: counts.ADMIN },
-  ];
-
-  if (view === 'profile' && selectedUserId) {
     return (
       <div style={{ maxWidth: 1200, margin: '0 auto', textAlign: 'left' }}>
         <button
-          onClick={() => { setView('list'); setSelectedUserId(null); }}
+          onClick={() => { setView('list'); setSelectedUserId(null); loadUsers(); }}
           className="btn btn-secondary"
           style={{ display: 'inline-flex', alignItems: 'center', gap: 6, marginBottom: 20, padding: '8px 16px' }}
         >
           <ChevronLeft size={18} /> Voltar para a Gestão de Usuários
         </button>
-        <Profile userId={selectedUserId} onBack={() => { setView('list'); setSelectedUserId(null); }} />
+        <Profile userId={selectedUserId} onBack={() => { setView('list'); setSelectedUserId(null); loadUsers(); }} />
+      </div>
+    );
+  }
+  if (view === 'academic' && selectedUserId) {
+    return (
+      <div style={{ maxWidth: 1200, margin: '0 auto', textAlign: 'left' }}>
+        <button
+          onClick={() => { setView('list'); setSelectedUserId(null); loadUsers(); }}
+          className="btn btn-secondary"
+          style={{ display: 'inline-flex', alignItems: 'center', gap: 6, marginBottom: 20, padding: '8px 16px' }}
+        >
+          <ChevronLeft size={18} /> Voltar para a Gestão de Usuários
+        </button>
+        <AcademicHistory userId={selectedUserId} onBack={() => { setView('list'); setSelectedUserId(null); loadUsers(); }} />
       </div>
     );
   }
@@ -878,36 +876,48 @@ export const UserManagement: React.FC = () => {
       )}
 
       {/* Category Tabs */}
-      <div style={{ display: 'flex', gap: 8, marginBottom: 16, overflowX: 'auto', paddingBottom: 4 }}>
-        {TABS_CONFIG.map(tab => {
-          const isActive = activeTab === tab.id;
-          return (
-            <button
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
-              style={{
-                display: 'flex', alignItems: 'center', gap: 8, padding: '10px 18px',
-                borderRadius: 14, fontSize: 13, fontWeight: 700, cursor: 'pointer',
-                border: isActive ? '1px solid var(--primary)' : '1px solid var(--border)',
-                background: isActive ? 'var(--primary)' : 'var(--bg-secondary)',
-                color: isActive ? '#fff' : 'var(--text-secondary)',
-                transition: 'all 0.2s ease', whiteSpace: 'nowrap',
-                boxShadow: isActive ? '0 4px 14px rgba(139,92,246,0.3)' : 'none'
-              }}
-            >
-              {tab.icon}
-              <span>{tab.label}</span>
-              <span style={{
-                fontSize: 11, padding: '2px 8px', borderRadius: 10,
-                background: isActive ? 'rgba(255,255,255,0.25)' : 'var(--bg-tertiary)',
-                color: isActive ? '#fff' : 'var(--text-tertiary)', fontWeight: 800
-              }}>
-                {tab.count}
-              </span>
-            </button>
-          );
-        })}
-      </div>
+      {(() => {
+        const TABS_CONFIG: { id: CategoryTab; label: string; icon: React.ReactNode; count: number }[] = [
+          { id: 'ALL', label: 'Todos os Registros', icon: <Users size={16} />, count: counts.ALL },
+          { id: 'STUDENT', label: 'Alunos', icon: <GraduationCap size={16} />, count: counts.STUDENT },
+          { id: 'INSTRUCTOR', label: 'Professores', icon: <UserCheck size={16} />, count: counts.INSTRUCTOR },
+          { id: 'GUARDIAN', label: 'Responsáveis', icon: <Users size={16} />, count: counts.GUARDIAN },
+          { id: 'MANAGEMENT', label: 'Gestão & Coordenação', icon: <Building2 size={16} />, count: counts.MANAGEMENT },
+          { id: 'ADMIN', label: 'Admin & Suporte', icon: <ShieldAlert size={16} />, count: counts.ADMIN },
+        ];
+        return (
+          <div style={{ display: 'flex', gap: 8, marginBottom: 16, overflowX: 'auto', paddingBottom: 4 }}>
+            {TABS_CONFIG.map(tab => {
+              const isActive = activeTab === tab.id;
+              return (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id)}
+                  style={{
+                    display: 'flex', alignItems: 'center', gap: 8, padding: '10px 18px',
+                    borderRadius: 14, fontSize: 13, fontWeight: 700, cursor: 'pointer',
+                    border: isActive ? '1px solid var(--primary)' : '1px solid var(--border)',
+                    background: isActive ? 'var(--primary)' : 'var(--bg-secondary)',
+                    color: isActive ? '#fff' : 'var(--text-secondary)',
+                    transition: 'all 0.2s ease', whiteSpace: 'nowrap',
+                    boxShadow: isActive ? '0 4px 14px rgba(139,92,246,0.3)' : 'none'
+                  }}
+                >
+                  {tab.icon}
+                  <span>{tab.label}</span>
+                  <span style={{
+                    fontSize: 11, padding: '2px 8px', borderRadius: 10,
+                    background: isActive ? 'rgba(255,255,255,0.25)' : 'var(--bg-tertiary)',
+                    color: isActive ? '#fff' : 'var(--text-tertiary)', fontWeight: 800
+                  }}>
+                    {tab.count}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        );
+      })()}
 
       {/* Filter & Controls Bar */}
       <div className="card" style={{ padding: '14px 18px', marginBottom: 20, display: 'flex', gap: 14, alignItems: 'center', flexWrap: 'wrap', borderRadius: 16 }}>

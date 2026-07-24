@@ -37,9 +37,11 @@ export const Profile: React.FC<ProfileProps> = ({ userId, onBack }) => {
   const { currentUser: loggedInUser, refreshUser } = useAuth();
   const { addLog } = useSystem();
   
-  const targetUser = userId 
-    ? db.getUsers().find(u => u.id === userId) || loggedInUser 
-    : loggedInUser;
+  const [userRecord, setUserRecord] = useState<User | null>(() => {
+    return userId ? db.getUsers().find(u => u.id === userId) || loggedInUser : loggedInUser;
+  });
+
+  const targetUser = userRecord || loggedInUser;
 
   const [name, setName] = useState(targetUser?.name || '');
   const [email, setEmail] = useState(targetUser?.email || '');
@@ -49,11 +51,21 @@ export const Profile: React.FC<ProfileProps> = ({ userId, onBack }) => {
   const [activeTab, setActiveTab] = useState<ProfileTab>('geral');
 
   useEffect(() => {
-    if (targetUser) {
-      setName(targetUser.name);
-      setEmail(targetUser.email);
+    const found = userId ? db.getUsers().find(u => u.id === userId) || loggedInUser : loggedInUser;
+    setUserRecord(found || null);
+    if (found) {
+      setName(found.name);
+      setEmail(found.email);
     }
-  }, [targetUser?.id]);
+  }, [userId, loggedInUser]);
+
+  const saveAndApplyUser = (updatedUser: User) => {
+    db.updateUser(updatedUser);
+    setUserRecord(updatedUser);
+    setName(updatedUser.name);
+    setEmail(updatedUser.email);
+    refreshUser();
+  };
 
   if (!targetUser) {
     return (
@@ -84,10 +96,7 @@ export const Profile: React.FC<ProfileProps> = ({ userId, onBack }) => {
       email,
     };
 
-    db.updateUser(updatedUser);
-    if (isSelf) {
-      refreshUser();
-    }
+    saveAndApplyUser(updatedUser);
     setSaveStatus('success');
     setIsEditing(false);
     setTimeout(() => setSaveStatus('idle'), 3000);
@@ -146,12 +155,7 @@ export const Profile: React.FC<ProfileProps> = ({ userId, onBack }) => {
       }
     };
 
-    db.updateUser(updatedUser);
-    if (isSelf) {
-      refreshUser();
-    } else {
-      window.location.reload();
-    }
+    saveAndApplyUser(updatedUser);
 
     addLog(
       'Mudança de Classe',
@@ -478,9 +482,7 @@ export const Profile: React.FC<ProfileProps> = ({ userId, onBack }) => {
                             avatarStyle: 'EPIC_ADULT',
                           }
                         };
-                        db.updateUser(updated);
-                        if (isSelf) refreshUser();
-                        else setName(updated.name);
+                        saveAndApplyUser(updated);
                       }}
                     >
                       ⚔️ Estilo RPG Épico Adulto (Guerreiro Maduro)
@@ -498,9 +500,7 @@ export const Profile: React.FC<ProfileProps> = ({ userId, onBack }) => {
                             avatarStyle: 'JUNIOR',
                           }
                         };
-                        db.updateUser(updated);
-                        if (isSelf) refreshUser();
-                        else setName(updated.name);
+                        saveAndApplyUser(updated);
                       }}
                     >
                       🎒 Estilo Jovem Aprendiz
@@ -517,8 +517,7 @@ export const Profile: React.FC<ProfileProps> = ({ userId, onBack }) => {
                       onClick={() => {
                         if (!targetUser.rpgCharacter) return;
                         const updated = { ...targetUser, rpgCharacter: { ...targetUser.rpgCharacter, gender: 'MALE' as const } };
-                        db.updateUser(updated);
-                        if (isSelf) refreshUser();
+                        saveAndApplyUser(updated);
                       }}
                     >
                       ♂ Masculino
@@ -529,8 +528,7 @@ export const Profile: React.FC<ProfileProps> = ({ userId, onBack }) => {
                       onClick={() => {
                         if (!targetUser.rpgCharacter) return;
                         const updated = { ...targetUser, rpgCharacter: { ...targetUser.rpgCharacter, gender: 'FEMALE' as const } };
-                        db.updateUser(updated);
-                        if (isSelf) refreshUser();
+                        saveAndApplyUser(updated);
                       }}
                     >
                       ♀ Feminino
