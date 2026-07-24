@@ -779,7 +779,7 @@ export const UserManagement: React.FC = () => {
                 <label htmlFor="new-class" style={{ display: 'block', fontWeight: 'bold', marginBottom: 6, fontSize: 13 }}>Classe RPG</label>
                 <select id="new-class" className="form-select" value={newUserClass} onChange={e => setNewUserClass(e.target.value as RpgClass)}>
                   <option value="MAGE">🔮 Arcano</option>
-                  <option value="WARRIOR">⚔️ Cruzado</option>
+                  <option value="WARRIOR">⚔️ Guerreiro</option>
                   <option value="RANGER">🏹 Caçador</option>
                   <option value="NECROMANCER">💀 Nigromante</option>
                   <option value="QUEEN">👑 Soberana</option>

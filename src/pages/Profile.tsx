@@ -523,7 +523,7 @@ export const Profile: React.FC<ProfileProps> = ({ userId, onBack }) => {
                         onClick={() => handleChangeClass(cls as RpgClass)}
                       >
                         {cls === 'MAGE' && '🔮 Arcano'}
-                        {cls === 'WARRIOR' && '⚔️ Cruzado'}
+                        {cls === 'WARRIOR' && '⚔️ Guerreiro'}
                         {cls === 'RANGER' && '🏹 Caçador'}
                         {cls === 'NECROMANCER' && '💀 Nigromante'}
                         {cls === 'QUEEN' && '👑 Soberana'}

@@ -121,15 +121,15 @@ export type RpgClass =
   | 'CHAMPION';
 
 export const RPG_CLASS_NAMES: Record<RpgClass, string> = {
-  MAGE: 'Arcano',
-  WARRIOR: 'Cruzado',
+  MAGE: 'Mago',
+  WARRIOR: 'Guerreiro',
   RANGER: 'Caçador',
   NECROMANCER: 'Nigromante',
   QUEEN: 'Soberana',
   SCHOLAR: 'Erudito',
-  SMITH: 'Ferreiro Rúnico',
-  PYROMANCER: 'Flamejante',
-  PIRATE: 'Corsário',
+  SMITH: 'Ferreiro',
+  PYROMANCER: 'Piromante',
+  PIRATE: 'Pirata',
   JESTER: 'Bufão',
   CHAMPION: 'Campeão',
 };
