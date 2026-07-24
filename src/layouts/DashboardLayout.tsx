@@ -368,13 +368,15 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
                         <button
                           type="button"
                           onClick={() => setActiveTab(item.id)}
+                          title={item.label}
+                          aria-label={item.label}
                           className={`nav-link ${isActive ? 'active' : ''}`}
                           style={{
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'center',
-                            width: 44,
-                            height: 44,
+                            width: 46,
+                            height: 46,
                             borderRadius: 'var(--radius-md)',
                             background: isActive ? 'var(--primary)' : 'var(--bg-tertiary)',
                             color: isActive ? '#fff' : 'var(--text-primary)',

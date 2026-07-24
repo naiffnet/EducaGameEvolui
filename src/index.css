@@ -219,14 +219,20 @@ body {
 
 .dashboard-grid {
   display: grid;
-  grid-template-columns: var(--sidebar-width, 260px) 1fr;
+  grid-template-columns: var(--sidebar-width, 290px) 1fr;
   min-height: 100vh;
   background-color: var(--bg-primary);
   transition: grid-template-columns 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .dashboard-grid.sidebar-collapsed {
-  --sidebar-width: 76px;
+  --sidebar-width: 80px;
+}
+
+.dashboard-grid.sidebar-collapsed aside {
+  overflow: visible !important;
+  overflow-x: visible !important;
+  overflow-y: visible !important;
 }
 
 /* Tooltips flutuantes para menu compacto (ícones apenas) */
@@ -242,18 +248,18 @@ body {
   margin-left: 14px;
   background: var(--bg-secondary);
   color: var(--text-primary);
-  border: 1px solid var(--border);
-  padding: 6px 12px;
+  border: 1px solid var(--primary);
+  padding: 8px 14px;
   border-radius: var(--radius-md);
-  font-size: 0.82rem;
+  font-size: 0.85rem;
   font-weight: 700;
   white-space: nowrap;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.35);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
   pointer-events: none;
   opacity: 0;
   visibility: hidden;
-  transition: opacity 0.18s ease, visibility 0.18s ease;
-  z-index: 9999;
+  transition: opacity 0.15s ease, visibility 0.15s ease, transform 0.15s ease;
+  z-index: 999999;
 }
 
 .nav-tooltip::before {
@@ -262,14 +268,15 @@ body {
   right: 100%;
   top: 50%;
   transform: translateY(-50%);
-  border-width: 5px;
+  border-width: 6px;
   border-style: solid;
-  border-color: transparent var(--border) transparent transparent;
+  border-color: transparent var(--primary) transparent transparent;
 }
 
 .nav-tooltip-container:hover .nav-tooltip {
   opacity: 1;
   visibility: visible;
+  transform: translateY(-50%) translateX(4px);
 }
 
 @media (max-width: 1024px) {
