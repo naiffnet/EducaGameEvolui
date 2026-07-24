@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useSystem } from '../context/SystemContext';
+import { db } from '../db/database';
 import { SEED_DEMO_PASSWORD } from '../db/seedData';
 import { Sparkles, LogIn, AlertCircle, Eye, EyeOff, GraduationCap } from 'lucide-react';
 
@@ -142,12 +143,14 @@ export const Login: React.FC = () => {
               className="btn btn-secondary"
               style={{ fontSize: 12, padding: '6px 8px', textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap' }}
               onClick={() => {
-                setEmail('ana.silva@escola.com');
+                const student = db.getUsers().find(u => u.role === 'STUDENT');
+                const targetEmail = student ? student.email : 'ana.silva@escola.com';
+                setEmail(targetEmail);
                 setPassword(SEED_DEMO_PASSWORD);
-                loginWithPassword('ana.silva@escola.com', SEED_DEMO_PASSWORD);
+                loginWithPassword(targetEmail, SEED_DEMO_PASSWORD);
               }}
             >
-              🎓 Estudante (Ana)
+              🎓 Estudante ({db.getUsers().find(u => u.role === 'STUDENT')?.name || 'Ana'})
             </button>
 
             <button
@@ -155,9 +158,11 @@ export const Login: React.FC = () => {
               className="btn btn-secondary"
               style={{ fontSize: 12, padding: '6px 8px', textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap' }}
               onClick={() => {
-                setEmail('marcos.paulo@escola.com');
+                const instructor = db.getUsers().find(u => u.role === 'INSTRUCTOR');
+                const targetEmail = instructor ? instructor.email : 'marcos.paulo@escola.com';
+                setEmail(targetEmail);
                 setPassword(SEED_DEMO_PASSWORD);
-                loginWithPassword('marcos.paulo@escola.com', SEED_DEMO_PASSWORD);
+                loginWithPassword(targetEmail, SEED_DEMO_PASSWORD);
               }}
             >
               👨‍🏫 Professor
@@ -168,9 +173,11 @@ export const Login: React.FC = () => {
               className="btn btn-secondary"
               style={{ fontSize: 12, padding: '6px 8px', textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap' }}
               onClick={() => {
-                setEmail('paulo.silva@escola.com');
+                const guardian = db.getUsers().find(u => u.role === 'GUARDIAN');
+                const targetEmail = guardian ? guardian.email : 'paulo.silva@escola.com';
+                setEmail(targetEmail);
                 setPassword(SEED_DEMO_PASSWORD);
-                loginWithPassword('paulo.silva@escola.com', SEED_DEMO_PASSWORD);
+                loginWithPassword(targetEmail, SEED_DEMO_PASSWORD);
               }}
             >
               👨‍👩‍👧 Responsável
@@ -181,9 +188,11 @@ export const Login: React.FC = () => {
               className="btn btn-secondary"
               style={{ fontSize: 12, padding: '6px 8px', textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap' }}
               onClick={() => {
-                setEmail('mariana.admin@escola.com');
+                const admin = db.getUsers().find(u => u.role === 'ADMIN');
+                const targetEmail = admin ? admin.email : 'mariana.admin@escola.com';
+                setEmail(targetEmail);
                 setPassword(SEED_DEMO_PASSWORD);
-                loginWithPassword('mariana.admin@escola.com', SEED_DEMO_PASSWORD);
+                loginWithPassword(targetEmail, SEED_DEMO_PASSWORD);
               }}
             >
               👑 Admin
