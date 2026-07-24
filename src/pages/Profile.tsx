@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useSystem } from '../context/SystemContext';
 import { db } from '../db/database';
+import { getRpgClassName } from '../types';
 import type { User, RpgClass } from '../types';
 import { RpgAvatar } from '../components/RpgAvatar';
 import { AcademicHistory } from './Student/AcademicHistory';
@@ -295,7 +296,7 @@ export const Profile: React.FC<ProfileProps> = ({ userId, onBack }) => {
             </p>
             {targetUser.rpgCharacter?.selectedClass && (
               <p style={{ margin: '6px 0 0', fontWeight: 'bold', color: 'var(--accent)' }}>
-                Nível {targetUser.rpgCharacter.level} — {targetUser.rpgCharacter.selectedClass}
+                Nível {targetUser.rpgCharacter.level} — {getRpgClassName(targetUser.rpgCharacter.selectedClass)}
               </p>
             )}
           </div>

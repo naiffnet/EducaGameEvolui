@@ -120,6 +120,25 @@ export type RpgClass =
   | 'JESTER'
   | 'CHAMPION';
 
+export const RPG_CLASS_NAMES: Record<RpgClass, string> = {
+  MAGE: 'Arcano',
+  WARRIOR: 'Cruzado',
+  RANGER: 'Caçador',
+  NECROMANCER: 'Nigromante',
+  QUEEN: 'Soberana',
+  SCHOLAR: 'Erudito',
+  SMITH: 'Ferreiro Rúnico',
+  PYROMANCER: 'Flamejante',
+  PIRATE: 'Corsário',
+  JESTER: 'Bufão',
+  CHAMPION: 'Campeão',
+};
+
+export function getRpgClassName(rpgClass: RpgClass | null | undefined): string {
+  if (!rpgClass) return 'Sem Classe';
+  return RPG_CLASS_NAMES[rpgClass] || rpgClass;
+}
+
 // ─── Evolution Domain ────────────────────────────────────────────────────────
 
 /** A milestone (marco) is an achievement that contributes to leveling up */

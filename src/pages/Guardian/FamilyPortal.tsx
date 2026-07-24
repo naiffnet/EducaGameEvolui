@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { db } from '../../db/database';
+import { getRpgClassName } from '../../types';
 import type { User, AttendanceRecord, Invoice } from '../../types';
 import { RpgAvatar } from '../../components/RpgAvatar';
 import { AnnouncementBoard } from '../../components/AnnouncementBoard';
@@ -125,7 +126,7 @@ export const FamilyPortal: React.FC = () => {
               </div>
               {selectedStudent.rpgCharacter && (
                 <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--primary)', marginTop: 4 }}>
-                  ⚔️ Nível {selectedStudent.rpgCharacter.level} · {selectedStudent.rpgCharacter.selectedClass} ({selectedStudent.rpgCharacter.xp} XP)
+                  ⚔️ Nível {selectedStudent.rpgCharacter.level} · {getRpgClassName(selectedStudent.rpgCharacter.selectedClass)} ({selectedStudent.rpgCharacter.xp} XP)
                 </div>
               )}
             </div>

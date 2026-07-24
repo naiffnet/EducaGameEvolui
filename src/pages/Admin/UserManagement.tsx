@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { db } from '../../db/database';
+import { getRpgClassName } from '../../types';
 import type { User, UserRole, RpgClass, EnrollmentEntry } from '../../types';
 import { useAuth } from '../../context/AuthContext';
 import { useSystem } from '../../context/SystemContext';
@@ -952,7 +953,7 @@ export const UserManagement: React.FC = () => {
                           <div style={{ fontWeight: 700, color: 'var(--text-primary)', fontSize: 14 }}>{user.name}</div>
                           {user.rpgCharacter ? (
                             <div style={{ fontSize: 11, color: 'var(--text-tertiary)', display: 'flex', gap: 6, flexWrap: 'wrap', marginTop: 2 }}>
-                              <span>⚔️ Nv.{user.rpgCharacter.level} {user.rpgCharacter.selectedClass}</span>
+                              <span>⚔️ Nv.{user.rpgCharacter.level} {getRpgClassName(user.rpgCharacter.selectedClass)}</span>
                               {user.schoolClass && <span style={{ color: 'var(--primary)', fontWeight: 600 }}>· 🏫 {user.schoolClass}</span>}
                             </div>
                           ) : (

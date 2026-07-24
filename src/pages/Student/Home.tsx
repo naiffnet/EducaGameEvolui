@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { useSystem } from '../../context/SystemContext';
 import { db } from '../../db/database';
+import { getRpgClassName } from '../../types';
 import type { Course, User, RpgClass, Mission } from '../../types';
 import { RpgAvatar } from '../../components/RpgAvatar';
 import { CharacterCreator } from '../../components/CharacterCreator';
@@ -793,10 +794,8 @@ export const Home: React.FC<HomeProps> = ({ onSelectCourse }) => {
                               <span style={{ fontSize: '0.7rem', color: 'var(--text-tertiary)' }}>{student.email}</span>
                             </div>
                           </td>
-                          <td style={{ fontSize: '0.85rem' }}>
-                            {char?.selectedClass === 'MAGE' && '🔮 Mago'}
-                            {char?.selectedClass === 'WARRIOR' && '⚔️ Guerreiro'}
-                            {char?.selectedClass === 'RANGER' && '🏹 Patrulheiro'}
+                          <td style={{ fontSize: '0.85rem', fontWeight: 600 }}>
+                            {getRpgClassName(char?.selectedClass)}
                           </td>
                           <td style={{ fontWeight: 'bold', fontSize: '0.9rem', color: 'var(--primary)' }}>
                             Lv. {char?.level || 1}

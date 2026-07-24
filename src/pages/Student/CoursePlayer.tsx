@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { useSystem } from '../../context/SystemContext';
 import { db } from '../../db/database';
+import { getRpgClassName } from '../../types';
 import type { Course, Lesson, RpgCharacter } from '../../types';
 import { 
   ArrowLeft, 
@@ -84,7 +85,7 @@ export const CoursePlayer: React.FC<CoursePlayerProps> = ({ courseId, onBack }) 
 
       addLog(
         'Subiu de Nível',
-        `Subiu para o Nível ${updatedChar.level} na classe ${updatedChar.selectedClass}!`,
+        `Subiu para o Nível ${updatedChar.level} na classe ${getRpgClassName(updatedChar.selectedClass)}!`,
         'success'
       );
     }

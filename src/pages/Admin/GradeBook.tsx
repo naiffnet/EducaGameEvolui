@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { db } from '../../db/database';
+import { getRpgClassName } from '../../types';
 import type { User, Course, GradeEntry } from '../../types';
 import { BookOpen, Save, X, CheckCircle, Edit3, Plus, Search } from 'lucide-react';
 
@@ -220,7 +221,7 @@ export const GradeBook: React.FC = () => {
                 <tr key={student.id} style={{ background: idx % 2 === 0 ? 'transparent' : 'var(--bg-tertiary)' }}>
                   <td style={{ padding: '14px 20px', borderBottom: '1px solid var(--border)' }}>
                     <div style={{ fontWeight: 600, color: 'var(--text-primary)', fontSize: 14 }}>{student.name}</div>
-                    <div style={{ fontSize: 12, color: 'var(--text-tertiary)' }}>{student.rpgCharacter?.selectedClass || 'Sem classe'} • Nível {student.rpgCharacter?.level || 1}</div>
+                    <div style={{ fontSize: 12, color: 'var(--text-tertiary)' }}>{getRpgClassName(student.rpgCharacter?.selectedClass)} • Nível {student.rpgCharacter?.level || 1}</div>
                   </td>
                   {displayCourses.map(c => {
                     const grade = getGrade(student.id, c.id);
