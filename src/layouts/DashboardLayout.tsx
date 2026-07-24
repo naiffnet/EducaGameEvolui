@@ -16,10 +16,10 @@ import {
   MessageSquare,
   Building2,
   ShoppingBag,
-  Award,
   LifeBuoy,
   ChevronDown,
   ChevronRight,
+  ChevronLeft,
   Gamepad2,
   ShieldCheck
 } from 'lucide-react';
@@ -54,12 +54,25 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
   const { currentUser } = useAuth();
   const { config } = useSystem();
 
-  // Track collapsed groups (default: all expanded for quick access)
+  // Track collapsed groups
   const [collapsedGroups, setCollapsedGroups] = useState<Record<string, boolean>>({});
+
+  // Track collapsed sidebar mode (icon-only vs full menu)
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState<boolean>(() => {
+    return localStorage.getItem('lms_sidebar_collapsed') === 'true';
+  });
 
   if (!currentUser) return <>{children}</>;
 
   const role = currentUser.role;
+
+  const toggleSidebar = () => {
+    setIsSidebarCollapsed(prev => {
+      const next = !prev;
+      localStorage.setItem('lms_sidebar_collapsed', String(next));
+      return next;
+    });
+  };
 
   const toggleGroup = (groupId: string) => {
     setCollapsedGroups(prev => ({
@@ -68,42 +81,32 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
     }));
   };
 
-  // Build categorized navigation groups based on user role
   const getNavGroups = (): NavGroup[] => {
     switch (role) {
       case 'STUDENT':
         return [
           {
-            groupId: 'student-academic',
-            title: 'Aprendizado & Cursos',
-            icon: <BookOpen size={15} />,
+            groupId: 'student-main',
+            title: 'Espaço do Aluno',
+            icon: <GraduationCap size={15} />,
             accentColor: 'var(--primary)',
             items: [
-              { id: 'home', label: 'Meus Cursos', icon: <BookOpen size={17} /> },
-              { id: 'academic-history', label: 'Histórico Escolar', icon: <GraduationCap size={17} /> },
-            ]
-          },
-          {
-            groupId: 'student-rpg',
-            title: 'Gamificação & Evolução',
-            icon: <Gamepad2 size={15} />,
-            accentColor: 'var(--accent)',
-            items: [
-              { id: 'mission-board', label: 'Quadro de Missões', icon: <Swords size={17} /> },
-              { id: 'skill-tree', label: 'Habilidades RPG', icon: <Award size={17} /> },
-              { id: 'boss-fight', label: 'Boss Fight da Turma', icon: <Swords size={17} style={{ color: 'var(--danger)' }} />, badge: 'TURMA', badgeColor: 'var(--danger)' },
-              { id: 'inventory-shop', label: 'Loja de Recompensas', icon: <ShoppingBag size={17} style={{ color: 'var(--accent)' }} /> },
+              { id: 'dashboard', label: 'Início & RPG', icon: <LayoutDashboard size={17} /> },
+              { id: 'home', label: 'Catálogo de Cursos', icon: <BookOpen size={17} /> },
+              { id: 'boss-fight', label: 'Boss Fight da Turma', icon: <Swords size={17} style={{ color: 'var(--danger)' }} /> },
+              { id: 'student-shop', label: 'Loja de Recompensas', icon: <ShoppingBag size={17} style={{ color: 'var(--warning)' }} /> },
               { id: 'gamification-manual', label: 'Manual Pedagógico', icon: <BookOpen size={17} style={{ color: 'var(--primary)' }} /> },
             ]
           },
           {
             groupId: 'student-support',
-            title: 'Atendimento & Ouvidoria',
-            icon: <ShieldCheck size={15} />,
-            accentColor: 'var(--success)',
+            title: 'Comunicação & Suporte',
+            icon: <MessageSquare size={15} />,
+            accentColor: 'var(--accent)',
             items: [
-              { id: 'support-center', label: 'Apoio & Ouvidoria', icon: <LifeBuoy size={17} style={{ color: 'var(--primary)' }} /> },
-              { id: 'profile', label: 'Meu Perfil', icon: <User size={17} /> },
+              { id: 'direct-messages', label: 'Mensagens Diretas', icon: <MessageSquare size={17} /> },
+              { id: 'support-center', label: 'Ouvidoria & Denúncia', icon: <LifeBuoy size={17} style={{ color: 'var(--primary)' }} /> },
+              { id: 'profile', label: 'Meu Perfil RPG', icon: <User size={17} /> },
             ]
           }
         ];
@@ -111,23 +114,23 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
       case 'INSTRUCTOR':
         return [
           {
-            groupId: 'instructor-class',
-            title: 'Gestão de Sala & Turmas',
-            icon: <LayoutDashboard size={15} />,
+            groupId: 'instructor-teaching',
+            title: 'Gestão Pedagógica',
+            icon: <GraduationCap size={15} />,
             accentColor: 'var(--primary)',
             items: [
-              { id: 'instructor-dashboard', label: 'Painel do Instrutor', icon: <LayoutDashboard size={17} /> },
-              { id: 'attendance', label: 'Diário de Chamada', icon: <ClipboardCheck size={17} /> },
-              { id: 'grade-book', label: 'Livro de Notas', icon: <GraduationCap size={17} /> },
+              { id: 'gradebook', label: 'Diário de Classe & Notas', icon: <ClipboardCheck size={17} /> },
+              { id: 'attendance', label: 'Frequência & Presença', icon: <Users size={17} /> },
+              { id: 'user-management', label: 'Gestão de Alunos', icon: <Users size={17} /> },
+              { id: 'academic-record', label: 'Histórico Escolar', icon: <BookOpen size={17} /> },
             ]
           },
           {
-            groupId: 'instructor-content',
-            title: 'Conteúdos & Missões',
-            icon: <BookOpen size={15} />,
-            accentColor: 'var(--accent)',
+            groupId: 'instructor-creation',
+            title: 'Cursos & Missões',
+            icon: <Swords size={15} />,
+            accentColor: 'var(--warning)',
             items: [
-              { id: 'home', label: 'Catálogo de Cursos', icon: <BookOpen size={17} /> },
               { id: 'course-editor', label: 'Editor de Cursos', icon: <Edit3 size={17} /> },
               { id: 'mission-editor', label: 'Editor de Missões', icon: <Swords size={17} /> },
               { id: 'boss-fight', label: 'Boss Fight da Turma', icon: <Swords size={17} style={{ color: 'var(--danger)' }} /> },
@@ -135,13 +138,13 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
             ]
           },
           {
-            groupId: 'instructor-communication',
-            title: 'Comunicação & Suporte',
+            groupId: 'instructor-support',
+            title: 'Comunicação & Sistema',
             icon: <MessageSquare size={15} />,
             accentColor: 'var(--success)',
             items: [
               { id: 'direct-messages', label: 'Mensagens Diretas', icon: <MessageSquare size={17} /> },
-              { id: 'support-center', label: 'Apoio & Ouvidoria', icon: <LifeBuoy size={17} style={{ color: 'var(--primary)' }} /> },
+              { id: 'support-center', label: 'Central de Ouvidoria', icon: <LifeBuoy size={17} style={{ color: 'var(--primary)' }} /> },
               { id: 'profile', label: 'Meu Perfil', icon: <User size={17} /> },
             ]
           }
@@ -151,25 +154,36 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
       case 'DIRECTOR':
         return [
           {
-            groupId: 'management-executive',
-            title: 'Gestão Executiva Escolar',
+            groupId: 'coord-academic',
+            title: 'Coordenação Escolar',
             icon: <Building2 size={15} />,
             accentColor: 'var(--primary)',
             items: [
-              { id: 'pedagogical-dashboard', label: 'Painel Executivo', icon: <Building2 size={17} /> },
-              { id: 'user-management', label: 'Alunos e Turmas', icon: <Users size={17} /> },
-              { id: 'grade-book', label: 'Boletins & Notas', icon: <GraduationCap size={17} /> },
-              { id: 'financial', label: 'Financeiro Escolar', icon: <DollarSign size={17} /> },
+              { id: 'user-management', label: 'Gestão de Usuários', icon: <Users size={17} /> },
+              { id: 'academic-record', label: 'Prontuário Pedagógico', icon: <BookOpen size={17} /> },
+              { id: 'gradebook', label: 'Visão Geral de Notas', icon: <ClipboardCheck size={17} /> },
+              { id: 'attendance', label: 'Relatório de Frequência', icon: <Users size={17} /> },
+            ]
+          },
+          {
+            groupId: 'coord-financial',
+            title: 'Financeiro & Gestão',
+            icon: <DollarSign size={15} />,
+            accentColor: 'var(--success)',
+            items: [
+              { id: 'financial', label: 'Módulo Financeiro', icon: <DollarSign size={17} /> },
+              { id: 'course-editor', label: 'Grade Curricular', icon: <Edit3 size={17} /> },
               { id: 'gamification-manual', label: 'Manual Pedagógico', icon: <BookOpen size={17} style={{ color: 'var(--primary)' }} /> },
             ]
           },
           {
-            groupId: 'management-support',
-            title: 'Atendimento & Ouvidoria',
-            icon: <ShieldCheck size={15} />,
-            accentColor: 'var(--success)',
+            groupId: 'coord-support',
+            title: 'Ouvidoria & Suporte',
+            icon: <LifeBuoy size={15} />,
+            accentColor: 'var(--warning)',
             items: [
-              { id: 'support-center', label: 'Central de Ouvidoria', icon: <LifeBuoy size={17} style={{ color: 'var(--primary)' }} /> },
+              { id: 'support-center', label: 'Gestão de Ouvidoria', icon: <LifeBuoy size={17} style={{ color: 'var(--primary)' }} /> },
+              { id: 'direct-messages', label: 'Mensagens Diretas', icon: <MessageSquare size={17} /> },
               { id: 'profile', label: 'Meu Perfil', icon: <User size={17} /> },
             ]
           }
@@ -178,25 +192,24 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
       case 'ADMIN':
         return [
           {
-            groupId: 'admin-management',
-            title: 'Gestão Geral da Escola',
-            icon: <Building2 size={15} />,
+            groupId: 'admin-main',
+            title: 'Administração Geral',
+            icon: <ShieldCheck size={15} />,
             accentColor: 'var(--primary)',
             items: [
-              { id: 'pedagogical-dashboard', label: 'Painel da Coordenação', icon: <Building2 size={17} /> },
-              { id: 'admin-dashboard', label: 'Painel do Admin', icon: <LayoutDashboard size={17} /> },
-              { id: 'user-management', label: 'Gerenciar Usuários', icon: <Users size={17} /> },
-              { id: 'grade-book', label: 'Livro de Notas', icon: <GraduationCap size={17} /> },
-              { id: 'financial', label: 'Financeiro Escolar', icon: <DollarSign size={17} /> },
+              { id: 'user-management', label: 'Gestão de Usuários', icon: <Users size={17} /> },
+              { id: 'academic-record', label: 'Histórico dos Alunos', icon: <BookOpen size={17} /> },
+              { id: 'gradebook', label: 'Diário de Classe', icon: <ClipboardCheck size={17} /> },
+              { id: 'attendance', label: 'Frequência Escolar', icon: <Users size={17} /> },
+              { id: 'financial', label: 'Gestão Financeira', icon: <DollarSign size={17} /> },
             ]
           },
           {
-            groupId: 'admin-content',
-            title: 'Conteúdos & Gamificação',
+            groupId: 'admin-courses',
+            title: 'Conteúdo & Gameficação',
             icon: <Gamepad2 size={15} />,
-            accentColor: 'var(--accent)',
+            accentColor: 'var(--warning)',
             items: [
-              { id: 'home', label: 'Visualizar Catálogo', icon: <BookOpen size={17} /> },
               { id: 'course-editor', label: 'Editor de Cursos', icon: <Edit3 size={17} /> },
               { id: 'mission-editor', label: 'Editor de Missões', icon: <Swords size={17} /> },
               { id: 'boss-fight', label: 'Boss Fight da Turma', icon: <Swords size={17} style={{ color: 'var(--danger)' }} /> },
@@ -257,60 +270,132 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
   const groups = getNavGroups();
 
   return (
-    <div className="dashboard-grid">
+    <div className={`dashboard-grid ${isSidebarCollapsed ? 'sidebar-collapsed' : ''}`}>
       {/* Sidebar Navigation */}
       <aside 
         style={{ 
           backgroundColor: 'var(--bg-secondary)', 
           borderRight: '1px solid var(--border)',
-          padding: '24px 16px',
+          padding: isSidebarCollapsed ? '16px 8px' : '24px 16px',
           display: 'flex',
           flexDirection: 'column',
           justifyContent: 'space-between',
           height: '100%',
-          overflowY: 'auto'
+          overflowY: 'auto',
+          transition: 'all 0.25s ease'
         }}
         aria-label="Menu Lateral de Navegação"
       >
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}>
-          {/* Contracting School Sidebar Logo/Branding Banner */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+          {/* Contracting School Sidebar Logo/Branding Banner & Toggle */}
           <div style={{
-            padding: '12px 14px',
+            padding: isSidebarCollapsed ? '8px 4px' : '12px 14px',
             background: 'var(--bg-tertiary)',
             borderRadius: 'var(--radius-md)',
             border: '1px solid var(--border)',
             display: 'flex',
             alignItems: 'center',
-            gap: 12,
+            justifyContent: isSidebarCollapsed ? 'center' : 'space-between',
+            gap: 10,
             boxShadow: '0 2px 8px rgba(0,0,0,0.03)'
           }}>
-            {config.schoolLogoUrl ? (
-              <img
-                src={config.schoolLogoUrl}
-                alt={config.schoolName || 'Escola Contratante'}
-                style={{ height: 34, width: 'auto', borderRadius: 'var(--radius-sm)', objectFit: 'contain' }}
-              />
+            {!isSidebarCollapsed ? (
+              <>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10, minWidth: 0, flex: 1 }}>
+                  {config.schoolLogoUrl ? (
+                    <img
+                      src={config.schoolLogoUrl}
+                      alt={config.schoolName || 'Escola Contratante'}
+                      style={{ height: 32, width: 'auto', borderRadius: 'var(--radius-sm)', objectFit: 'contain' }}
+                    />
+                  ) : (
+                    <div style={{
+                      width: 32, height: 32, borderRadius: 'var(--radius-md)',
+                      background: 'linear-gradient(135deg, var(--primary) 0%, #3b82f6 100%)',
+                      color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: '0.85rem'
+                    }}>
+                      🏫
+                    </div>
+                  )}
+                  <div style={{ minWidth: 0, flex: 1 }}>
+                    <div style={{ fontSize: '0.82rem', fontWeight: 800, color: 'var(--text-primary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                      {config.schoolName || 'Colégio Evoluir & Saber'}
+                    </div>
+                    <div style={{ fontSize: '0.66rem', color: 'var(--primary)', fontWeight: 700 }}>
+                      Plataforma Contratada
+                    </div>
+                  </div>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={toggleSidebar}
+                  className="btn btn-secondary"
+                  style={{ padding: '6px', width: 28, height: 28, minWidth: 28, borderRadius: 'var(--radius-sm)' }}
+                  title="Recolher Menu (Modo Apenas Ícones)"
+                >
+                  <ChevronLeft size={16} />
+                </button>
+              </>
             ) : (
-              <div style={{
-                width: 34, height: 34, borderRadius: 'var(--radius-md)',
-                background: 'linear-gradient(135deg, var(--primary) 0%, #3b82f6 100%)',
-                color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: '0.95rem'
-              }}>
-                🏫
+              <div className="nav-tooltip-container" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <button
+                  type="button"
+                  onClick={toggleSidebar}
+                  className="btn btn-primary"
+                  style={{ padding: '6px', width: 40, height: 40, borderRadius: 'var(--radius-md)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                  title="Expandir Menu Lateral"
+                >
+                  <ChevronRight size={20} />
+                </button>
+                <div className="nav-tooltip">
+                  Expandir Menu ({config.schoolName || 'Escola'})
+                </div>
               </div>
             )}
-            <div style={{ minWidth: 0, flex: 1 }}>
-              <div style={{ fontSize: '0.85rem', fontWeight: 800, color: 'var(--text-primary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                {config.schoolName || 'Colégio Evoluir & Saber'}
-              </div>
-              <div style={{ fontSize: '0.68rem', color: 'var(--primary)', fontWeight: 700 }}>
-                Plataforma Contratada
-              </div>
-            </div>
           </div>
 
           {groups.map(group => {
             const isCollapsed = !!collapsedGroups[group.groupId];
+
+            if (isSidebarCollapsed) {
+              return (
+                <div key={group.groupId} style={{ display: 'flex', flexDirection: 'column', gap: 8, alignItems: 'center' }}>
+                  {group.items.map(item => {
+                    const isActive = activeTab === item.id;
+                    return (
+                      <div key={item.id} className="nav-tooltip-container" style={{ width: '100%', display: 'flex', justifyContent: 'center' }}>
+                        <button
+                          type="button"
+                          onClick={() => setActiveTab(item.id)}
+                          className={`nav-link ${isActive ? 'active' : ''}`}
+                          style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            width: 44,
+                            height: 44,
+                            borderRadius: 'var(--radius-md)',
+                            background: isActive ? 'var(--primary)' : 'var(--bg-tertiary)',
+                            color: isActive ? '#fff' : 'var(--text-primary)',
+                            border: isActive ? '1px solid var(--primary)' : '1px solid var(--border)',
+                            cursor: 'pointer',
+                            transition: 'all 0.2s ease',
+                            boxShadow: isActive ? '0 4px 12px rgba(139,92,246,0.3)' : 'none',
+                          }}
+                        >
+                          {item.icon}
+                        </button>
+                        <div className="nav-tooltip">
+                          {item.label}
+                          {item.badge && <span style={{ marginLeft: 6, color: 'var(--accent)', fontWeight: 800 }}>({item.badge})</span>}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              );
+            }
 
             return (
               <div 
@@ -322,7 +407,6 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
                   border: '1px solid var(--border)',
                 }}
               >
-                {/* Sleek Category Accordion Header */}
                 <button
                   type="button"
                   onClick={() => toggleGroup(group.groupId)}
@@ -370,7 +454,6 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
                   </span>
                 </button>
 
-                {/* Submenu Nav Items */}
                 {!isCollapsed && (
                   <nav style={{ display: 'flex', flexDirection: 'column', gap: '4px', marginTop: '8px', paddingTop: '8px', borderTop: '1px solid var(--border)' }}>
                     {group.items.map(item => {
@@ -426,37 +509,54 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
         </div>
 
         {/* Footer info inside Sidebar */}
-        <div 
-          style={{ 
-            marginTop: '24px',
-            padding: '12px 14px', 
-            borderRadius: 'var(--radius-md)', 
-            backgroundColor: 'var(--bg-tertiary)',
-            border: '1px solid var(--border)',
-            fontSize: '0.78rem',
-            color: 'var(--text-tertiary)',
-            display: 'flex',
-            alignItems: 'center',
-            gap: 10
-          }}
-        >
+        {!isSidebarCollapsed ? (
           <div 
             style={{ 
-              width: 10, 
-              height: 10, 
-              borderRadius: 'var(--radius-full)', 
-              backgroundColor: 'var(--success)',
-              boxShadow: '0 0 8px var(--success)',
-              flexShrink: 0
-            }} 
-          />
-          <div style={{ overflow: 'hidden' }}>
-            <div style={{ fontWeight: 800, color: 'var(--text-primary)', fontSize: 11, whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}>
-              {config.schoolName || 'EducaGame Evolui'}
+              marginTop: '24px',
+              padding: '12px 14px', 
+              borderRadius: 'var(--radius-md)', 
+              backgroundColor: 'var(--bg-tertiary)',
+              border: '1px solid var(--border)',
+              fontSize: '0.78rem',
+              color: 'var(--text-tertiary)',
+              display: 'flex',
+              alignItems: 'center',
+              gap: 10
+            }}
+          >
+            <div 
+              style={{ 
+                width: 10, 
+                height: 10, 
+                borderRadius: 'var(--radius-full)', 
+                backgroundColor: 'var(--success)',
+                boxShadow: '0 0 8px var(--success)',
+                flexShrink: 0
+              }} 
+            />
+            <div style={{ overflow: 'hidden' }}>
+              <div style={{ fontWeight: 800, color: 'var(--text-primary)', fontSize: 11, whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}>
+                {config.schoolName || 'EducaGame Evolui'}
+              </div>
+              <div style={{ fontSize: 10 }}>Plataforma Interativa v{config.systemVersion}</div>
             </div>
-            <div style={{ fontSize: 10 }}>Plataforma Interativa v{config.systemVersion}</div>
           </div>
-        </div>
+        ) : (
+          <div className="nav-tooltip-container" style={{ marginTop: '24px', display: 'flex', justifyContent: 'center' }}>
+            <div 
+              style={{ 
+                width: 12, 
+                height: 12, 
+                borderRadius: 'var(--radius-full)', 
+                backgroundColor: 'var(--success)',
+                boxShadow: '0 0 8px var(--success)'
+              }} 
+            />
+            <div className="nav-tooltip">
+              Sistema Operacional (v{config.systemVersion})
+            </div>
+          </div>
+        )}
       </aside>
 
       {/* Main Content Viewport */}

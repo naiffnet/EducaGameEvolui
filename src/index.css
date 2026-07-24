@@ -219,9 +219,57 @@ body {
 
 .dashboard-grid {
   display: grid;
-  grid-template-columns: 260px 1fr;
+  grid-template-columns: var(--sidebar-width, 260px) 1fr;
   min-height: 100vh;
   background-color: var(--bg-primary);
+  transition: grid-template-columns 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.dashboard-grid.sidebar-collapsed {
+  --sidebar-width: 76px;
+}
+
+/* Tooltips flutuantes para menu compacto (ícones apenas) */
+.nav-tooltip-container {
+  position: relative;
+}
+
+.nav-tooltip {
+  position: absolute;
+  left: 100%;
+  top: 50%;
+  transform: translateY(-50%);
+  margin-left: 14px;
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+  border: 1px solid var(--border);
+  padding: 6px 12px;
+  border-radius: var(--radius-md);
+  font-size: 0.82rem;
+  font-weight: 700;
+  white-space: nowrap;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.35);
+  pointer-events: none;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.18s ease, visibility 0.18s ease;
+  z-index: 9999;
+}
+
+.nav-tooltip::before {
+  content: '';
+  position: absolute;
+  right: 100%;
+  top: 50%;
+  transform: translateY(-50%);
+  border-width: 5px;
+  border-style: solid;
+  border-color: transparent var(--border) transparent transparent;
+}
+
+.nav-tooltip-container:hover .nav-tooltip {
+  opacity: 1;
+  visibility: visible;
 }
 
 @media (max-width: 1024px) {
