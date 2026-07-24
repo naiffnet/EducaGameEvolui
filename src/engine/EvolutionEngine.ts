@@ -217,7 +217,7 @@ export function grantXp(
       break;
     case 'mission_completed':
       // XP vem da própria Missão (details.xpOverride), não de uma constante fixa —
-      // única atividade com valor de XP variável (ver PLANO_IMPLEMENTACAO_PLATAFORMA.md)
+      // única atividade com valor de XP variável (ver PLANO_IMPLEMENTACAO.md)
       xpGained = details.xpOverride ?? 0;
       break;
   }

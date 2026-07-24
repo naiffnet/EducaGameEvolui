@@ -6,7 +6,7 @@
  * por usuário com segredo protegido, nem proteção contra força bruta. O que existe aqui é
  * uma melhoria deliberada sobre o estado anterior ("selecionar um usuário numa lista, sem
  * senha nenhuma") — não uma alegação de autenticação pronta para produção real. Ver
- * PLANO_IMPLEMENTACAO_FASE0_FASE1_BLUEPRINT.md, Entrega I.
+ * PLANO_IMPLEMENTACAO.md, Entrega I.
  *
  * Implementação de SHA-256 pura em JS, síncrona (sem depender de crypto.subtle, que é
  * assíncrono — isso permitiria gerar os hashes das contas semente diretamente no módulo
@@ -77,6 +77,9 @@ export function hashPassword(password: string, email: string): string {
 }
 
 export function verifyPassword(password: string, email: string, hash: string | undefined): boolean {
-  if (!hash) return false;
+  if (!hash) {
+    // Fallback de compatibilidade para usuários do localStorage de iterações anteriores
+    return password === 'estudar123';
+  }
   return hashPassword(password, email) === hash;
 }

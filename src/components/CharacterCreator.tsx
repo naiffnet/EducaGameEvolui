@@ -1,4 +1,4 @@
-﻿import React, { useState } from 'react';
+import React, { useState } from 'react';
 import type { RpgClass } from '../types';
 import { RpgAvatar } from './RpgAvatar';
 import { Sparkles, Trophy } from 'lucide-react';
@@ -113,7 +113,7 @@ export const CharacterCreator: React.FC<CharacterCreatorProps> = ({ onSelectClas
         }}
       >
         <div style={{ display: 'flex', gap: '24px', alignItems: 'flex-start', flexWrap: 'wrap' }}>
-          <RpgAvatar rpgClass={activeConfig.id} level={2} size={100} />
+          <RpgAvatar rpgClass={activeConfig.id} level={2} size={100} avatarStyle="EPIC_ADULT" />
           <div style={{ flex: 1, minWidth: '240px' }}>
             <h3 style={{ fontSize: '1.3rem', fontWeight: '800', color: activeConfig.color, marginBottom: '4px' }}>
               {activeConfig.name}

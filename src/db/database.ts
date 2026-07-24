@@ -1,5 +1,7 @@
-import type { Course, User, AuditLog, SystemConfig, AcademicRecord, GradeEntry, EnrollmentEntry, AttendanceRecord, Mission, MissionSubmission } from '../types';
-import { INITIAL_USERS, INITIAL_COURSES, INITIAL_AUDIT_LOGS, INITIAL_CONFIG, INITIAL_ATTENDANCE, INITIAL_MISSIONS } from './seedData';
+import type { Course, User, AuditLog, SystemConfig, AcademicRecord, GradeEntry, EnrollmentEntry, AttendanceRecord, Mission, MissionSubmission, GuardianLink, Invoice, Announcement, DirectMessage, SkillNode, InventoryItem, UserInventory, BossFight, StudentAppointment, SchoolReport } from '../types';
+import { INITIAL_USERS, INITIAL_COURSES, INITIAL_AUDIT_LOGS, INITIAL_CONFIG, INITIAL_ATTENDANCE, INITIAL_MISSIONS, INITIAL_GUARDIAN_LINKS, INITIAL_INVOICES, INITIAL_ANNOUNCEMENTS, INITIAL_DIRECT_MESSAGES, INITIAL_SKILL_NODES, INITIAL_INVENTORY_ITEMS, INITIAL_BOSS_FIGHTS, INITIAL_STUDENT_APPOINTMENTS, INITIAL_SCHOOL_REPORTS } from './seedData';
+import { resolveInvoicesStatus } from '../engine/FinancialEngine';
+import { hashPassword } from '../engine/AuthUtils';
 
 const KEYS = {
   USERS: 'lms_users',
@@ -11,12 +13,50 @@ const KEYS = {
   ATTENDANCE: 'lms_attendance',
   MISSIONS: 'lms_missions',
   MISSION_SUBMISSIONS: 'lms_mission_submissions',
+  GUARDIAN_LINKS: 'lms_guardian_links',
+  INVOICES: 'lms_invoices',
+  ANNOUNCEMENTS: 'lms_announcements',
+  DIRECT_MESSAGES: 'lms_direct_messages',
+  SKILL_NODES: 'lms_skill_nodes',
+  INVENTORY_ITEMS: 'lms_inventory_items',
+  USER_INVENTORIES: 'lms_user_inventories',
+  BOSS_FIGHTS: 'lms_boss_fights',
+  STUDENT_APPOINTMENTS: 'lms_student_appointments',
+  SCHOOL_REPORTS: 'lms_school_reports',
 };
 
 // Auto-initialize LocalStorage with Seed Data if empty
 export const initializeDB = (forceReset = false) => {
   if (forceReset || !localStorage.getItem(KEYS.USERS)) {
     localStorage.setItem(KEYS.USERS, JSON.stringify(INITIAL_USERS));
+  } else {
+    // Backfill: garante que todos os usuários legados possuam passwordHash
+    try {
+      const stored: User[] = JSON.parse(localStorage.getItem(KEYS.USERS) || '[]');
+      let updated = false;
+      const currentMap = new Map(stored.map(u => [u.id, u]));
+
+      // Merge missing initial seed users (ex: user-guardian-paulo ou novas contas)
+      for (const initUser of INITIAL_USERS) {
+        if (!currentMap.has(initUser.id)) {
+          stored.push(initUser);
+          updated = true;
+        }
+      }
+
+      for (let i = 0; i < stored.length; i++) {
+        if (!stored[i].passwordHash) {
+          stored[i].passwordHash = hashPassword('estudar123', stored[i].email);
+          updated = true;
+        }
+      }
+
+      if (updated) {
+        localStorage.setItem(KEYS.USERS, JSON.stringify(stored));
+      }
+    } catch {
+      localStorage.setItem(KEYS.USERS, JSON.stringify(INITIAL_USERS));
+    }
   }
   if (forceReset || !localStorage.getItem(KEYS.COURSES)) {
     localStorage.setItem(KEYS.COURSES, JSON.stringify(INITIAL_COURSES));
@@ -41,6 +81,33 @@ export const initializeDB = (forceReset = false) => {
   }
   if (forceReset || !localStorage.getItem(KEYS.MISSION_SUBMISSIONS)) {
     localStorage.setItem(KEYS.MISSION_SUBMISSIONS, JSON.stringify([]));
+  }
+  if (forceReset || !localStorage.getItem(KEYS.GUARDIAN_LINKS)) {
+    localStorage.setItem(KEYS.GUARDIAN_LINKS, JSON.stringify(INITIAL_GUARDIAN_LINKS));
+  }
+  if (forceReset || !localStorage.getItem(KEYS.INVOICES)) {
+    localStorage.setItem(KEYS.INVOICES, JSON.stringify(INITIAL_INVOICES));
+  }
+  if (forceReset || !localStorage.getItem(KEYS.ANNOUNCEMENTS)) {
+    localStorage.setItem(KEYS.ANNOUNCEMENTS, JSON.stringify(INITIAL_ANNOUNCEMENTS));
+  }
+  if (forceReset || !localStorage.getItem(KEYS.DIRECT_MESSAGES)) {
+    localStorage.setItem(KEYS.DIRECT_MESSAGES, JSON.stringify(INITIAL_DIRECT_MESSAGES));
+  }
+  if (forceReset || !localStorage.getItem(KEYS.SKILL_NODES)) {
+    localStorage.setItem(KEYS.SKILL_NODES, JSON.stringify(INITIAL_SKILL_NODES));
+  }
+  if (forceReset || !localStorage.getItem(KEYS.INVENTORY_ITEMS)) {
+    localStorage.setItem(KEYS.INVENTORY_ITEMS, JSON.stringify(INITIAL_INVENTORY_ITEMS));
+  }
+  if (forceReset || !localStorage.getItem(KEYS.BOSS_FIGHTS)) {
+    localStorage.setItem(KEYS.BOSS_FIGHTS, JSON.stringify(INITIAL_BOSS_FIGHTS));
+  }
+  if (forceReset || !localStorage.getItem(KEYS.STUDENT_APPOINTMENTS)) {
+    localStorage.setItem(KEYS.STUDENT_APPOINTMENTS, JSON.stringify(INITIAL_STUDENT_APPOINTMENTS));
+  }
+  if (forceReset || !localStorage.getItem(KEYS.SCHOOL_REPORTS)) {
+    localStorage.setItem(KEYS.SCHOOL_REPORTS, JSON.stringify(INITIAL_SCHOOL_REPORTS));
   }
 };
 
@@ -484,6 +551,257 @@ export const db = {
       completedLessons += lessons.filter(l => user.completedLessons.includes(l.id)).length;
     });
     return totalLessons === 0 ? 0 : Math.round((completedLessons / totalLessons) * 100);
+  },
+
+  // ── Guardian Links ──────────────────────────────────────────────────────────
+  getGuardianLinks(): GuardianLink[] {
+    const data = localStorage.getItem(KEYS.GUARDIAN_LINKS);
+    return data ? JSON.parse(data) : [];
+  },
+
+  saveGuardianLinks(links: GuardianLink[]) {
+    localStorage.setItem(KEYS.GUARDIAN_LINKS, JSON.stringify(links));
+  },
+
+  getStudentsForGuardian(guardianUserId: string): User[] {
+    const links = this.getGuardianLinks().filter(l => l.guardianUserId === guardianUserId);
+    const studentIds = new Set(links.map(l => l.studentUserId));
+    return this.getUsers().filter(u => studentIds.has(u.id));
+  },
+
+  getGuardiansForStudent(studentUserId: string): { guardian: User; relationship: string; linkId: string }[] {
+    const links = this.getGuardianLinks().filter(l => l.studentUserId === studentUserId);
+    const users = this.getUsers();
+    return links
+      .map(l => {
+        const guardian = users.find(u => u.id === l.guardianUserId);
+        return guardian ? { guardian, relationship: l.relationship, linkId: l.id } : null;
+      })
+      .filter((item): item is { guardian: User; relationship: string; linkId: string } => item !== null);
+  },
+
+  addGuardianLink(link: GuardianLink) {
+    const links = this.getGuardianLinks();
+    if (!links.some(l => l.guardianUserId === link.guardianUserId && l.studentUserId === link.studentUserId)) {
+      links.push(link);
+      this.saveGuardianLinks(links);
+    }
+  },
+
+  removeGuardianLink(linkId: string) {
+    const links = this.getGuardianLinks().filter(l => l.id !== linkId);
+    this.saveGuardianLinks(links);
+  },
+
+  // ── Financial / Invoices (Entrega F) ──────────────────────────────────────
+  getRawInvoices(): Invoice[] {
+    const data = localStorage.getItem(KEYS.INVOICES);
+    return data ? JSON.parse(data) : [];
+  },
+
+  saveInvoices(invoices: Invoice[]) {
+    localStorage.setItem(KEYS.INVOICES, JSON.stringify(invoices));
+  },
+
+  getInvoices(): Invoice[] {
+    const raw = this.getRawInvoices();
+    const resolved = resolveInvoicesStatus(raw);
+    if (JSON.stringify(raw) !== JSON.stringify(resolved)) {
+      this.saveInvoices(resolved);
+    }
+    return resolved;
+  },
+
+  getInvoicesForStudent(studentId: string): Invoice[] {
+    return this.getInvoices().filter(inv => inv.studentId === studentId);
+  },
+
+  addInvoice(invoice: Invoice) {
+    const invoices = this.getRawInvoices();
+    invoices.push(invoice);
+    this.saveInvoices(invoices);
+  },
+
+  markInvoicePaid(invoiceId: string) {
+    const invoices = this.getRawInvoices();
+    const idx = invoices.findIndex(i => i.id === invoiceId);
+    if (idx !== -1) {
+      invoices[idx] = {
+        ...invoices[idx],
+        status: 'PAID',
+        paidAt: new Date().toISOString(),
+      };
+      this.saveInvoices(invoices);
+    }
+  },
+
+  deleteInvoice(invoiceId: string) {
+    const invoices = this.getRawInvoices().filter(i => i.id !== invoiceId);
+    this.saveInvoices(invoices);
+  },
+
+  // ── Communication / Announcements (Entrega G) ─────────────────────────────
+  getAnnouncements(): Announcement[] {
+    const data = localStorage.getItem(KEYS.ANNOUNCEMENTS);
+    return data ? JSON.parse(data) : [];
+  },
+
+  saveAnnouncements(announcements: Announcement[]) {
+    localStorage.setItem(KEYS.ANNOUNCEMENTS, JSON.stringify(announcements));
+  },
+
+  addAnnouncement(announcement: Announcement) {
+    const list = this.getAnnouncements();
+    list.unshift(announcement);
+    this.saveAnnouncements(list);
+  },
+
+  deleteAnnouncement(id: string) {
+    const list = this.getAnnouncements().filter(a => a.id !== id);
+    this.saveAnnouncements(list);
+  },
+
+  /** Regra G1: Filtra avisos por audiência (Escola toda ou Turma do Aluno/Responsável) */
+  getAnnouncementsForUser(user: User): Announcement[] {
+    const all = this.getAnnouncements();
+    if (user.role === 'ADMIN' || user.role === 'INSTRUCTOR') {
+      return all;
+    }
+
+    if (user.role === 'STUDENT') {
+      return all.filter(a =>
+        a.audience === 'SCHOOL' ||
+        (typeof a.audience === 'object' && a.audience.schoolClass === user.schoolClass)
+      );
+    }
+
+    if (user.role === 'GUARDIAN') {
+      const students = this.getStudentsForGuardian(user.id);
+      const studentClasses = new Set(students.map(s => s.schoolClass).filter(Boolean));
+      return all.filter(a =>
+        a.audience === 'SCHOOL' ||
+        (typeof a.audience === 'object' && studentClasses.has(a.audience.schoolClass))
+      );
+    }
+
+    return all.filter(a => a.audience === 'SCHOOL');
+  },
+
+  // ── Communication / Direct Messages (Entrega G) ────────────────────────────
+  getDirectMessages(): DirectMessage[] {
+    const data = localStorage.getItem(KEYS.DIRECT_MESSAGES);
+    return data ? JSON.parse(data) : [];
+  },
+
+  saveDirectMessages(messages: DirectMessage[]) {
+    localStorage.setItem(KEYS.DIRECT_MESSAGES, JSON.stringify(messages));
+  },
+
+  sendDirectMessage(fromUser: User, toUser: User, body: string, studentId?: string): DirectMessage {
+    const list = this.getDirectMessages();
+    const newMsg: DirectMessage = {
+      id: `msg-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+      fromUserId: fromUser.id,
+      fromUserName: fromUser.name,
+      toUserId: toUser.id,
+      toUserName: toUser.name,
+      studentId,
+      body,
+      createdAt: new Date().toISOString(),
+    };
+    list.push(newMsg);
+    this.saveDirectMessages(list);
+    return newMsg;
+  },
+
+  getDirectMessagesForUser(userId: string): DirectMessage[] {
+    const all = this.getDirectMessages();
+    return all.filter(m => m.fromUserId === userId || m.toUserId === userId);
+  },
+
+  // ── Skill Nodes (Árvore de Habilidades) ──────────────────────────────────
+  getSkillNodes(): SkillNode[] {
+    const data = localStorage.getItem(KEYS.SKILL_NODES);
+    return data ? JSON.parse(data) : INITIAL_SKILL_NODES;
+  },
+
+  // ── Inventory Items (Loja de Inventário) ──────────────────────────────────
+  getInventoryItems(): InventoryItem[] {
+    const data = localStorage.getItem(KEYS.INVENTORY_ITEMS);
+    return data ? JSON.parse(data) : INITIAL_INVENTORY_ITEMS;
+  },
+
+  getUserInventory(userId: string): UserInventory {
+    try {
+      const data = localStorage.getItem(KEYS.USER_INVENTORIES);
+      const dict: Record<string, UserInventory> = data ? JSON.parse(data) : {};
+      if (dict[userId]) return dict[userId];
+    } catch {}
+    return { coins: 120, ownedItemIds: [], unlockedSkillIds: ['skill-warrior-1', 'skill-mage-1', 'skill-queen-1', 'skill-pirate-1'] };
+  },
+
+  saveUserInventory(userId: string, inv: UserInventory) {
+    try {
+      const data = localStorage.getItem(KEYS.USER_INVENTORIES);
+      const dict: Record<string, UserInventory> = data ? JSON.parse(data) : {};
+      dict[userId] = inv;
+      localStorage.setItem(KEYS.USER_INVENTORIES, JSON.stringify(dict));
+    } catch {}
+  },
+
+  // ── Boss Fights (Desafios Colaborativos da Turma) ─────────────────────────
+  getBossFights(): BossFight[] {
+    const data = localStorage.getItem(KEYS.BOSS_FIGHTS);
+    return data ? JSON.parse(data) : INITIAL_BOSS_FIGHTS;
+  },
+
+  saveBossFight(boss: BossFight) {
+    const fights = this.getBossFights();
+    const idx = fights.findIndex(b => b.id === boss.id);
+    if (idx >= 0) fights[idx] = boss;
+    else fights.push(boss);
+    localStorage.setItem(KEYS.BOSS_FIGHTS, JSON.stringify(fights));
+  },
+
+  dealDamageToBoss(bossId: string, damage: number): BossFight | null {
+    const fights = this.getBossFights();
+    const boss = fights.find(b => b.id === bossId);
+    if (!boss || boss.status === 'VICTORIOUS') return null;
+
+    boss.currentHp = Math.max(0, boss.currentHp - damage);
+    if (boss.currentHp === 0) {
+      boss.status = 'VICTORIOUS';
+    }
+    this.saveBossFight(boss);
+    return boss;
+  },
+
+  // ── Central de Atendimento (Agendamento) ──────────────────────────────────
+  getStudentAppointments(): StudentAppointment[] {
+    const data = localStorage.getItem(KEYS.STUDENT_APPOINTMENTS);
+    return data ? JSON.parse(data) : INITIAL_STUDENT_APPOINTMENTS;
+  },
+
+  saveStudentAppointment(app: StudentAppointment) {
+    const list = this.getStudentAppointments();
+    const idx = list.findIndex(a => a.id === app.id);
+    if (idx >= 0) list[idx] = app;
+    else list.push(app);
+    localStorage.setItem(KEYS.STUDENT_APPOINTMENTS, JSON.stringify(list));
+  },
+
+  // ── Ouvidoria Escolar (Canal de Denúncias Seguras) ───────────────────────
+  getSchoolReports(): SchoolReport[] {
+    const data = localStorage.getItem(KEYS.SCHOOL_REPORTS);
+    return data ? JSON.parse(data) : INITIAL_SCHOOL_REPORTS;
+  },
+
+  saveSchoolReport(rep: SchoolReport) {
+    const list = this.getSchoolReports();
+    const idx = list.findIndex(r => r.id === rep.id);
+    if (idx >= 0) list[idx] = rep;
+    else list.push(rep);
+    localStorage.setItem(KEYS.SCHOOL_REPORTS, JSON.stringify(list));
   },
 };
 

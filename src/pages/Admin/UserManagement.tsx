@@ -16,7 +16,7 @@ type ViewMode = 'list' | 'profile' | 'academic';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 const ROLE_LABEL: Record<UserRole, string> = {
-  STUDENT: 'Aluno', INSTRUCTOR: 'Professor', ADMIN: 'Administrador', MAINTENANCE: 'Suporte'
+  STUDENT: 'Aluno', INSTRUCTOR: 'Professor', ADMIN: 'Administrador', MAINTENANCE: 'Suporte', GUARDIAN: 'Responsável', COORDINATOR: 'Coordenação', DIRECTOR: 'Direção'
 };
 
 const DEFAULT_STATS: Record<RpgClass, { strength: number; intelligence: number; dexterity: number }> = {
@@ -276,6 +276,147 @@ const PasswordResetModal: React.FC<PasswordResetModalProps> = ({ user, onClose, 
   );
 };
 
+// ─── Guardian Link Modal (Entrega E) ──────────────────────────────────────────
+interface GuardianLinkModalProps {
+  user: User;
+  allUsers: User[];
+  onClose: () => void;
+  onRefresh: () => void;
+}
+const GuardianLinkModal: React.FC<GuardianLinkModalProps> = ({ user, allUsers, onClose, onRefresh }) => {
+  const [relationship, setRelationship] = useState('Pai');
+  const [selectedTargetId, setSelectedTargetId] = useState('');
+
+  const isGuardian = user.role === 'GUARDIAN';
+  const isStudent = user.role === 'STUDENT';
+
+  const targetCandidates = allUsers.filter(u => isGuardian ? u.role === 'STUDENT' : u.role === 'GUARDIAN');
+  const currentLinks = isGuardian ? db.getStudentsForGuardian(user.id) : db.getGuardiansForStudent(user.id);
+  const rawLinks = db.getGuardianLinks();
+
+  const handleAddLink = () => {
+    if (!selectedTargetId) return;
+    const guardianUserId = isGuardian ? user.id : selectedTargetId;
+    const studentUserId = isStudent ? user.id : selectedTargetId;
+
+    db.addGuardianLink({
+      id: `link-${Date.now()}`,
+      guardianUserId,
+      studentUserId,
+      relationship,
+      createdAt: new Date().toISOString()
+    });
+    setSelectedTargetId('');
+    onRefresh();
+  };
+
+  const handleRemoveLink = (linkId: string) => {
+    db.removeGuardianLink(linkId);
+    onRefresh();
+  };
+
+  return (
+    <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(6px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999 }}>
+      <div style={{ background: 'linear-gradient(145deg,#1e1b4b,#0f172a)', border: '1px solid rgba(139,92,246,0.3)', borderRadius: 24, padding: 32, width: 480, maxHeight: '80vh', overflowY: 'auto', boxShadow: '0 25px 60px rgba(0,0,0,0.6)' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
+          <h2 style={{ fontSize: 18, fontWeight: 800, color: '#fff', margin: 0, display: 'flex', alignItems: 'center', gap: 8 }}>
+            <Users size={18} style={{ color: '#8b5cf6' }} />
+            {isGuardian ? `Dependentes de ${user.name}` : `Responsáveis de ${user.name}`}
+          </h2>
+          <button onClick={onClose} style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.4)', cursor: 'pointer' }}><X size={20} /></button>
+        </div>
+
+        <div style={{ marginBottom: 20 }}>
+          <h4 style={{ color: 'rgba(255,255,255,0.7)', fontSize: 13, marginBottom: 10 }}>Vínculos Atuais:</h4>
+          {isGuardian ? (
+            (currentLinks as User[]).length === 0 ? (
+              <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.4)' }}>Nenhum estudante vinculado ainda.</p>
+            ) : (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                {(currentLinks as User[]).map(st => {
+                  const linkObj = rawLinks.find(l => l.guardianUserId === user.id && l.studentUserId === st.id);
+                  return (
+                    <div key={st.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 14px', background: 'rgba(255,255,255,0.05)', borderRadius: 10 }}>
+                      <div>
+                        <div style={{ color: '#fff', fontWeight: 600, fontSize: 14 }}>{st.name}</div>
+                        <div style={{ color: 'rgba(255,255,255,0.5)', fontSize: 11 }}>{st.email} · {st.schoolClass || 'Sem Turma'} ({linkObj?.relationship || 'Responsável'})</div>
+                      </div>
+                      {linkObj && (
+                        <button onClick={() => handleRemoveLink(linkObj.id)} className="btn btn-secondary" style={{ padding: '4px 8px', fontSize: 11, color: '#ef4444' }}>
+                          Desvincular
+                        </button>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            )
+          ) : (
+            (currentLinks as { guardian: User; relationship: string; linkId: string }[]).length === 0 ? (
+              <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.4)' }}>Nenhum responsável vinculado ainda.</p>
+            ) : (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                {(currentLinks as { guardian: User; relationship: string; linkId: string }[]).map(g => (
+                  <div key={g.linkId} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 14px', background: 'rgba(255,255,255,0.05)', borderRadius: 10 }}>
+                    <div>
+                      <div style={{ color: '#fff', fontWeight: 600, fontSize: 14 }}>{g.guardian.name}</div>
+                      <div style={{ color: 'rgba(255,255,255,0.5)', fontSize: 11 }}>{g.guardian.email} ({g.relationship})</div>
+                    </div>
+                    <button onClick={() => handleRemoveLink(g.linkId)} className="btn btn-secondary" style={{ padding: '4px 8px', fontSize: 11, color: '#ef4444' }}>
+                      Desvincular
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )
+          )}
+        </div>
+
+        <div style={{ borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: 16 }}>
+          <h4 style={{ color: '#fff', fontSize: 13, marginBottom: 12 }}>Adicionar Novo Vínculo</h4>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+            <div>
+              <label style={{ display: 'block', fontSize: 12, color: 'rgba(255,255,255,0.6)', marginBottom: 4 }}>
+                {isGuardian ? 'Selecionar Estudante' : 'Selecionar Responsável'}
+              </label>
+              <select
+                value={selectedTargetId}
+                onChange={e => setSelectedTargetId(e.target.value)}
+                style={{ width: '100%', background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(139,92,246,0.4)', borderRadius: 8, padding: '8px 10px', color: '#fff', fontSize: 13 }}
+              >
+                <option value="" style={{ background: '#0f172a' }}>-- Selecionar --</option>
+                {targetCandidates.map(tc => (
+                  <option key={tc.id} value={tc.id} style={{ background: '#0f172a' }}>
+                    {tc.name} ({tc.email})
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label style={{ display: 'block', fontSize: 12, color: 'rgba(255,255,255,0.6)', marginBottom: 4 }}>Grau de Parentesco / Relação</label>
+              <input
+                type="text"
+                value={relationship}
+                onChange={e => setRelationship(e.target.value)}
+                placeholder="Ex: Pai, Mãe, Tutor Legal"
+                style={{ width: '100%', boxSizing: 'border-box', background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(139,92,246,0.4)', borderRadius: 8, padding: '8px 10px', color: '#fff', fontSize: 13 }}
+              />
+            </div>
+            <button
+              onClick={handleAddLink}
+              disabled={!selectedTargetId}
+              className="btn btn-primary"
+              style={{ marginTop: 4, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}
+            >
+              <UserPlus size={15} /> Vincular Conta
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 // ─── Inline Edit Row ──────────────────────────────────────────────────────────
 interface EditRowProps {
   user: User;
@@ -319,6 +460,7 @@ const EditRow: React.FC<EditRowProps> = ({ user, onSave, onCancel }) => {
           <option value="INSTRUCTOR">Professor</option>
           <option value="ADMIN">Administrador</option>
           <option value="MAINTENANCE">Suporte</option>
+          <option value="GUARDIAN">Responsável</option>
         </select>
       </td>
       <td style={{ padding: '10px 16px' }} colSpan={2}>
@@ -363,6 +505,7 @@ export const UserManagement: React.FC = () => {
   const [enrollModalUser, setEnrollModalUser] = useState<User | null>(null);
   const [registrationModalUser, setRegistrationModalUser] = useState<User | null>(null);
   const [passwordResetUser, setPasswordResetUser] = useState<User | null>(null);
+  const [guardianLinkUser, setGuardianLinkUser] = useState<User | null>(null);
   const [newUserPassword, setNewUserPassword] = useState('');
 
   const loadUsers = useCallback(() => {
@@ -536,6 +679,7 @@ export const UserManagement: React.FC = () => {
                 <option value="INSTRUCTOR">Professor</option>
                 <option value="ADMIN">Administrador</option>
                 <option value="MAINTENANCE">Suporte</option>
+                <option value="GUARDIAN">Responsável</option>
               </select>
             </div>
             {newUserRole === 'STUDENT' && (
@@ -614,6 +758,7 @@ export const UserManagement: React.FC = () => {
           <option value="INSTRUCTOR">Professores</option>
           <option value="ADMIN">Administradores</option>
           <option value="MAINTENANCE">Suporte</option>
+          <option value="GUARDIAN">Responsáveis</option>
         </select>
       </div>
 
@@ -706,6 +851,16 @@ export const UserManagement: React.FC = () => {
                             </button>
                           </>
                         )}
+                        {(user.role === 'GUARDIAN' || user.role === 'STUDENT') && (
+                          <button
+                            onClick={() => setGuardianLinkUser(user)}
+                            className="btn btn-secondary"
+                            style={{ padding: '5px 10px', fontSize: 12, display: 'flex', alignItems: 'center', gap: 4 }}
+                            title="Gerenciar Vínculos Familiares"
+                          >
+                            <Users size={13} /> Vínculos
+                          </button>
+                        )}
                         <button
                           onClick={() => setEditingUserId(user.id)}
                           className="btn btn-secondary"
@@ -771,6 +926,16 @@ export const UserManagement: React.FC = () => {
           user={passwordResetUser}
           onClose={() => setPasswordResetUser(null)}
           onSave={handlePasswordReset}
+        />
+      )}
+
+      {/* Guardian Link Modal */}
+      {guardianLinkUser && (
+        <GuardianLinkModal
+          user={guardianLinkUser}
+          allUsers={users}
+          onClose={() => setGuardianLinkUser(null)}
+          onRefresh={loadUsers}
         />
       )}
 

@@ -9,7 +9,8 @@ import {
   Database,
   CheckCircle,
   AlertOctagon,
-  FileText
+  FileText,
+  Building2
 } from 'lucide-react';
 
 export const SystemStatus: React.FC = () => {
@@ -140,6 +141,56 @@ export const SystemStatus: React.FC = () => {
                       Status: {config.maintenanceMode ? 'ISOLADO' : 'ONLINE'}
                     </span>
                   </div>
+                </div>
+
+                {/* White-Label School Branding Card */}
+                <div className="card">
+                  <h3 style={{ fontSize: '1.15rem', display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
+                    <Building2 size={20} style={{ color: 'var(--primary)' }} /> Identidade Visual da Escola (White-Label)
+                  </h3>
+                  <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginBottom: '16px' }}>
+                    Personalize o nome da instituição de ensino contratante e a logomarca exibidos no cabeçalho de toda a plataforma.
+                  </p>
+                  <form
+                    onSubmit={(e) => {
+                      e.preventDefault();
+                      const target = e.target as typeof e.target & {
+                        schoolName: { value: string };
+                        schoolLogoUrl: { value: string };
+                      };
+                      updateConfig({
+                        schoolName: target.schoolName.value.trim() || 'Instituição de Ensino',
+                        schoolLogoUrl: target.schoolLogoUrl.value.trim(),
+                      });
+                      alert('Identidade da escola atualizada com sucesso!');
+                    }}
+                    style={{ display: 'flex', flexDirection: 'column', gap: 12 }}
+                  >
+                    <div>
+                      <label htmlFor="cfg-school-name" style={{ display: 'block', fontSize: 12, fontWeight: 700, marginBottom: 4 }}>Nome da Escola / Colégio</label>
+                      <input
+                        id="cfg-school-name"
+                        type="text"
+                        className="form-input"
+                        defaultValue={config.schoolName || 'Colégio Evoluir & Saber'}
+                        placeholder="Ex: Colégio Evoluir & Saber"
+                        required
+                      />
+                    </div>
+                    <div>
+                      <label htmlFor="cfg-school-logo" style={{ display: 'block', fontSize: 12, fontWeight: 700, marginBottom: 4 }}>URL da Logomarca (Opcional)</label>
+                      <input
+                        id="cfg-school-logo"
+                        type="url"
+                        className="form-input"
+                        defaultValue={config.schoolLogoUrl || ''}
+                        placeholder="https://exemplo.com/logo.png"
+                      />
+                    </div>
+                    <button type="submit" className="btn btn-primary" style={{ padding: '8px 16px', fontSize: 13, alignSelf: 'flex-start' }}>
+                      Salvar Personalização da Escola
+                    </button>
+                  </form>
                 </div>
 
                 {/* DB Wipe & Seed Card */}

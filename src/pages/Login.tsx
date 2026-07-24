@@ -92,12 +92,79 @@ export const Login: React.FC = () => {
         </button>
 
         <div style={{
-          marginTop: '4px', padding: '14px', background: 'var(--bg-tertiary)', border: '1px solid var(--border)',
-          borderRadius: 'var(--radius-md)', fontSize: '0.78rem', color: 'var(--text-tertiary)', lineHeight: 1.5,
+          marginTop: '12px', padding: '16px', background: 'var(--bg-tertiary)', border: '1px solid var(--border)',
+          borderRadius: 'var(--radius-md)', fontSize: '0.8rem', display: 'flex', flexDirection: 'column', gap: 10,
         }}>
-          <strong style={{ color: 'var(--text-secondary)' }}>Ambiente de demonstração:</strong> use qualquer e-mail de conta semente
-          (ex: <code>ana.silva@escola.com</code>, <code>marcos.paulo@escola.com</code>, <code>mariana.admin@escola.com</code>)
-          com a senha <code>{SEED_DEMO_PASSWORD}</code>.
+          <div style={{ fontWeight: 700, color: 'var(--text-secondary)' }}>⚡ Atalhos de Acesso Rápido (Demonstração):</div>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+            <button
+              type="button"
+              className="btn btn-secondary"
+              style={{ fontSize: 12, padding: '6px 8px', textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap' }}
+              onClick={() => {
+                setEmail('ana.silva@escola.com');
+                setPassword(SEED_DEMO_PASSWORD);
+                loginWithPassword('ana.silva@escola.com', SEED_DEMO_PASSWORD);
+              }}
+            >
+              🎓 Estudante (Ana)
+            </button>
+
+            <button
+              type="button"
+              className="btn btn-secondary"
+              style={{ fontSize: 12, padding: '6px 8px', textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap' }}
+              onClick={() => {
+                setEmail('marcos.paulo@escola.com');
+                setPassword(SEED_DEMO_PASSWORD);
+                loginWithPassword('marcos.paulo@escola.com', SEED_DEMO_PASSWORD);
+              }}
+            >
+              👨‍🏫 Professor
+            </button>
+
+            <button
+              type="button"
+              className="btn btn-secondary"
+              style={{ fontSize: 12, padding: '6px 8px', textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap' }}
+              onClick={() => {
+                setEmail('paulo.silva@escola.com');
+                setPassword(SEED_DEMO_PASSWORD);
+                loginWithPassword('paulo.silva@escola.com', SEED_DEMO_PASSWORD);
+              }}
+            >
+              👨‍👩‍👧 Responsável
+            </button>
+
+            <button
+              type="button"
+              className="btn btn-secondary"
+              style={{ fontSize: 12, padding: '6px 8px', textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap' }}
+              onClick={() => {
+                setEmail('mariana.admin@escola.com');
+                setPassword(SEED_DEMO_PASSWORD);
+                loginWithPassword('mariana.admin@escola.com', SEED_DEMO_PASSWORD);
+              }}
+            >
+              👑 Admin
+            </button>
+
+            <button
+              type="button"
+              className="btn btn-secondary"
+              style={{ fontSize: 12, padding: '6px 8px', textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap' }}
+              onClick={() => {
+                setEmail('carla.coordenacao@escola.com');
+                setPassword(SEED_DEMO_PASSWORD);
+                loginWithPassword('carla.coordenacao@escola.com', SEED_DEMO_PASSWORD);
+              }}
+            >
+              🏛️ Coordenação
+            </button>
+          </div>
+          <div style={{ fontSize: 11, color: 'var(--text-tertiary)', marginTop: 4 }}>
+            Senha padrão de demonstração: <code>{SEED_DEMO_PASSWORD}</code>
+          </div>
         </div>
       </form>
     </div>

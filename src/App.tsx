@@ -13,9 +13,17 @@ import { Dashboard as AdminDashboard } from './pages/Admin/Dashboard';
 import { CourseEditor } from './pages/Admin/CourseEditor';
 import { UserManagement } from './pages/Admin/UserManagement';
 import { GradeBook } from './pages/Admin/GradeBook';
+import { Financial } from './pages/Admin/Financial';
 import { Attendance } from './pages/Instructor/Attendance';
 import { MissionEditor } from './pages/Instructor/MissionEditor';
 import { MissionBoard } from './components/MissionBoard';
+import { DirectMessaging } from './components/DirectMessaging';
+import { FamilyPortal } from './pages/Guardian/FamilyPortal';
+import { PedagogicalDashboard } from './pages/Management/PedagogicalDashboard';
+import { SkillTree } from './components/SkillTree';
+import { InventoryShop } from './components/InventoryShop';
+import { ClassBossFight } from './components/ClassBossFight';
+import { SupportCenter } from './components/SupportCenter';
 import { SystemStatus } from './pages/Maintenance/SystemStatus';
 import { Profile } from './pages/Profile';
 import { Login } from './pages/Login';
@@ -53,6 +61,10 @@ const AppContent: React.FC = () => {
       // Default redirect based on role privileges
       if (currentUser.role === 'MAINTENANCE') {
         setActiveTab('maintenance-status');
+      } else if (currentUser.role === 'GUARDIAN') {
+        setActiveTab('family-portal');
+      } else if (currentUser.role === 'COORDINATOR' || currentUser.role === 'DIRECTOR') {
+        setActiveTab('pedagogical-dashboard');
       } else {
         setActiveTab('home');
       }
@@ -74,6 +86,24 @@ const AppContent: React.FC = () => {
       case 'home':
         return <Home onSelectCourse={(id) => setSelectedCourseId(id)} />;
       
+      case 'family-portal':
+        return <FamilyPortal />;
+
+      case 'pedagogical-dashboard':
+        return <PedagogicalDashboard />;
+
+      case 'skill-tree':
+        return <SkillTree />;
+
+      case 'inventory-shop':
+        return <InventoryShop />;
+
+      case 'boss-fight':
+        return <ClassBossFight />;
+
+      case 'support-center':
+        return <SupportCenter />;
+
       case 'instructor-dashboard':
       case 'admin-dashboard':
         return <AdminDashboard />;
@@ -86,6 +116,12 @@ const AppContent: React.FC = () => {
 
       case 'grade-book':
         return <GradeBook />;
+
+      case 'financial':
+        return <Financial />;
+
+      case 'direct-messages':
+        return <DirectMessaging />;
 
       case 'attendance':
         return <Attendance />;

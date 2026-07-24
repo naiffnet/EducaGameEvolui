@@ -260,6 +260,8 @@ export const Profile: React.FC<ProfileProps> = ({ userId, onBack }) => {
               rpgClass={targetUser.rpgCharacter.selectedClass} 
               level={targetUser.rpgCharacter.level} 
               size={100}
+              avatarStyle={targetUser.rpgCharacter.avatarStyle || 'EPIC_ADULT'}
+              birthDate={targetUser.birthDate}
             />
           ) : (
             <div 
@@ -455,6 +457,53 @@ export const Profile: React.FC<ProfileProps> = ({ userId, onBack }) => {
                       </div>
                     </div>
                   ))}
+                </div>
+
+                <div style={{ borderTop: '1px solid var(--border)', paddingTop: '20px', marginBottom: '20px' }}>
+                  <h4 style={{ fontSize: '0.95rem', fontWeight: '800', marginBottom: '12px', color: 'var(--text-secondary)' }}>
+                    Estilo Visual do Avatar (Arte Épica Adulta vs. Aprendiz)
+                  </h4>
+                  <div style={{ display: 'flex', gap: '10px' }}>
+                    <button
+                      className={`btn ${(targetUser.rpgCharacter?.avatarStyle || 'EPIC_ADULT') === 'EPIC_ADULT' ? 'btn-primary' : 'btn-secondary'}`}
+                      style={{ padding: '8px 16px', fontSize: '0.85rem' }}
+                      onClick={() => {
+                        if (!targetUser.rpgCharacter) return;
+                        const updated: User = {
+                          ...targetUser,
+                          rpgCharacter: {
+                            ...targetUser.rpgCharacter,
+                            avatarStyle: 'EPIC_ADULT',
+                          }
+                        };
+                        db.updateUser(updated);
+                        if (isSelf) refreshUser();
+                        else setName(updated.name);
+                      }}
+                    >
+                      ⚔️ Estilo RPG Épico Adulto (Guerreiro Maduro)
+                    </button>
+
+                    <button
+                      className={`btn ${targetUser.rpgCharacter?.avatarStyle === 'JUNIOR' ? 'btn-primary' : 'btn-secondary'}`}
+                      style={{ padding: '8px 16px', fontSize: '0.85rem' }}
+                      onClick={() => {
+                        if (!targetUser.rpgCharacter) return;
+                        const updated: User = {
+                          ...targetUser,
+                          rpgCharacter: {
+                            ...targetUser.rpgCharacter,
+                            avatarStyle: 'JUNIOR',
+                          }
+                        };
+                        db.updateUser(updated);
+                        if (isSelf) refreshUser();
+                        else setName(updated.name);
+                      }}
+                    >
+                      🎒 Estilo Jovem Aprendiz
+                    </button>
+                  </div>
                 </div>
 
                 <div style={{ borderTop: '1px solid var(--border)', paddingTop: '20px' }}>

@@ -107,7 +107,7 @@
 
 | Termo | Definição | Aliases a evitar |
 |---|---|---|
-| **Turma (schoolClass)** | Um rótulo textual simples (ex: "9º Ano A") que agrupa estudantes; **não** é uma entidade própria no sistema — deliberadamente, ver `PLANO_IMPLEMENTACAO_PLATAFORMA.md` | Classe, Sala |
+| **Turma (schoolClass)** | Um rótulo textual simples (ex: "9º Ano A") que agrupa estudantes; **não** é uma entidade própria no sistema — deliberadamente, ver `PLANO_IMPLEMENTACAO.md` | Classe, Sala |
 | **Chamada** | O ato do Instrutor registrar a presença/falta de cada aluno de uma Turma numa data | Frequência (frequência é o conceito, Chamada é o ato) |
 | **Registro de Presença (AttendanceRecord)** | O dado persistido: um aluno, uma data, presente ou não, quem registrou | Falta, Presença (isolados — o registro cobre os dois estados) |
 | **Cadastro Estendido** | Os dados administrativos do `User` além do essencial: matrícula, nascimento, telefone, turma, responsável | Ficha do aluno |

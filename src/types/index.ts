@@ -1,4 +1,104 @@
-export type UserRole = 'STUDENT' | 'INSTRUCTOR' | 'ADMIN' | 'MAINTENANCE';
+export type UserRole = 'STUDENT' | 'INSTRUCTOR' | 'ADMIN' | 'MAINTENANCE' | 'GUARDIAN' | 'COORDINATOR' | 'DIRECTOR';
+
+// ─── Blueprint Fase 2 & 3 Domain Types ────────────────────────────────────────
+
+export interface SkillNode {
+  id: string;
+  className: RpgClass;
+  title: string;
+  description: string;
+  requiredLevel: number;
+  iconName: string;
+  category: 'PASSIVE' | 'ACTIVE' | 'ULTIMATE';
+  effect: string;
+}
+
+export type ItemRarity = 'COMMON' | 'RARE' | 'EPIC' | 'LEGENDARY';
+
+export interface InventoryItem {
+  id: string;
+  name: string;
+  category: 'avatar' | 'title' | 'badge' | 'xp_boost';
+  description: string;
+  cost: number;
+  iconName: string;
+  rarity: ItemRarity;
+  value?: string; // ex: avatar symbol or title text
+}
+
+export interface UserInventory {
+  coins: number;
+  ownedItemIds: string[];
+  equippedTitle?: string;
+  equippedAvatar?: string;
+  unlockedSkillIds: string[];
+}
+
+export interface BossFight {
+  id: string;
+  schoolClass: string;
+  courseId: string;
+  courseName: string;
+  title: string;
+  bossName: string;
+  description: string;
+  maxHp: number;
+  currentHp: number;
+  rewardXp: number;
+  rewardCoins: number;
+  status: 'ACTIVE' | 'VICTORIOUS';
+  avatarSymbol: string;
+  createdAt: string;
+}
+
+/** Relacionamento entre um Responsável (GUARDIAN) e um Estudante */
+export interface GuardianLink {
+  id: string;
+  guardianUserId: string;
+  studentUserId: string;
+  relationship: string; // ex: "Pai", "Mãe", "Tutor Legal", "Outro"
+  createdAt: string; // ISO datetime
+}
+
+export type InvoiceStatus = 'PENDING' | 'PAID' | 'OVERDUE';
+
+/** Cobrança/Mensalidade financeira (Entrega F) */
+export interface Invoice {
+  id: string;
+  studentId: string;
+  description: string;
+  amount: number;
+  dueDate: string; // YYYY-MM-DD
+  status: InvoiceStatus;
+  paidAt?: string; // ISO datetime
+  createdAt: string; // ISO datetime
+}
+
+export type AnnouncementAudience = 'SCHOOL' | { schoolClass: string };
+
+/** Aviso do Mural de Comunicação (Entrega G) */
+export interface Announcement {
+  id: string;
+  authorId: string;
+  authorName: string;
+  title: string;
+  body: string;
+  audience: AnnouncementAudience;
+  createdAt: string; // ISO datetime
+}
+
+/** Mensagem Direta entre Responsável e Instrutor (Entrega G) */
+export interface DirectMessage {
+  id: string;
+  fromUserId: string;
+  fromUserName: string;
+  toUserId: string;
+  toUserName: string;
+  studentId?: string; // opcional: ID do estudante sobre o qual é a dúvida
+  body: string;
+  createdAt: string; // ISO datetime
+  readAt?: string; // ISO datetime
+}
 
 export interface TeacherNote {
   id: string;
@@ -55,6 +155,7 @@ export interface RpgCharacter {
   selectedClass: RpgClass | null;
   level: number;
   xp: number;
+  avatarStyle?: 'EPIC_ADULT' | 'JUNIOR';
   unlockedSkills: string[];
   stats: {
     strength: number;
@@ -76,7 +177,7 @@ export interface User {
   unlockedBadges: string[];
   teacherNotes: TeacherNote[];
   rpgCharacter?: RpgCharacter;
-  /** Turma administrativa do estudante (ex: "9º Ano A") — agrupamento leve, não uma entidade própria. Ver PLANO_IMPLEMENTACAO_PLATAFORMA.md */
+  /** Turma administrativa do estudante (ex: "9º Ano A") — agrupamento leve, não uma entidade própria. Ver PLANO_IMPLEMENTACAO.md */
   schoolClass?: string;
   /** Cadastro Estendido (Entrega A) — todos opcionais para não quebrar usuários existentes */
   registrationId?: string; // matrícula
@@ -184,6 +285,10 @@ export interface SystemConfig {
   maintenanceMode: boolean;
   allowStudentRegistration: boolean;
   systemVersion: string;
+  /** Nome da Instituição de Ensino Contratante (White-label Branding) */
+  schoolName?: string;
+  /** URL/Ícone da Logomarca da Escola Contratante */
+  schoolLogoUrl?: string;
 }
 
 // ─── Missões Domain ───────────────────────────────────────────────────────────
@@ -223,4 +328,41 @@ export interface MissionSubmission {
   submittedAt: string; // ISO datetime
   reviewedAt?: string; // ISO datetime
   reviewNote?: string;
+}
+
+// ─── Central de Atendimento & Ouvidoria Escolar ────────────────────────────
+
+export interface StudentAppointment {
+  id: string;
+  studentId: string;
+  studentName: string;
+  targetStaffId: string;
+  targetStaffName: string;
+  targetStaffRole: 'INSTRUCTOR' | 'COORDINATOR' | 'DIRECTOR' | 'COUNSELOR';
+  mode: 'PRESENTIAL' | 'VIRTUAL';
+  category: 'ACADEMIC_DOUBT' | 'PEDAGOGICAL_SUPPORT' | 'EMOTIONAL_SUPPORT' | 'COMPLAINT_SUGGESTION';
+  date: string; // YYYY-MM-DD
+  timeSlot: string; // e.g. "10:30"
+  subject: string;
+  notes?: string;
+  status: 'PENDING' | 'CONFIRMED' | 'COMPLETED' | 'CANCELLED';
+  meetingLink?: string;
+  createdAt: string;
+}
+
+export interface SchoolReport {
+  id: string;
+  protocolNumber: string;
+  isAnonymous: boolean;
+  reporterStudentId?: string;
+  reporterStudentName?: string;
+  category: 'BULLYING' | 'CYBERBULLYING' | 'AGGRESSION' | 'DISCRIMINATION' | 'VANDALISM' | 'OTHER';
+  urgency: 'NORMAL' | 'HIGH' | 'URGENT';
+  location: string;
+  incidentDate: string;
+  description: string;
+  involvedPeople?: string;
+  status: 'PENDING' | 'UNDER_REVIEW' | 'ACTION_TAKEN' | 'ARCHIVED';
+  resolutionNotes?: string;
+  createdAt: string;
 }

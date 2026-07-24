@@ -2,9 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { useSystem } from '../../context/SystemContext';
 import { db } from '../../db/database';
-import type { Course, User, RpgClass } from '../../types';
+import type { Course, User, RpgClass, Mission } from '../../types';
 import { RpgAvatar } from '../../components/RpgAvatar';
 import { CharacterCreator } from '../../components/CharacterCreator';
+import { OnboardingModal } from '../../components/OnboardingModal';
 import { 
   Search, 
   GraduationCap, 
@@ -20,6 +21,7 @@ import {
 } from 'lucide-react';
 import { DailyDashboard } from '../../components/DailyDashboard';
 import { StreakIndicator } from '../../components/StreakIndicator';
+import { AnnouncementBoard } from '../../components/AnnouncementBoard';
 import { 
   getXpProgress, 
   canLevelUp,
@@ -44,11 +46,47 @@ export const Home: React.FC<HomeProps> = ({ onSelectCourse }) => {
   const [selectedYearRange, setSelectedYearRange] = useState<string>('All');
   const [activeSubTab, setActiveSubTab] = useState<'catalog' | 'evolution'>('catalog');
   const [allUsers, setAllUsers] = useState<User[]>([]);
+  const [showOnboarding, setShowOnboarding] = useState(false);
 
   useEffect(() => {
     setCourses(db.getCourses());
     setAllUsers(db.getUsers());
-  }, []);
+
+    // Regra H1 (Blueprint §3.6): Criação automática e idempotente da Missão de Boas-Vindas
+    if (currentUser && currentUser.role === 'STUDENT') {
+      const welcomeMissionId = `welcome-${currentUser.id}`;
+      const existingMissions = db.getMissions();
+      const hasWelcomeMission = existingMissions.some(m => m.id === welcomeMissionId);
+
+      if (!hasWelcomeMission) {
+        const today = new Date().toISOString().split('T')[0];
+        const dueAt = new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+        const newWelcomeMission: Mission = {
+          id: welcomeMissionId,
+          courseId: 'course-react',
+          instructorId: 'user-instructor',
+          instructorName: 'Prof. Marcos Paulo',
+          title: '🌟 Sua Primeira Missão de Boas-Vindas!',
+          description: 'Assista à sua primeira aula no catálogo de cursos e conclua um exercício para inaugurar seu diário de evolução!',
+          xpReward: 100,
+          type: 'BLITZ',
+          milestoneType: 'PERSONAL',
+          requiresValidation: false,
+          availableFrom: today,
+          dueAt,
+          targetStudentIds: [currentUser.id],
+          createdAt: new Date().toISOString(),
+        };
+        db.addMission(newWelcomeMission);
+      }
+
+      // Check if onboarding modal has been dismissed
+      const onboardingKey = `lms_onboarding_done_${currentUser.id}`;
+      if (!localStorage.getItem(onboardingKey)) {
+        setShowOnboarding(true);
+      }
+    }
+  }, [currentUser]);
 
   const handleSelectClass = (selectedClass: RpgClass) => {
     if (!currentUser) return;
@@ -176,14 +214,14 @@ export const Home: React.FC<HomeProps> = ({ onSelectCourse }) => {
             Acessibilidade & Acolhimento
           </span>
           <h2 style={{ fontSize: '2.5rem', color: '#ffffff', marginBottom: '16px', fontWeight: '800', lineHeight: '1.2' }}>
-            Let's Learn With Lots Of Fun!
+            Vamos Aprender com Muita Diversão!
           </h2>
           <p style={{ color: 'rgba(255, 255, 255, 0.85)', fontSize: '1.05rem', margin: 0 }}>
             Aprender com diversão e inclusão é o nosso lema. Explore novos conhecimentos de forma lúdica, responsiva e com total acessibilidade!
           </p>
         </div>
 
-        {/* Big Yellow Interactive Go button from mockup */}
+        {/* Big Yellow Interactive button from mockup */}
         <div>
           <button 
             className="btn" 
@@ -193,7 +231,7 @@ export const Home: React.FC<HomeProps> = ({ onSelectCourse }) => {
               width: '80px', 
               height: '80px', 
               borderRadius: 'var(--radius-full)',
-              fontSize: '1.2rem',
+              fontSize: '1.05rem',
               fontWeight: '800',
               border: 'none',
               boxShadow: '0 8px 20px rgba(255, 183, 39, 0.4)',
@@ -206,10 +244,13 @@ export const Home: React.FC<HomeProps> = ({ onSelectCourse }) => {
             }}
             aria-label="Ir para catálogo de cursos"
           >
-            Go
+            Explorar
           </button>
         </div>
       </div>
+
+      {/* MURAL DE AVISOS */}
+      <AnnouncementBoard />
 
       {/* TABS: Catalog vs Evolution */}
       <div 
@@ -272,45 +313,47 @@ export const Home: React.FC<HomeProps> = ({ onSelectCourse }) => {
           <div 
             style={{ 
               display: 'grid', 
-              gridTemplateColumns: '280px 1fr', 
+              gridTemplateColumns: currentUser?.role === 'STUDENT' ? '1fr' : '280px 1fr', 
               gap: '32px',
               alignItems: 'start'
             }}
             id="catalog-section"
           >
-            {/* Left Sidebar: Levels Pill Inspired Selector from Mockup */}
-            <aside aria-label="Níveis escolares e filtros secundários">
-              <div className="evolution-card" style={{ padding: '20px' }}>
-                <h3 style={{ fontSize: '1.05rem', fontWeight: '800', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <GraduationCap size={18} /> Nível Escolar (Filtro)
-                </h3>
+            {/* Left Sidebar: Levels Pill (Apenas para Administrador, Professor e Responsável) */}
+            {currentUser?.role !== 'STUDENT' && (
+              <aside aria-label="Níveis escolares e filtros secundários">
+                <div className="evolution-card" style={{ padding: '20px' }}>
+                  <h3 style={{ fontSize: '1.05rem', fontWeight: '800', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <GraduationCap size={18} /> Nível Escolar (Filtro)
+                  </h3>
 
-                <div className="level-container">
-                  {[
-                    { label: 'Todos os Níveis', val: 'All', cls: 'level-capsule-purple' },
-                    { label: 'Ensino Fundamental (Iniciante)', val: 'Year 7-9', cls: 'level-capsule-green' },
-                    { label: 'Ensino Médio (Intermediário)', val: 'Year 10-11', cls: 'level-capsule-blue' },
-                    { label: 'Graduação / Técnico (Avançado)', val: 'Year 12-13', cls: 'level-capsule-coral' },
-                    { label: 'Mestrado / Doutorado (Pós-Graduação)', val: 'Year 14-15', cls: 'level-capsule-pink' },
-                  ].map((level, i) => (
-                    <button
-                      key={i}
-                      onClick={() => setSelectedYearRange(level.val)}
-                      className={`level-capsule ${level.cls}`}
-                      style={{ 
-                        opacity: selectedYearRange === level.val ? 1 : 0.7,
-                        transform: selectedYearRange === level.val ? 'scale(1.03)' : 'scale(1)',
-                        boxShadow: selectedYearRange === level.val ? '0 4px 12px rgba(0,0,0,0.15)' : 'none',
-                        border: selectedYearRange === level.val ? '2px solid #ffffff' : '1px solid transparent'
-                      }}
-                      aria-label={`Filtrar por nível: ${level.label}`}
-                    >
-                      <span>{level.label}</span>
-                    </button>
-                  ))}
+                  <div className="level-container">
+                    {[
+                      { label: 'Todos os Níveis', val: 'All', cls: 'level-capsule-purple' },
+                      { label: 'Ensino Fundamental (Iniciante)', val: 'Year 7-9', cls: 'level-capsule-green' },
+                      { label: 'Ensino Médio (Intermediário)', val: 'Year 10-11', cls: 'level-capsule-blue' },
+                      { label: 'Graduação / Técnico (Avançado)', val: 'Year 12-13', cls: 'level-capsule-coral' },
+                      { label: 'Mestrado / Doutorado (Pós-Graduação)', val: 'Year 14-15', cls: 'level-capsule-pink' },
+                    ].map((level, i) => (
+                      <button
+                        key={i}
+                        onClick={() => setSelectedYearRange(level.val)}
+                        className={`level-capsule ${level.cls}`}
+                        style={{ 
+                          opacity: selectedYearRange === level.val ? 1 : 0.7,
+                          transform: selectedYearRange === level.val ? 'scale(1.03)' : 'scale(1)',
+                          boxShadow: selectedYearRange === level.val ? '0 4px 12px rgba(0,0,0,0.15)' : 'none',
+                          border: selectedYearRange === level.val ? '2px solid #ffffff' : '1px solid transparent'
+                        }}
+                        aria-label={`Filtrar por nível: ${level.label}`}
+                      >
+                        <span>{level.label}</span>
+                      </button>
+                    ))}
+                  </div>
                 </div>
-              </div>
-            </aside>
+              </aside>
+            )}
 
             {/* Right Side: Filters Bar + Courses Grid */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
@@ -350,7 +393,7 @@ export const Home: React.FC<HomeProps> = ({ onSelectCourse }) => {
                       onClick={() => setSelectedCategory(cat)}
                       className={`pill-filter ${selectedCategory === cat ? 'active' : ''}`}
                     >
-                      {cat === 'All' ? 'Todos' : cat}
+                      {cat === 'All' ? 'Todas as Categorias' : cat}
                     </button>
                   ))}
 
@@ -860,6 +903,19 @@ export const Home: React.FC<HomeProps> = ({ onSelectCourse }) => {
         </div>
       )}
 
+      {/* ONBOARDING TUTORIAL MODAL (Entrega H) */}
+      {showOnboarding && currentUser && (
+        <OnboardingModal
+          studentName={currentUser.name}
+          rpgClass={currentUser.rpgCharacter?.selectedClass || null}
+          onClose={() => {
+            if (currentUser) {
+              localStorage.setItem(`lms_onboarding_done_${currentUser.id}`, 'true');
+            }
+            setShowOnboarding(false);
+          }}
+        />
+      )}
     </div>
   );
 };
