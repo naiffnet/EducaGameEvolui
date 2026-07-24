@@ -167,9 +167,10 @@ export const SystemStatus: React.FC = () => {
                     style={{ display: 'flex', flexDirection: 'column', gap: 12 }}
                   >
                     <div>
-                      <label htmlFor="cfg-school-name" style={{ display: 'block', fontSize: 12, fontWeight: 700, marginBottom: 4 }}>Nome da Escola / Colégio</label>
+                      <label htmlFor="cfg-school-name" style={{ display: 'block', fontSize: 12, fontWeight: 700, marginBottom: 4 }}>Nome da Escola / Colégio Contratante</label>
                       <input
                         id="cfg-school-name"
+                        name="schoolName"
                         type="text"
                         className="form-input"
                         defaultValue={config.schoolName || 'Colégio Evoluir & Saber'}
@@ -178,13 +179,14 @@ export const SystemStatus: React.FC = () => {
                       />
                     </div>
                     <div>
-                      <label htmlFor="cfg-school-logo" style={{ display: 'block', fontSize: 12, fontWeight: 700, marginBottom: 4 }}>URL da Logomarca (Opcional)</label>
+                      <label htmlFor="cfg-school-logo" style={{ display: 'block', fontSize: 12, fontWeight: 700, marginBottom: 4 }}>URL ou Caminho da Logomarca (Opcional)</label>
                       <input
                         id="cfg-school-logo"
-                        type="url"
+                        name="schoolLogoUrl"
+                        type="text"
                         className="form-input"
                         defaultValue={config.schoolLogoUrl || ''}
-                        placeholder="https://exemplo.com/logo.png"
+                        placeholder="Ex: https://escola.com/logo.png ou /pixel_art/logo.png"
                       />
                     </div>
                     <button type="submit" className="btn btn-primary" style={{ padding: '8px 16px', fontSize: 13, alignSelf: 'flex-start' }}>

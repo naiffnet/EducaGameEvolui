@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
+import { useSystem } from '../context/SystemContext';
 import { SEED_DEMO_PASSWORD } from '../db/seedData';
-import { Sparkles, LogIn, AlertCircle, Eye, EyeOff } from 'lucide-react';
+import { Sparkles, LogIn, AlertCircle, Eye, EyeOff, GraduationCap } from 'lucide-react';
 
 export const Login: React.FC = () => {
   const { loginWithPassword, authError } = useAuth();
+  const { config } = useSystem();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -17,21 +19,35 @@ export const Login: React.FC = () => {
     setSubmitting(false);
   };
 
+  const schoolName = config.schoolName || 'Colégio Evoluir & Saber';
+
   return (
     <div style={{
       minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
       padding: '40px 20px', backgroundColor: 'var(--bg-primary)', color: 'var(--text-primary)',
     }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '28px' }}>
-        <div style={{
-          width: 44, height: 44, borderRadius: 'var(--radius-md)', background: 'var(--primary)',
-          display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: '1.2rem', color: '#fff',
-        }} aria-hidden="true">A</div>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '14px', marginBottom: '28px' }}>
+        {config.schoolLogoUrl ? (
+          <img
+            src={config.schoolLogoUrl}
+            alt={schoolName}
+            style={{ height: 50, width: 'auto', borderRadius: 'var(--radius-md)', objectFit: 'contain' }}
+          />
+        ) : (
+          <div style={{
+            width: 48, height: 48, borderRadius: 'var(--radius-md)',
+            background: 'linear-gradient(135deg, var(--primary) 0%, #3b82f6 100%)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: '1.4rem', color: '#fff',
+            boxShadow: 'var(--shadow-md)'
+          }} aria-hidden="true" title={`Logomarca: ${schoolName}`}>
+            <GraduationCap size={28} />
+          </div>
+        )}
         <div>
-          <h1 style={{ fontSize: '1.5rem', margin: 0, fontWeight: 800, display: 'flex', alignItems: 'center', gap: '6px' }}>
-            Antigravity LMS <Sparkles size={17} style={{ color: 'var(--accent)' }} />
+          <h1 style={{ fontSize: '1.45rem', margin: 0, fontWeight: 800, display: 'flex', alignItems: 'center', gap: '6px' }}>
+            {schoolName} <Sparkles size={17} style={{ color: 'var(--accent)' }} />
           </h1>
-          <p style={{ fontSize: '0.8rem', margin: 0, color: 'var(--text-tertiary)' }}>Plataforma de Ensino Inclusiva</p>
+          <p style={{ fontSize: '0.8rem', margin: '2px 0 0', color: 'var(--text-tertiary)' }}>Plataforma Educacional Gamificada · EducaGame Evolui</p>
         </div>
       </div>
 

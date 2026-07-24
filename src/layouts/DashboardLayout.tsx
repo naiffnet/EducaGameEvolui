@@ -272,7 +272,43 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
         }}
         aria-label="Menu Lateral de Navegação"
       >
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '22px' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}>
+          {/* Contracting School Sidebar Logo/Branding Banner */}
+          <div style={{
+            padding: '12px 14px',
+            background: 'var(--bg-tertiary)',
+            borderRadius: 'var(--radius-md)',
+            border: '1px solid var(--border)',
+            display: 'flex',
+            alignItems: 'center',
+            gap: 12,
+            boxShadow: '0 2px 8px rgba(0,0,0,0.03)'
+          }}>
+            {config.schoolLogoUrl ? (
+              <img
+                src={config.schoolLogoUrl}
+                alt={config.schoolName || 'Escola Contratante'}
+                style={{ height: 34, width: 'auto', borderRadius: 'var(--radius-sm)', objectFit: 'contain' }}
+              />
+            ) : (
+              <div style={{
+                width: 34, height: 34, borderRadius: 'var(--radius-md)',
+                background: 'linear-gradient(135deg, var(--primary) 0%, #3b82f6 100%)',
+                color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: '0.95rem'
+              }}>
+                🏫
+              </div>
+            )}
+            <div style={{ minWidth: 0, flex: 1 }}>
+              <div style={{ fontSize: '0.85rem', fontWeight: 800, color: 'var(--text-primary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                {config.schoolName || 'Colégio Evoluir & Saber'}
+              </div>
+              <div style={{ fontSize: '0.68rem', color: 'var(--primary)', fontWeight: 700 }}>
+                Plataforma Contratada
+              </div>
+            </div>
+          </div>
+
           {groups.map(group => {
             const isCollapsed = !!collapsedGroups[group.groupId];
 
