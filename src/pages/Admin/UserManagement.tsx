@@ -7,7 +7,7 @@ import { useSystem } from '../../context/SystemContext';
 import { createDefaultDailyProgress } from '../../engine/EvolutionEngine';
 import { hashPassword } from '../../engine/AuthUtils';
 import {
-  ShieldCheck, UserPlus, Search, Trash2, Eye, Edit3, Save, X,
+  ShieldCheck, UserPlus, Search, Trash2, Eye, EyeOff, Edit3, Save, X,
   BookOpen, GraduationCap, Users, TrendingUp, Check, Award, IdCard, KeyRound,
   Filter, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight,
   UserCheck, ShieldAlert, Building2
@@ -237,6 +237,8 @@ interface PasswordResetModalProps {
 const PasswordResetModal: React.FC<PasswordResetModalProps> = ({ user, onClose, onSave }) => {
   const [password, setPassword] = useState('');
   const [confirm, setConfirm] = useState('');
+  const [showPass, setShowPass] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
 
   const fieldStyle: React.CSSProperties = {
     width: '100%', boxSizing: 'border-box', background: 'rgba(255,255,255,0.08)',
@@ -261,11 +263,31 @@ const PasswordResetModal: React.FC<PasswordResetModalProps> = ({ user, onClose, 
         <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
           <div>
             <label style={labelStyle}>Nova senha (mín. 4 caracteres)</label>
-            <input type="password" style={fieldStyle} value={password} onChange={e => setPassword(e.target.value)} autoFocus />
+            <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+              <input type={showPass ? 'text' : 'password'} style={{ ...fieldStyle, paddingRight: 40 }} value={password} onChange={e => setPassword(e.target.value)} autoFocus />
+              <button
+                type="button"
+                onClick={() => setShowPass(!showPass)}
+                style={{ position: 'absolute', right: 10, background: 'none', border: 'none', color: 'rgba(255,255,255,0.6)', cursor: 'pointer', display: 'flex', alignItems: 'center', padding: 4 }}
+                title={showPass ? 'Ocultar senha' : 'Revelar senha'}
+              >
+                {showPass ? <EyeOff size={16} /> : <Eye size={16} />}
+              </button>
+            </div>
           </div>
           <div>
             <label style={labelStyle}>Confirmar senha</label>
-            <input type="password" style={fieldStyle} value={confirm} onChange={e => setConfirm(e.target.value)} />
+            <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+              <input type={showConfirm ? 'text' : 'password'} style={{ ...fieldStyle, paddingRight: 40 }} value={confirm} onChange={e => setConfirm(e.target.value)} />
+              <button
+                type="button"
+                onClick={() => setShowConfirm(!showConfirm)}
+                style={{ position: 'absolute', right: 10, background: 'none', border: 'none', color: 'rgba(255,255,255,0.6)', cursor: 'pointer', display: 'flex', alignItems: 'center', padding: 4 }}
+                title={showConfirm ? 'Ocultar senha' : 'Revelar senha'}
+              >
+                {showConfirm ? <EyeOff size={16} /> : <Eye size={16} />}
+              </button>
+            </div>
           </div>
           {password && confirm && password !== confirm && (
             <p style={{ color: '#ef4444', fontSize: 12, margin: 0 }}>As senhas não coincidem.</p>
@@ -516,6 +538,7 @@ export const UserManagement: React.FC = () => {
   const [newUserGuardianName, setNewUserGuardianName] = useState('');
   const [newUserGuardianPhone, setNewUserGuardianPhone] = useState('');
   const [newUserPassword, setNewUserPassword] = useState('');
+  const [showNewUserPassword, setShowNewUserPassword] = useState(false);
 
   const [editingUserId, setEditingUserId] = useState<string | null>(null);
   const [enrollModalUser, setEnrollModalUser] = useState<User | null>(null);
@@ -752,8 +775,18 @@ export const UserManagement: React.FC = () => {
             </div>
             <div>
               <label htmlFor="new-password" style={{ display: 'block', fontWeight: 'bold', marginBottom: 6, fontSize: 13 }}>Senha Padrão (mín. 4 chars)</label>
-              <input id="new-password" type="password" className="form-input" placeholder="••••••••"
-                value={newUserPassword} onChange={e => setNewUserPassword(e.target.value)} required minLength={4} />
+              <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+                <input id="new-password" type={showNewUserPassword ? 'text' : 'password'} className="form-input" style={{ width: '100%', paddingRight: 40 }} placeholder="••••••••"
+                  value={newUserPassword} onChange={e => setNewUserPassword(e.target.value)} required minLength={4} />
+                <button
+                  type="button"
+                  onClick={() => setShowNewUserPassword(!showNewUserPassword)}
+                  style={{ position: 'absolute', right: 10, background: 'none', border: 'none', color: 'var(--text-tertiary)', cursor: 'pointer', display: 'flex', alignItems: 'center', padding: 4 }}
+                  title={showNewUserPassword ? 'Ocultar senha' : 'Revelar senha'}
+                >
+                  {showNewUserPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                </button>
+              </div>
             </div>
             <div>
               <label htmlFor="new-role" style={{ display: 'block', fontWeight: 'bold', marginBottom: 6, fontSize: 13 }}>Perfil / Função</label>
