@@ -525,11 +525,11 @@ export const Profile: React.FC<ProfileProps> = ({ userId, onBack }) => {
                         {cls === 'MAGE' && '🔮 Arcano'}
                         {cls === 'WARRIOR' && '⚔️ Guerreiro'}
                         {cls === 'RANGER' && '🏹 Caçador'}
-                        {cls === 'NECROMANCER' && '💀 Nigromante'}
-                        {cls === 'QUEEN' && '👑 Soberana'}
+                        {cls === 'NECROMANCER' && '💀 Necromante'}
+                        {cls === 'QUEEN' && '👑 Rainha'}
                         {cls === 'SCHOLAR' && '📚 Erudito'}
                         {cls === 'SMITH' && '🔨 Ferreiro Rúnico'}
-                        {cls === 'PYROMANCER' && '🔥 Flamejante'}
+                        {cls === 'PYROMANCER' && '🔥 Dobrador de Fogo'}
                         {cls === 'PIRATE' && '🏴‍☠️ Corsário'}
                         {cls === 'JESTER' && '🎭 Bufão'}
                         {cls === 'CHAMPION' && '🏆 Campeão'}

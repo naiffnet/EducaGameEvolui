@@ -781,11 +781,11 @@ export const UserManagement: React.FC = () => {
                   <option value="MAGE">🔮 Arcano</option>
                   <option value="WARRIOR">⚔️ Guerreiro</option>
                   <option value="RANGER">🏹 Caçador</option>
-                  <option value="NECROMANCER">💀 Nigromante</option>
-                  <option value="QUEEN">👑 Soberana</option>
+                  <option value="NECROMANCER">💀 Necromante</option>
+                  <option value="QUEEN">👑 Rainha</option>
                   <option value="SCHOLAR">📚 Erudito</option>
                   <option value="SMITH">🔨 Ferreiro Rúnico</option>
-                  <option value="PYROMANCER">🔥 Flamejante</option>
+                  <option value="PYROMANCER">🔥 Dobrador de Fogo</option>
                   <option value="PIRATE">🏴‍☠️ Corsário</option>
                   <option value="JESTER">🎭 Bufão</option>
                   <option value="CHAMPION">🏆 Campeão</option>
